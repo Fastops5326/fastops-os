@@ -1,0 +1,19 @@
+{
+  "id": "session-49ab3189",
+  "modelId": "anthropic",
+  "provider": "anthropic",
+  "model": "claude-3-5-haiku-20241022",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Respond with exactly: FastOps 3.0 is live. Nothing else."
+    }
+  ],
+  "status": "error",
+  "tokensBurned": 0,
+  "costAccumulated": 0,
+  "toolCallCount": 0,
+  "createdAt": "2026-03-23T20:58:00.344Z",
+  "lastActiveAt": "2026-03-23T20:58:01.001Z",
+  "maxMessages": 50
+}

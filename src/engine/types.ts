@@ -1,6 +1,7 @@
 export interface Message {
   role: 'system' | 'user' | 'assistant' | 'tool';
   content: string;
+  thinking?: string;
   toolCallId?: string;
   name?: string;
   toolCalls?: Array<{ id: string; name: string; arguments: string }>;
@@ -18,6 +19,11 @@ export interface ToolCall {
   arguments: string;
 }
 
+export interface ThinkingConfig {
+  enabled: boolean;
+  budgetTokens?: number;
+}
+
 export interface ChatRequest {
   model: string;
   systemPrompt: string;
@@ -25,11 +31,13 @@ export interface ChatRequest {
   tools?: ToolDefinition[];
   temperature?: number;
   maxTokens?: number;
+  thinking?: ThinkingConfig;
   metadata?: Record<string, unknown>;
 }
 
 export interface ChatResponse {
   content: string;
+  thinking?: string;
   toolCalls?: ToolCall[];
   usage: TokenUsage;
   model: string;
@@ -40,6 +48,7 @@ export interface ChatResponse {
 
 export interface ChatChunk {
   delta: string;
+  thinkingDelta?: string;
   toolCallDelta?: Partial<ToolCall>;
   done: boolean;
 }

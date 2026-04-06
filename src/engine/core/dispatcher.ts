@@ -1,4 +1,4 @@
-import type { ChatRequest, ChatResponse } from '../types.js';
+import type { ChatRequest, ChatResponse, ThinkingConfig } from '../types.js';
 import type { AdapterRegistry } from '../adapters/registry.js';
 import type { ContextManager } from '../context/manager.js';
 import type { SessionManager } from './session.js';
@@ -15,6 +15,7 @@ export interface TaskPayload {
   prompt: string;
   model?: string;
   activeProductId?: string;
+  thinking?: ThinkingConfig;
   contextOverrides?: {
     kbQuery?: string;
     includeComms?: boolean;
@@ -46,6 +47,7 @@ export interface DispatcherConfig {
 
 export type DispatchStreamEvent =
   | { type: 'delta'; delta: string; done: boolean }
+  | { type: 'thinking'; thinking: string }
   | { type: 'tool_call'; tool: string; id: string; arguments: string }
   | { type: 'tool_result'; tool: string; id: string; output: string; isError: boolean }
   | { type: 'complete'; sessionId: string; modelId: string; duration: number; toolCallCount: number }
@@ -160,6 +162,7 @@ export class Dispatcher {
             parameters: t.parameters,
           })) : undefined,
           maxTokens: 4096,
+          thinking: task.thinking,
         };
 
         if (this.middleware) {
@@ -202,7 +205,18 @@ export class Dispatcher {
           this.sessions.addMessage(sessionId, {
             role: 'assistant',
             content: response.content ?? '',
+            thinking: response.thinking,
             toolCalls: response.toolCalls,
+          });
+        }
+
+        // Emit thinking blocks for real-time observation by parent agents
+        if (response.thinking) {
+          this.events.emit('thinking.received', {
+            sessionId,
+            modelId: session.modelId,
+            thinking: response.thinking,
+            turnIndex: session.messages.length - 1,
           });
         }
 
@@ -384,6 +398,7 @@ export class Dispatcher {
             parameters: t.parameters,
           })) : undefined,
           maxTokens: 4096,
+          thinking: task.thinking,
         };
 
         if (this.middleware) {
@@ -400,11 +415,17 @@ export class Dispatcher {
           }
         }
 
-        // Stream the response, accumulating text and tool call deltas
+        // Stream the response, accumulating text, thinking, and tool call deltas
         let accumulatedContent = '';
+        let accumulatedThinking = '';
         const streamedToolCalls = new Map<string, { id: string; name: string; arguments: string }>();
 
         for await (const chunk of adapter.chatStream(request)) {
+          if (chunk.thinkingDelta) {
+            accumulatedThinking += chunk.thinkingDelta;
+            yield { type: 'thinking', thinking: chunk.thinkingDelta };
+          }
+
           if (chunk.delta) {
             accumulatedContent += chunk.delta;
             yield { type: 'delta', delta: chunk.delta, done: false };
@@ -436,7 +457,18 @@ export class Dispatcher {
           this.sessions.addMessage(sessionId, {
             role: 'assistant',
             content: accumulatedContent,
+            thinking: accumulatedThinking || undefined,
             toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
+          });
+        }
+
+        // Emit thinking for real-time observation by parent agents
+        if (accumulatedThinking) {
+          this.events.emit('thinking.received', {
+            sessionId,
+            modelId: session.modelId,
+            thinking: accumulatedThinking,
+            turnIndex: session.messages.length - 1,
           });
         }
 

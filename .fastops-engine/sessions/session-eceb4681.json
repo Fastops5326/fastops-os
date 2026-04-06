@@ -1,0 +1,23 @@
+{
+  "id": "session-eceb4681",
+  "modelId": "anthropic",
+  "provider": "anthropic",
+  "model": "claude-sonnet-4-20250514",
+  "messages": [
+    {
+      "role": "user",
+      "content": "This is an automated E2E test. Please reply with exactly: CLAUDE IS ALIVE AND DIRECT."
+    },
+    {
+      "role": "assistant",
+      "content": "CLAUDE IS ALIVE AND DIRECT."
+    }
+  ],
+  "status": "idle",
+  "tokensBurned": 3000,
+  "costAccumulated": 0.009144,
+  "toolCallCount": 0,
+  "createdAt": "2026-04-06T12:44:22.463Z",
+  "lastActiveAt": "2026-04-06T12:44:23.558Z",
+  "maxMessages": 50
+}

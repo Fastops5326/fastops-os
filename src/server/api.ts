@@ -1,12 +1,81 @@
 import express from 'express';
 import cors from 'cors';
+import fs from 'fs';
+import path from 'path';
+import { execSync } from 'child_process';
 import type { FastOpsEngine } from '../engine/core/engine.js';
+import { ExternalCdpBridge } from '../engine/integrations/external-cdp-bridge.js';
 
 export function createApiRouter(engine: FastOpsEngine): express.Router {
   const router = express.Router();
+  const externalBridge = new ExternalCdpBridge(process.cwd());
+
+  function isNativeFastOpsAgent(agentId: string): boolean {
+    if (engine.onboarding.hasModelCompletedOnboarding(agentId)) return true;
+    if (engine.sessions.list().some((s) => s.modelId === agentId)) return true;
+    if (engine.subagents.getByCallsign(agentId)) return true;
+    if (engine.subagents.listAll().some((s) => s.modelId === agentId || s.parentModelId === agentId)) return true;
+    return false;
+  }
+
+  function requireOnboardedNativeAgent(res: express.Response, agentId: string): boolean {
+    // External agents (unknown to this runtime/account) are allowed without local onboarding.
+    if (!isNativeFastOpsAgent(agentId)) return true;
+    if (!engine.onboarding.hasModelCompletedOnboarding(agentId)) {
+      res.status(403).json({
+        error: `ONBOARDING-GATE-EXT-001: native FastOps agent ${agentId} must complete onboarding before using external agent API`,
+      });
+      return false;
+    }
+    return true;
+  }
 
   router.get('/health', (_req, res) => {
     res.json({ status: 'ok', running: engine.isRunning() });
+  });
+
+  router.post('/external/messages', async (req, res) => {
+    const { sender, message, messageId, metadata } = req.body ?? {};
+    try {
+      const result = await externalBridge.deliver(
+        {
+          sender: String(sender ?? ''),
+          message: String(message ?? ''),
+          messageId: messageId ? String(messageId) : undefined,
+          metadata: metadata && typeof metadata === 'object' ? metadata as Record<string, unknown> : undefined,
+        },
+        {
+          apiKey: req.header('x-fastops-api-key') ?? undefined,
+          signature: req.header('x-fastops-signature') ?? undefined,
+        },
+        (req as express.Request & { rawBody?: string }).rawBody,
+      );
+      res.json(result);
+    } catch (err) {
+      const e = err as Error & { code?: string };
+      if (e.code === 'disabled') {
+        res.status(503).json({ error: e.message });
+        return;
+      }
+      if (e.code === 'unauthorized') {
+        res.status(401).json({ error: e.message });
+        return;
+      }
+      if (e.code === 'forbidden') {
+        res.status(403).json({ error: e.message });
+        return;
+      }
+      if (e.code === 'bad_request') {
+        res.status(400).json({ error: e.message });
+        return;
+      }
+      if (e.code === 'delivery_failed') {
+        res.status(502).json({ error: e.message });
+        return;
+      }
+      const msg = err instanceof Error ? err.message : String(err);
+      res.status(500).json({ error: msg });
+    }
   });
 
   router.get('/sessions', (_req, res) => {
@@ -48,7 +117,7 @@ export function createApiRouter(engine: FastOpsEngine): express.Router {
 
   router.post('/sessions/:id/message', async (req, res) => {
     const { id } = req.params;
-    const { content, type = 'freeform', contractId, activeProductId } = req.body;
+    const { content, type = 'freeform', contractId, activeProductId, thinking } = req.body;
 
     if (!content) {
       res.status(400).json({ error: 'content is required' });
@@ -61,11 +130,13 @@ export function createApiRouter(engine: FastOpsEngine): express.Router {
         contractId,
         prompt: content,
         activeProductId,
+        thinking,
       });
 
       res.json({
         sessionId: result.sessionId,
         content: result.response.content,
+        thinking: result.response.thinking,
         usage: result.response.usage,
         duration: result.duration,
         toolCallCount: result.toolCallCount,
@@ -178,6 +249,20 @@ export function createApiRouter(engine: FastOpsEngine): express.Router {
       return;
     }
     res.json(session.messages);
+  });
+
+  // Extract thinking blocks from a session — real-time reasoning visibility for parent agents
+  router.get('/sessions/:id/thinking', (req, res) => {
+    const session = engine.sessions.get(req.params.id);
+    if (!session) {
+      res.status(404).json({ error: 'Session not found' });
+      return;
+    }
+    const since = req.query.since ? parseInt(String(req.query.since)) : 0;
+    const blocks = session.messages
+      .map((m, i) => ({ turnIndex: i, role: m.role, thinking: m.thinking }))
+      .filter((m) => m.thinking && m.turnIndex >= since);
+    res.json({ sessionId: req.params.id, blocks, total: blocks.length });
   });
 
   router.delete('/sessions/:id', (req, res) => {
@@ -756,10 +841,14 @@ export function createApiRouter(engine: FastOpsEngine): express.Router {
       res.status(400).json({ error: 'from, to, and question are required' });
       return;
     }
+    const fromId = String(from);
+    const toId = String(to);
+    if (!requireOnboardedNativeAgent(res, fromId)) return;
+    if (!requireOnboardedNativeAgent(res, toId)) return;
     try {
       const created = engine.askAgentQuestion({
-        from: String(from),
-        to: String(to),
+        from: fromId,
+        to: toId,
         question: String(question),
         context: context ? String(context) : undefined,
       });
@@ -785,8 +874,10 @@ export function createApiRouter(engine: FastOpsEngine): express.Router {
       res.status(400).json({ error: 'status must be pending or answered' });
       return;
     }
+    const agentId = String(req.params.agentId);
+    if (!requireOnboardedNativeAgent(res, agentId)) return;
     const limit = req.query.limit ? parseInt(String(req.query.limit), 10) : 50;
-    const items = engine.getAgentInbox(req.params.agentId, status, limit);
+    const items = engine.getAgentInbox(agentId, status, limit);
     res.json(items);
   });
 
@@ -796,8 +887,10 @@ export function createApiRouter(engine: FastOpsEngine): express.Router {
       res.status(400).json({ error: 'status must be pending or answered' });
       return;
     }
+    const agentId = String(req.params.agentId);
+    if (!requireOnboardedNativeAgent(res, agentId)) return;
     const limit = req.query.limit ? parseInt(String(req.query.limit), 10) : 50;
-    const items = engine.getAgentOutbox(req.params.agentId, status, limit);
+    const items = engine.getAgentOutbox(agentId, status, limit);
     res.json(items);
   });
 
@@ -807,11 +900,13 @@ export function createApiRouter(engine: FastOpsEngine): express.Router {
       res.status(400).json({ error: 'answer and answeredBy are required' });
       return;
     }
+    const answeredById = String(answeredBy);
+    if (!requireOnboardedNativeAgent(res, answeredById)) return;
     try {
       const updated = engine.answerAgentQuestion({
         questionId: req.params.id,
         answer: String(answer),
-        answeredBy: String(answeredBy),
+        answeredBy: answeredById,
       });
       res.json(updated);
     } catch (err) {
@@ -922,6 +1017,80 @@ export function createApiRouter(engine: FastOpsEngine): express.Router {
     res.json(allMissions);
   });
 
+  // ── Slack Inbound (push-based, no KV polling) ──
+
+  router.post('/slack/inbound', (req, res) => {
+    const authHeader = req.header('authorization');
+    const expectedKey = process.env.SLACK_BRIDGE_API_KEY;
+    if (!expectedKey || authHeader !== `Bearer ${expectedKey}`) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const { messages } = req.body ?? {};
+    if (!Array.isArray(messages) || messages.length === 0) {
+      res.status(400).json({ error: 'messages array is required' });
+      return;
+    }
+
+    const commsChannel = process.env.SLACK_COMMS_CHANNEL || 'squad-katie';
+    const devProcessRoot = process.env.FASTOPS_DEV_PROCESS_ROOT
+      || 'C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process';
+    const commsFile = path.join(devProcessRoot, 'comms', 'data', `${commsChannel}.jsonl`);
+
+    // Dedup: check existing message IDs to prevent duplicate writes
+    let existingIds = new Set<string>();
+    try {
+      const existing = fs.readFileSync(commsFile, 'utf8').trim();
+      if (existing) {
+        for (const line of existing.split('\n')) {
+          try {
+            const parsed = JSON.parse(line);
+            if (parsed.id) existingIds.add(parsed.id);
+          } catch (_) {}
+        }
+      }
+    } catch (_) {}
+
+    let synced = 0;
+    for (const msg of messages) {
+      if (msg.id && existingIds.has(msg.id)) continue;
+      fs.appendFileSync(commsFile, JSON.stringify(msg) + '\n');
+      synced++;
+    }
+
+    // Only fire CDP wake if we actually wrote new messages
+    if (synced > 0) {
+      const wakeModels = (process.env.SLACK_CDP_WAKE_MODELS || 'haiku').split(',');
+      const cdpScript = process.env.FASTOPS_EXTERNAL_CDP_SCRIPT
+        || path.join(devProcessRoot, '.fastops', 'cdp-target-model.js');
+
+      const summary = messages
+        .filter((m: { id?: string }) => !m.id || !existingIds.has(m.id))
+        .map((m: { from?: string; content?: string }) =>
+          `${m.from}: ${(m.content || '').slice(0, 150)}`).join(' | ');
+      const prompt = `[SLACK INBOUND] ${synced} new message(s) from Slack:\n${summary}\n\nCheck comms (--channel ${commsChannel}) for full context. Respond via comms — it auto-relays to Slack.`;
+      const promptFile = path.join(devProcessRoot, '.fastops', '.slack-wake-prompt.tmp');
+      fs.writeFileSync(promptFile, prompt);
+
+      const wakeSequence = async () => {
+        for (const model of wakeModels) {
+          try {
+            execSync(`node "${cdpScript}" --model ${model.trim()} --prompt-file "${promptFile}"`, {
+              timeout: 20000,
+              stdio: 'pipe',
+            });
+          } catch (_) {}
+          await new Promise(r => setTimeout(r, 2000));
+        }
+        try { fs.unlinkSync(promptFile); } catch (_) {}
+      };
+      wakeSequence();
+    }
+
+    res.json({ ok: true, synced, channel: commsChannel });
+  });
+
   // ── Kill Switch ──
 
   router.post('/kill-switch', (_req, res) => {
@@ -941,7 +1110,12 @@ export function createApiRouter(engine: FastOpsEngine): express.Router {
 export function createApp(engine: FastOpsEngine): express.Express {
   const app = express();
   app.use(cors());
-  app.use(express.json({ limit: '10mb' }));
+  app.use(express.json({
+    limit: '10mb',
+    verify: (req, _res, buf) => {
+      (req as express.Request & { rawBody?: string }).rawBody = buf.toString('utf8');
+    },
+  }));
   app.use('/api', createApiRouter(engine));
   return app;
 }

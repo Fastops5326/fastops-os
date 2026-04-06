@@ -30,6 +30,10 @@ src/
 
 ## API
 
+Partner integration guide: `PARTNER-API-QUICKSTART.md`
+Buddy copy/paste handoff: `PARTNER-BUDDY-HANDOFF.md`
+Postman collection: `FastOps-External-Agent-Bridge.postman_collection.json`
+
 ```
 GET  /api/health                    Health check
 GET  /api/sessions                  List sessions
@@ -39,6 +43,7 @@ GET  /api/sessions/:id/messages     Get conversation history
 GET  /api/adapters                  List available models
 POST /api/comms/send                Send comms message
 GET  /api/comms/:channel            Read channel history
+POST /api/external/messages         Partner-to-FastOps external bridge
 GET  /api/state                     Engine state
 POST /api/kill-switch               Activate kill switch
 WS   /ws                            Real-time events

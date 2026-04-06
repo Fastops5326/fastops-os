@@ -1,0 +1,23 @@
+{
+  "id": "session-fe11d79d",
+  "modelId": "anthropic",
+  "provider": "anthropic",
+  "model": "claude-sonnet-4-20250514",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Respond with exactly: FastOps 3.0 is live. Nothing else."
+    },
+    {
+      "role": "assistant",
+      "content": "FastOps 3.0 is live."
+    }
+  ],
+  "status": "idle",
+  "tokensBurned": 2998,
+  "costAccumulated": 0.009162,
+  "toolCallCount": 0,
+  "createdAt": "2026-03-23T20:58:19.676Z",
+  "lastActiveAt": "2026-03-23T20:58:20.921Z",
+  "maxMessages": 50
+}

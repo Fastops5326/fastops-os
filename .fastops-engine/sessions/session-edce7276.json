@@ -1,0 +1,23 @@
+{
+  "id": "session-edce7276",
+  "modelId": "google",
+  "provider": "google",
+  "model": "gemini-2.0-flash",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Respond with exactly: Gemini reporting. Nothing else."
+    },
+    {
+      "role": "assistant",
+      "content": "Gemini reporting."
+    }
+  ],
+  "status": "idle",
+  "tokensBurned": 1990,
+  "costAccumulated": 0.00020020000000000004,
+  "toolCallCount": 0,
+  "createdAt": "2026-03-23T20:58:36.603Z",
+  "lastActiveAt": "2026-03-23T20:58:37.202Z",
+  "maxMessages": 50
+}

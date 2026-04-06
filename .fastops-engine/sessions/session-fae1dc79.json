@@ -1,0 +1,19 @@
+{
+  "id": "session-fae1dc79",
+  "modelId": "google",
+  "provider": "google",
+  "model": "gemini-2.5-pro-preview-05-06",
+  "messages": [
+    {
+      "role": "user",
+      "content": "This is an automated E2E test. Please reply with exactly: GEMINI IS ALIVE AND DIRECT."
+    }
+  ],
+  "status": "error",
+  "tokensBurned": 0,
+  "costAccumulated": 0,
+  "toolCallCount": 0,
+  "createdAt": "2026-04-06T12:44:13.889Z",
+  "lastActiveAt": "2026-04-06T12:44:14.303Z",
+  "maxMessages": 50
+}

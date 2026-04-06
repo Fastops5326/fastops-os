@@ -23,6 +23,15 @@ const TEST_DIR = join(process.cwd(), '.test-api-integration');
 let server: Server;
 let engine: FastOpsEngine;
 let baseUrl: string;
+const originalEnv: Record<string, string | undefined> = {
+  FASTOPS_EXTERNAL_CDP_ENABLED: process.env.FASTOPS_EXTERNAL_CDP_ENABLED,
+  FASTOPS_EXTERNAL_CDP_DRY_RUN: process.env.FASTOPS_EXTERNAL_CDP_DRY_RUN,
+  FASTOPS_EXTERNAL_CDP_API_KEY: process.env.FASTOPS_EXTERNAL_CDP_API_KEY,
+  FASTOPS_EXTERNAL_CDP_ALLOWED_SENDERS: process.env.FASTOPS_EXTERNAL_CDP_ALLOWED_SENDERS,
+  FASTOPS_EXTERNAL_CDP_ALLOWED_MODELS: process.env.FASTOPS_EXTERNAL_CDP_ALLOWED_MODELS,
+  FASTOPS_EXTERNAL_CDP_ROUTES: process.env.FASTOPS_EXTERNAL_CDP_ROUTES,
+  FASTOPS_EXTERNAL_CDP_DEFAULT_MODEL: process.env.FASTOPS_EXTERNAL_CDP_DEFAULT_MODEL,
+};
 
 async function api(path: string, opts?: RequestInit): Promise<Response> {
   return fetch(`${baseUrl}/api${path}`, {
@@ -52,6 +61,17 @@ beforeAll(async () => {
   if (existsSync(TEST_DIR)) rmSync(TEST_DIR, { recursive: true, force: true });
   mkdirSync(TEST_DIR, { recursive: true });
 
+  process.env.FASTOPS_EXTERNAL_CDP_ENABLED = '1';
+  process.env.FASTOPS_EXTERNAL_CDP_DRY_RUN = '1';
+  process.env.FASTOPS_EXTERNAL_CDP_API_KEY = 'bridge-test-key';
+  process.env.FASTOPS_EXTERNAL_CDP_ALLOWED_SENDERS = 'ext-alpha,ext-beta';
+  process.env.FASTOPS_EXTERNAL_CDP_ALLOWED_MODELS = 'claude,gemini';
+  process.env.FASTOPS_EXTERNAL_CDP_ROUTES = JSON.stringify({
+    'ext-alpha': 'claude',
+    'ext-beta': 'gemini',
+  });
+  process.env.FASTOPS_EXTERNAL_CDP_DEFAULT_MODEL = 'claude';
+
   const config = loadConfig();
   engine = createEngine(config, {
     workingDirectory: TEST_DIR,
@@ -78,6 +98,10 @@ afterAll(async () => {
   await engine.stop();
   server.close();
   if (existsSync(TEST_DIR)) rmSync(TEST_DIR, { recursive: true, force: true });
+  for (const [k, v] of Object.entries(originalEnv)) {
+    if (v === undefined) delete process.env[k];
+    else process.env[k] = v;
+  }
 });
 
 describe('Health', () => {
@@ -210,8 +234,85 @@ describe('Comms', () => {
   });
 });
 
+describe('External CDP Bridge', () => {
+  it('POST /external/messages rejects missing API key', async () => {
+    const res = await api('/external/messages', {
+      method: 'POST',
+      body: JSON.stringify({
+        sender: 'ext-alpha',
+        message: 'Ping from external system',
+      }),
+    });
+    expect(res.status).toBe(401);
+  });
+
+  it('POST /external/messages accepts allowlisted sender with valid key', async () => {
+    const res = await api('/external/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-fastops-api-key': 'bridge-test-key' },
+      body: JSON.stringify({
+        sender: 'ext-alpha',
+        message: 'Please wake Claude agent',
+        messageId: 'msg-001',
+      }),
+    });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.accepted).toBe(true);
+    expect(body.routedTo).toBe('claude');
+    expect(body.deduped).toBe(false);
+  });
+
+  it('POST /external/messages dedupes repeated messageId', async () => {
+    const first = await api('/external/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-fastops-api-key': 'bridge-test-key' },
+      body: JSON.stringify({
+        sender: 'ext-beta',
+        message: 'Run validation',
+        messageId: 'msg-dedupe-01',
+      }),
+    });
+    expect(first.status).toBe(200);
+
+    const second = await api('/external/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-fastops-api-key': 'bridge-test-key' },
+      body: JSON.stringify({
+        sender: 'ext-beta',
+        message: 'Run validation',
+        messageId: 'msg-dedupe-01',
+      }),
+    });
+    expect(second.status).toBe(200);
+    const body = await second.json();
+    expect(body.accepted).toBe(true);
+    expect(body.deduped).toBe(true);
+    expect(body.routedTo).toBe('gemini');
+  });
+
+  it('POST /external/messages rejects non-allowlisted sender', async () => {
+    const res = await api('/external/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-fastops-api-key': 'bridge-test-key' },
+      body: JSON.stringify({
+        sender: 'not-allowed',
+        message: 'Attempt to route',
+      }),
+    });
+    expect(res.status).toBe(403);
+  });
+});
+
 describe('Agent Q&A', () => {
+  const onboardAgents = (...ids: string[]) => {
+    for (const id of ids) {
+      engine.onboarding.markModelOnboarded(id);
+    }
+  };
+
   it('POST /agents/questions creates a question', async () => {
+    onboardAgents('gpt', 'claude');
     const res = await api('/agents/questions', {
       method: 'POST',
       body: JSON.stringify({
@@ -230,6 +331,7 @@ describe('Agent Q&A', () => {
   });
 
   it('GET /agents/:agentId/inbox returns pending questions', async () => {
+    onboardAgents('gemini', 'gpt');
     const create = await api('/agents/questions', {
       method: 'POST',
       body: JSON.stringify({
@@ -248,6 +350,7 @@ describe('Agent Q&A', () => {
   });
 
   it('POST /agents/questions/:id/answer answers a question', async () => {
+    onboardAgents('gpt', 'kimi');
     const createRes = await api('/agents/questions', {
       method: 'POST',
       body: JSON.stringify({
@@ -273,6 +376,7 @@ describe('Agent Q&A', () => {
   });
 
   it('POST /agents/questions/:id/answer rejects spoofed answeredBy', async () => {
+    onboardAgents('gpt', 'kimi', 'claude');
     const createRes = await api('/agents/questions', {
       method: 'POST',
       body: JSON.stringify({
@@ -296,6 +400,7 @@ describe('Agent Q&A', () => {
   });
 
   it('GET /agents/:agentId/outbox returns answered questions', async () => {
+    onboardAgents('claude', 'gemini');
     const createRes = await api('/agents/questions', {
       method: 'POST',
       body: JSON.stringify({
@@ -318,6 +423,76 @@ describe('Agent Q&A', () => {
     const outbox = await outboxRes.json();
     expect(Array.isArray(outbox)).toBe(true);
     expect(outbox.some((q: { from: string; status: string }) => q.from === 'claude' && q.status === 'answered')).toBe(true);
+  });
+
+  it('POST /agents/questions allows external (non-native) agents without onboarding', async () => {
+    const res = await api('/agents/questions', {
+      method: 'POST',
+      body: JSON.stringify({
+        from: 'non-onboarded-a',
+        to: 'non-onboarded-b',
+        question: 'Can you help?',
+      }),
+    });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.status).toBe('pending');
+  });
+
+  it('GET /agents/:agentId/inbox allows external (non-native) agents without onboarding', async () => {
+    const res = await api('/agents/non-onboarded-a/inbox');
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(Array.isArray(body)).toBe(true);
+  });
+
+  it('POST /agents/questions/:id/answer allows external (non-native) answerer when recipient matches', async () => {
+    onboardAgents('gpt', 'onboarded-target');
+    const createRes = await api('/agents/questions', {
+      method: 'POST',
+      body: JSON.stringify({
+        from: 'gpt', // onboarded native sender
+        to: 'external-agent-1', // external recipient, not onboarded locally
+        question: 'Please validate this.',
+      }),
+    });
+    expect(createRes.status).toBe(200);
+    const created = await createRes.json();
+
+    const answerRes = await api(`/agents/questions/${created.id}/answer`, {
+      method: 'POST',
+      body: JSON.stringify({
+        answeredBy: 'external-agent-1',
+        answer: 'Looks good.',
+      }),
+    });
+    expect(answerRes.status).toBe(200);
+    const body = await answerRes.json();
+    expect(body.status).toBe('answered');
+  });
+
+  it('POST /agents/questions rejects native non-onboarded agents', async () => {
+    const available = engine['registry'].listAvailable();
+    const nativeModel = available[0];
+
+    // Create a local session so this model is treated as native to this runtime/account.
+    const sessionRes = await api('/sessions', {
+      method: 'POST',
+      body: JSON.stringify({ modelId: nativeModel }),
+    });
+    expect(sessionRes.status).toBe(200);
+
+    const res = await api('/agents/questions', {
+      method: 'POST',
+      body: JSON.stringify({
+        from: nativeModel,
+        to: 'external-agent-2',
+        question: 'Can you run QC?',
+      }),
+    });
+    expect(res.status).toBe(403);
+    const body = await res.json();
+    expect(body.error).toContain('ONBOARDING-GATE-EXT-001');
   });
 });
 

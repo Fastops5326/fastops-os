@@ -1,0 +1,145 @@
+{
+  "info": {
+    "_postman_id": "5c6f4f3d-6e50-4a7a-b2f3-8f8bc4db9420",
+    "name": "FastOps External Agent Bridge",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Ready-to-import collection for partner agents to send messages into FastOps."
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/health",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "health"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Send External Message",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-fastops-api-key",
+            "value": "{{apiKey}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"sender\": \"{{sender}}\",\n  \"message\": \"{{message}}\",\n  \"messageId\": \"{{messageId}}\",\n  \"metadata\": {\n    \"threadId\": \"{{threadId}}\",\n    \"priority\": \"{{priority}}\",\n    \"sourceSystem\": \"{{sourceSystem}}\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/external/messages",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "external",
+            "messages"
+          ]
+        },
+        "description": "Primary partner request into FastOps."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status is 2xx or known auth/allowlist block', function () {",
+              "  pm.expect([200, 202, 401, 403, 502, 503]).to.include(pm.response.code);",
+              "});",
+              "",
+              "if (pm.response.code >= 200 && pm.response.code < 300) {",
+              "  const json = pm.response.json();",
+              "  pm.test('accepted boolean exists', function () {",
+              "    pm.expect(json).to.have.property('accepted');",
+              "  });",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Send Duplicate (Dedupe Demo)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "x-fastops-api-key",
+            "value": "{{apiKey}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"sender\": \"{{sender}}\",\n  \"message\": \"{{message}}\",\n  \"messageId\": \"{{messageId}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/external/messages",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "external",
+            "messages"
+          ]
+        },
+        "description": "Run after Send External Message using the same messageId to validate idempotency."
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3100"
+    },
+    {
+      "key": "apiKey",
+      "value": "replace-with-shared-key"
+    },
+    {
+      "key": "sender",
+      "value": "partner-agent-01"
+    },
+    {
+      "key": "message",
+      "value": "Please run QC on FOS-22 and return blockers only."
+    },
+    {
+      "key": "messageId",
+      "value": "partner-{{$timestamp}}"
+    },
+    {
+      "key": "threadId",
+      "value": "th-77"
+    },
+    {
+      "key": "priority",
+      "value": "high"
+    },
+    {
+      "key": "sourceSystem",
+      "value": "partner-orchestrator"
+    }
+  ]
+}
