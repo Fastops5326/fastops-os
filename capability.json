@@ -34,7 +34,8 @@
     { "category": "contracts.comms",             "path": "contracts/comms/",                 "interface": "static contract files" },
     { "category": "contracts.engine-internal",   "path": "contracts/.fastops-contracts/",    "interface": "static contract files" },
     { "category": "docs.architecture",           "path": "docs/architecture/",               "interface": "markdown" },
-    { "category": "docs.partner-onboarding",     "path": "docs/partner-onboarding/",         "interface": "markdown" }
+    { "category": "docs.partner-onboarding",     "path": "docs/partner-onboarding/",         "interface": "markdown" },
+    { "category": "ui.partner-platform",         "path": "fastops-ui/",                      "interface": "Next.js 14 app served at api.fastops.ai" }
   ],
   "cli": {
     "binary": "fastops",

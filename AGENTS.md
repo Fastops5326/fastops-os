@@ -21,6 +21,7 @@ If you need product code (e.g. WarriorPath), you're in the wrong repo — go to 
 | `src/engine/` | Engine internals: orchestration, comms, cdp, knowledge-retrieval, partner-platform, lib |
 | `services/` | Long-running services: `slack-bridge/`, `mcp/`, `partner-test/groupme/` |
 | `templates/` | Templates that `fastops init` copies into new mission repos: `hooks/claude/`, `hooks/cursor/`, `skills/`, `project/` (package.json, tsconfig, .gitignore), `github-workflows/`, `onboarding/` |
+| `fastops-ui/` | **Partner-facing Next.js UI** for `api.fastops.ai`. This is the partner-platform front-end (login, dashboards, partner self-service). Engine-owned because the partner platform is engine-owned. Do **not** confuse with mission-repo UIs (each mission/product has its own UI in its own repo). |
 | `contracts/` | Internal contracts: `comms/`, `.fastops-contracts/` |
 | `docs/` | Architecture + partner onboarding docs |
 | `evidence/` | (Active) Engineering evidence — kept post-spinout for whatever's still referenced |

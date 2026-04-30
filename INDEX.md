@@ -7,13 +7,24 @@
 ```
 fastops-os/
 ├── src/
-│   └── engine/                       ← Engine internals
-│       ├── orchestration/             (62 files — main routing/dispatch)
-│       ├── comms/                     (40 files — comms bus + adapters)
+│   └── engine/                       ← Engine internals (314 files total across 21 subsystems)
+│       ├── orchestration/             (61 files — main routing/dispatch)
+│       ├── comms/                     (53 files — comms bus + adapters)
+│       ├── partner-platform/          (40 files — partner API + pt + qc-results)
 │       ├── cdp/                       (27 files — Chrome DevTools Protocol)
+│       ├── __tests__/                 (24 files — engine tests)
+│       ├── context/                   (20 files — context graph + retrieval)
 │       ├── knowledge-retrieval/       (13 files — Overwatch input handler)
-│       ├── partner-platform/pt/       (8 files + qc-results — partner API)
-│       └── lib/                       (2 files — shared utilities)
+│       ├── tools/                     (12 files — tool registry + helpers)
+│       ├── adapters/                  (9 files — provider adapters)
+│       ├── compaction/                (8 files — session compaction)
+│       ├── persistence/               (7 files — state persistence)
+│       ├── contracts/                 (6 files — engine internal contracts)
+│       ├── middleware/                (6 files — request middleware)
+│       ├── core/                      (5 files — core kernel)
+│       ├── onboarding/                (3 files — agent onboarding)
+│       ├── overwatch/                 (3 files — overwatch surface)
+│       ├── agents/, integrations/, lib/, products/, subagents/  (1-2 files each)
 ├── services/
 │   ├── slack-bridge/                  (Cloudflare Worker)
 │   ├── mcp/                           (MCP server)
@@ -32,6 +43,11 @@ fastops-os/
 ├── docs/
 │   ├── architecture/                  (ARCHITECTURE.md is at root)
 │   └── partner-onboarding/            (16 files)
+├── fastops-ui/                        ← PARTNER-FACING UI (Next.js 14, 20,690 files)
+│   │                                    Front-end for api.fastops.ai. Login, dashboards,
+│   │                                    partner self-service. Engine-owned because
+│   │                                    the partner platform is engine-owned.
+│   └── (standard Next.js layout: app/, components/, lib/, public/, ...)
 ├── evidence/                          ← Active engineering evidence (post-spinout)
 ├── scripts/                           ← Operational scripts
 ├── supabase/migrations/               ← Engine-owned migrations
@@ -74,15 +90,16 @@ fastops-os/
 | "Where does comms live?" | `src/engine/comms/` (bus) + `services/slack-bridge/` (transport) |
 | "How does the partner API work?" | `src/engine/partner-platform/pt/` + `docs/partner-onboarding/` |
 | "Where do I add a new template hook?" | `templates/hooks/{claude,cursor}/` |
+| "Where is the partner-facing UI?" | `fastops-ui/` (Next.js 14, served at `api.fastops.ai`) |
 | "What's the canonical architecture?" | `ARCHITECTURE.md` (repo root) |
 | "What was here before the 2026-04-29 spin-out?" | `SPINOUT.md` + `.archive/` |
 | "What environment variables does this need?" | `.env.example` |
 
 ## Sub-indexes (per category)
 
-Add an `INDEX.md` inside each `src/engine/<subsystem>/` as the subsystem grows. Currently:
+Sub-indexes are **created on demand**, not pre-stubbed. The root `INDEX.md` (this file) is the only one guaranteed to exist; the file counts above let you spot which subsystems have substantive content. If a subsystem grows large enough that you need a deeper map, drop an `INDEX.md` inside it and link it from the table above. Currently:
 
-- `src/engine/comms/docs/` has its own docs sub-index (9 files)
+- `src/engine/comms/docs/` ships its own docs sub-index
 - `docs/partner-onboarding/` is the partner-facing index
 
 ## Status legend
