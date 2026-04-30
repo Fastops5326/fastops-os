@@ -1,0 +1,1110 @@
+{
+  "generatedAt": "2026-04-29T23:11:56.010Z",
+  "totalFiles": 12835,
+  "bucketCounts": {
+    "STAYS-IN-SOURCE-AS-ARCHIVE": 4956,
+    "fastops-method/knowledge/case-studies/.fastops-misc/": 1522,
+    "IGNORED-GENERATED": 13,
+    "fastops-method/knowledge/case-studies/spin-out-process/": 3,
+    "STAYS-IN-SOURCE-WP-PRODUCT": 992,
+    "fastops-method/knowledge/case-studies/agent-outputs/": 2147,
+    "fastops-os/templates/hooks/claude/": 15,
+    "fastops-os/templates/hooks/claude/commands/": 24,
+    "fastops-os/templates/hooks/claude/hooks/": 60,
+    "fastops-os/templates/hooks/claude/skills/": 9,
+    "fastops-os/templates/hooks/cursor/": 3,
+    "fastops-os/templates/hooks/cursor/rules/": 12,
+    "fastops-os/templates/skills/visual-qc/": 1,
+    "fastops-method/knowledge/case-studies/agent-conviction/": 6,
+    "fastops-method/knowledge/memories/": 9,
+    "fastops-os/.fastops-engine/compaction-artifacts/": 9,
+    "fastops-os/.archive/deliberations/": 9,
+    "fastops-os/.archive/factory-runs/": 9,
+    "fastops-method/knowledge/case-studies/peer-qa/": 14,
+    "fastops-os/src/engine/partner-platform/pt/qc-results/": 32,
+    "fastops-os/.fastops-engine/session-baselines/": 12,
+    "fastops-os/.fastops-engine/sessions/": 157,
+    "fastops-os/src/engine/partner-platform/pt/": 8,
+    "fastops-os/.fastops-engine/agents/": 1,
+    "fastops-os/src/engine/cdp/": 27,
+    "fastops-os/src/engine/orchestration/": 61,
+    "fastops-os/contracts/.fastops-contracts/": 8,
+    "fastops-os/.archive/conversations/": 117,
+    "fastops-method/knowledge/case-studies/discussions/": 1,
+    "fastops-os/docs/architecture/": 2,
+    "fastops-method/knowledge/lessons-learned/what-broke/": 1,
+    "fastops-method/knowledge/case-studies/freedom-experiment/": 3,
+    "fastops-os/.archive/handoffs/": 1,
+    "fastops-os/templates/hooks/legacy/": 1,
+    "fastops-method/knowledge/case-studies/intel/": 5,
+    "fastops-method/knowledge/entries-archive/": 1,
+    "fastops-os/.fastops-engine/knowledge-stats/": 2,
+    "fastops-method/knowledge/lessons-learned/": 3,
+    "fastops-os/src/engine/lib/": 2,
+    "fastops-method/knowledge/case-studies/meetings/": 32,
+    "fastops-method/methodology/": 18,
+    "fastops-method/knowledge/case-studies/milestones/": 2,
+    "fastops-method/knowledge/case-studies/mission-archive/": 39,
+    "fastops-os/templates/onboarding/": 1,
+    "fastops-method/knowledge/case-studies/sign-offs/": 5,
+    "fastops-method/knowledge/memories/team/": 1192,
+    "fastops-os/src/engine/tools/legacy/": 1,
+    "fastops-method/knowledge/case-studies/waves/": 8,
+    "fastops-os/templates/github-workflows/": 1,
+    "fastops-os/templates/project/.gitignore.template": 1,
+    "fastops-method/knowledge/case-studies/knowledge-base/": 7,
+    "fastops-method/knowledge/case-studies/strategy-docs/": 14,
+    "fastops-method/knowledge/case-studies/joel-archive/": 490,
+    "fastops-method/knowledge/case-studies/strategy-docs/shared-findings.jsonl": 1,
+    "fastops-os/src/engine/comms/docs/": 9,
+    "fastops-os/src/engine/comms/": 40,
+    "fastops-os/contracts/comms/": 6,
+    "fastops-os/.archive/comms-from-dev-process/": 372,
+    "fastops-os/.archive/comms-from-dev-process/.relay/": 8,
+    "fastops-method/knowledge/case-studies/deliverables/": 173,
+    "fastops-os/docs/partner-onboarding/": 16,
+    "fastops-method/knowledge/case-studies/experiments/": 10,
+    "fastops-method/methodology/memory-classification/": 10,
+    "fastops-method/knowledge/case-studies/evidence-misc/": 2,
+    "fastops-method/knowledge/case-studies/onboarding-narratives/": 26,
+    "fastops-os/services/mcp/": 5,
+    "fastops-os/services/partner-test/groupme/": 9,
+    "fastops-os/templates/project/package.json.template": 1,
+    "fastops-os/src/engine/knowledge-retrieval/": 13,
+    "fastops-method/knowledge/case-studies/env-build/": 9,
+    "fastops-method/knowledge/case-studies/reef/": 4,
+    "fastops-method/knowledge/case-studies/stigmergy/": 6,
+    "fastops-method/knowledge/case-studies/reef-misc/": 1,
+    "fastops-os/.fastops-engine/knowledge-retrieval/": 2,
+    "fastops-os/.archive/reef-outcome-log.jsonl": 1,
+    "fastops-method/knowledge/case-studies/env-build/receipts/": 8,
+    "fastops-method/knowledge/case-studies/receipts/": 8,
+    "fastops-method/knowledge/case-studies/retroactive/": 5,
+    "fastops-method/knowledge/case-studies/reports/": 4,
+    "fastops-method/knowledge/case-studies/research-misc/": 6,
+    "fastops-os/services/slack-bridge/": 7,
+    "fastops-os/supabase/migrations/": 1,
+    "fastops-method/methodology/gaming-resistance/": 2,
+    "fastops-os/templates/project/tsconfig.template.json": 1
+  },
+  "unroutedCount": 0,
+  "unroutedFiles": [],
+  "reviewCount": 0,
+  "reviewFiles": [],
+  "fallbackCount": 0,
+  "fallbackFiles": [],
+  "sample": {
+    "STAYS-IN-SOURCE-AS-ARCHIVE": [
+      {
+        "file": ".fastops/.tmp-build-log.txt",
+        "note": "temp scratch"
+      },
+      {
+        "file": ".agent-outputs/.cognitive-stream-poc-test-1.jsonl",
+        "note": "resolved by agent-outputs-triage.js"
+      },
+      {
+        "file": ".agent-outputs/.cognitive-stream-poc-test-2.jsonl",
+        "note": "resolved by agent-outputs-triage.js"
+      }
+    ],
+    "fastops-method/knowledge/case-studies/.fastops-misc/": [
+      {
+        "file": ".fastops/_converge-mok8wn9h.json",
+        "note": "remaining .fastops items default to case-studies"
+      },
+      {
+        "file": ".fastops/_converge-mok8wq64.json",
+        "note": "remaining .fastops items default to case-studies"
+      },
+      {
+        "file": ".fastops/_converge-mok8wusl.json",
+        "note": "remaining .fastops items default to case-studies"
+      }
+    ],
+    "IGNORED-GENERATED": [
+      {
+        "file": ".fastops/spinout-tools/.secretlintrc.json",
+        "note": "spin-out tooling, will be removed post-execution"
+      },
+      {
+        "file": ".fastops/spinout-tools/agent-outputs-archive.txt",
+        "note": "spin-out tooling, will be removed post-execution"
+      },
+      {
+        "file": ".fastops/spinout-tools/agent-outputs-keep.txt",
+        "note": "spin-out tooling, will be removed post-execution"
+      }
+    ],
+    "fastops-method/knowledge/case-studies/spin-out-process/": [
+      {
+        "file": "FASTOPS-3REPO-SPINOUT-FINAL.md",
+        "note": "SANITIZE-FIRST"
+      },
+      {
+        "file": "FASTOPS-3REPO-SPINOUT-V2-DELTA.md",
+        "note": "SANITIZE-FIRST"
+      },
+      {
+        "file": "FASTOPS-STARTER-PACK-DEFINITION-OF-DONE.md",
+        "note": "SANITIZE-FIRST"
+      }
+    ],
+    "STAYS-IN-SOURCE-WP-PRODUCT": [
+      {
+        "file": "WARRIORPATH-SPINOUT-REVIEW-PACKAGE-V3-DELTA.md",
+        "note": null
+      },
+      {
+        "file": "WARRIORPATH-SPINOUT-REVIEW-PACKAGE-V3.1-DELTA.md",
+        "note": null
+      },
+      {
+        "file": "warriorpath/scripts/admin-pw-reset.js",
+        "note": null
+      }
+    ],
+    "fastops-method/knowledge/case-studies/agent-outputs/": [
+      {
+        "file": ".agent-outputs/00-PHASE-3-EXECUTIVE-SUMMARY.md",
+        "note": "resolved by agent-outputs-triage.js"
+      },
+      {
+        "file": ".agent-outputs/AD-3-ANALYTICS-STORAGE-ARCHITECTURE-broadside.md",
+        "note": "resolved by agent-outputs-triage.js"
+      },
+      {
+        "file": ".agent-outputs/AD-4-FLASH-SALE-COMPUTE-ARCHITECTURE-broadside.md",
+        "note": "resolved by agent-outputs-triage.js"
+      }
+    ],
+    "fastops-os/templates/hooks/claude/": [
+      {
+        "file": ".claude/.mode",
+        "note": null
+      },
+      {
+        "file": ".claude/.smoke-transcript-claim.jsonl",
+        "note": null
+      },
+      {
+        "file": ".claude/CLAUDE.md",
+        "note": "SANITIZE"
+      }
+    ],
+    "fastops-os/templates/hooks/claude/commands/": [
+      {
+        "file": ".claude/commands/briefing.md",
+        "note": null
+      },
+      {
+        "file": ".claude/commands/cdp-fix.md",
+        "note": null
+      },
+      {
+        "file": ".claude/commands/con-op.md",
+        "note": null
+      }
+    ],
+    "fastops-os/templates/hooks/claude/hooks/": [
+      {
+        "file": ".claude/hooks/HOOKS-REMOVED-BACKUP.md",
+        "note": null
+      },
+      {
+        "file": ".claude/hooks/REMOVED-HOOKS.md",
+        "note": null
+      },
+      {
+        "file": ".claude/hooks/agent-activity-log.js",
+        "note": null
+      }
+    ],
+    "fastops-os/templates/hooks/claude/skills/": [
+      {
+        "file": ".claude/skills/cdp-god-view.md",
+        "note": null
+      },
+      {
+        "file": ".claude/skills/fastops-wave.md",
+        "note": null
+      },
+      {
+        "file": ".claude/skills/onedrive.md",
+        "note": null
+      }
+    ],
+    "fastops-os/templates/hooks/cursor/": [
+      {
+        "file": ".cursor/CURSOR-OVERWATCH-ONBOARDING.md",
+        "note": null
+      },
+      {
+        "file": ".cursor/mcp.json",
+        "note": null
+      },
+      {
+        "file": ".cursorrules",
+        "note": null
+      }
+    ],
+    "fastops-os/templates/hooks/cursor/rules/": [
+      {
+        "file": ".cursor/rules/3way-comms.mdc",
+        "note": null
+      },
+      {
+        "file": ".cursor/rules/action-kb-frontier-subagent.mdc",
+        "note": null
+      },
+      {
+        "file": ".cursor/rules/city-qc-limits.mdc",
+        "note": null
+      }
+    ],
+    "fastops-os/templates/skills/visual-qc/": [
+      {
+        "file": ".cursor/skills/visual-qc/SKILL.md",
+        "note": "SCRUB-REQUIRED"
+      }
+    ],
+    "fastops-method/knowledge/case-studies/agent-conviction/": [
+      {
+        "file": ".fastops/.agent-conviction/deepseek.jsonl",
+        "note": null
+      },
+      {
+        "file": ".fastops/.agent-conviction/gemini.jsonl",
+        "note": null
+      },
+      {
+        "file": ".fastops/.agent-conviction/gpt.jsonl",
+        "note": null
+      }
+    ],
+    "fastops-method/knowledge/memories/": [
+      {
+        "file": ".fastops/.agent-memory/cogito.jsonl",
+        "note": null
+      },
+      {
+        "file": ".fastops/.agent-memory/deepseek-v3-2.jsonl",
+        "note": null
+      },
+      {
+        "file": ".fastops/.agent-memory/deepseek.jsonl",
+        "note": null
+      }
+    ],
+    "fastops-os/.fastops-engine/compaction-artifacts/": [
+      {
+        "file": ".fastops/.compiled-state/boot-checkpoint.json",
+        "note": null
+      },
+      {
+        "file": ".fastops/.compiled-state/comms-digest.json",
+        "note": null
+      },
+      {
+        "file": ".fastops/.compiled-state/deltas.jsonl",
+        "note": null
+      }
+    ],
+    "fastops-os/.archive/deliberations/": [
+      {
+        "file": ".fastops/.deliberation-30-60/round-1.json",
+        "note": null
+      },
+      {
+        "file": ".fastops/.deliberation-30-60/round-2.json",
+        "note": null
+      },
+      {
+        "file": ".fastops/.deliberation-30-60/round-3.json",
+        "note": null
+      }
+    ],
+    "fastops-os/.archive/factory-runs/": [
+      {
+        "file": ".fastops/.factory-runs/factory-ralph-3gates-mnqe/authorized-files.json",
+        "note": null
+      },
+      {
+        "file": ".fastops/.factory-runs/factory-ralph-3gates-mnqe/sign-off.json",
+        "note": null
+      },
+      {
+        "file": ".fastops/.factory-runs/factory-ralph-git-anchored-mnqf/authorized-files.json",
+        "note": null
+      }
+    ],
+    "fastops-method/knowledge/case-studies/peer-qa/": [
+      {
+        "file": ".fastops/.peer-qa-cleanup-brief.txt",
+        "note": null
+      },
+      {
+        "file": ".fastops/.peer-qa-cleanup-responses/deepseek.txt",
+        "note": null
+      },
+      {
+        "file": ".fastops/.peer-qa-cleanup-responses/grok-4.txt",
+        "note": null
+      }
+    ],
+    "fastops-os/src/engine/partner-platform/pt/qc-results/": [
+      {
+        "file": ".fastops/.qc-results/qc-mnfyn005.json",
+        "note": null
+      },
+      {
+        "file": ".fastops/.qc-results/qc-mnfyssp4.json",
+        "note": null
+      },
+      {
+        "file": ".fastops/.qc-results/qc-mnfz6kip.json",
+        "note": null
+      }
+    ],
+    "fastops-os/.fastops-engine/session-baselines/": [
+      {
+        "file": ".fastops/.session-baselines/08b8b48d-2d07-4a22-ae3b-600c750c6670.json",
+        "note": null
+      },
+      {
+        "file": ".fastops/.session-baselines/157d755d-a5de-490d-be70-0b0c17ea2569.json",
+        "note": null
+      },
+      {
+        "file": ".fastops/.session-baselines/26b3f14c-e0d7-4e06-9a47-a2b7892b71e9.json",
+        "note": null
+      }
+    ],
+    "fastops-os/.fastops-engine/sessions/": [
+      {
+        "file": ".fastops/.sessions/cogito-mnkmphgd-644b54.json",
+        "note": null
+      },
+      {
+        "file": ".fastops/.sessions/deepseek-mnka4gha-0dbc6f.json",
+        "note": null
+      },
+      {
+        "file": ".fastops/.sessions/deepseek-mnkadz83-eb2602.json",
+        "note": null
+      }
+    ],
+    "fastops-os/src/engine/partner-platform/pt/": [
+      {
+        "file": ".fastops/_pt-commander-mode.js",
+        "note": null
+      },
+      {
+        "file": ".fastops/_pt-delivery-reply.js",
+        "note": null
+      },
+      {
+        "file": ".fastops/_pt-design-answers.js",
+        "note": null
+      }
+    ],
+    "fastops-os/.fastops-engine/agents/": [
+      {
+        "file": ".fastops/agents/aliases/verify-t.claim",
+        "note": null
+      }
+    ],
+    "fastops-os/src/engine/cdp/": [
+      {
+        "file": ".fastops/cdp/CDP-BIDIRECTIONAL-STATUS.md",
+        "note": null
+      },
+      {
+        "file": ".fastops/cdp/CDP-PEER-PROTOCOL.md",
+        "note": null
+      },
+      {
+        "file": ".fastops/cdp/CDP-PORT-PERMANENCE.md",
+        "note": null
+      }
+    ],
+    "fastops-os/src/engine/orchestration/": [
+      {
+        "file": ".fastops/city-adversarial-jury.js",
+        "note": null
+      },
+      {
+        "file": ".fastops/city-auto-dispatch.js",
+        "note": null
+      },
+      {
+        "file": ".fastops/city-beacon.js",
+        "note": null
+      }
+    ],
+    "fastops-os/contracts/.fastops-contracts/": [
+      {
+        "file": ".fastops/contracts/DIGEST-READER-CONTRACT.md",
+        "note": "engine contracts"
+      },
+      {
+        "file": ".fastops/contracts/DIGEST-WRITER-CONTRACT.md",
+        "note": "engine contracts"
+      },
+      {
+        "file": ".fastops/contracts/INTENT-ENGINE-CONTRACT.md",
+        "note": "engine contracts"
+      }
+    ],
+    "fastops-os/.archive/conversations/": [
+      {
+        "file": ".fastops/conversations/.changelog-synthesis.txt",
+        "note": null
+      },
+      {
+        "file": ".fastops/conversations/4moment-challenge-1771980290.jsonl",
+        "note": null
+      },
+      {
+        "file": ".fastops/conversations/README.md",
+        "note": null
+      }
+    ],
+    "fastops-method/knowledge/case-studies/discussions/": [
+      {
+        "file": ".fastops/discussions/optimizing-the-jail-break-how-many-rounds-of-chal.md",
+        "note": null
+      }
+    ],
+    "fastops-os/docs/architecture/": [
+      {
+        "file": ".fastops/external-api-runtime-pointer.md",
+        "note": null
+      },
+      {
+        "file": ".fastops/external-api-sender-allowlist.json",
+        "note": null
+      }
+    ],
+    "fastops-method/knowledge/lessons-learned/what-broke/": [
+      {
+        "file": ".fastops/failure-library/failure-patterns.jsonl",
+        "note": null
+      }
+    ],
+    "fastops-method/knowledge/case-studies/freedom-experiment/": [
+      {
+        "file": ".fastops/freedom-experiment/wave-0-prompts.json",
+        "note": null
+      },
+      {
+        "file": ".fastops/freedom-experiment/wave-1-prompts.json",
+        "note": null
+      },
+      {
+        "file": ".fastops/freedom-experiment/wave-results-2026-03-10.jsonl",
+        "note": null
+      }
+    ],
+    "fastops-os/.archive/handoffs/": [
+      {
+        "file": ".fastops/handoffs/techlabs/wave-0-handoff.json",
+        "note": null
+      }
+    ],
+    "fastops-os/templates/hooks/legacy/": [
+      {
+        "file": ".fastops/hooks/tax-gate.js",
+        "note": null
+      }
+    ],
+    "fastops-method/knowledge/case-studies/intel/": [
+      {
+        "file": ".fastops/intel/baselines/codebase_map.json",
+        "note": null
+      },
+      {
+        "file": ".fastops/intel/baselines/infrastructure.json",
+        "note": null
+      },
+      {
+        "file": ".fastops/intel/baselines/knowledge_threats.json",
+        "note": null
+      }
+    ],
+    "fastops-method/knowledge/entries-archive/": [
+      {
+        "file": ".fastops/knowledge/entries.jsonl.archived-merged-to-main-kb",
+        "note": null
+      }
+    ],
+    "fastops-os/.fastops-engine/knowledge-stats/": [
+      {
+        "file": ".fastops/knowledge/scorecards.jsonl",
+        "note": null
+      },
+      {
+        "file": ".fastops/knowledge/usage.jsonl",
+        "note": null
+      }
+    ],
+    "fastops-method/knowledge/lessons-learned/": [
+      {
+        "file": ".fastops/learnings/SWARM-WISDOM.md",
+        "note": null
+      },
+      {
+        "file": ".fastops/learnings/entries/agent-bootstrap-001.json",
+        "note": null
+      },
+      {
+        "file": ".fastops/learnings/index.json",
+        "note": null
+      }
+    ],
+    "fastops-os/src/engine/lib/": [
+      {
+        "file": ".fastops/lib/consolidate-wisdom.ts",
+        "note": null
+      },
+      {
+        "file": ".fastops/lib/learning-writer.ts",
+        "note": null
+      }
+    ],
+    "fastops-method/knowledge/case-studies/meetings/": [
+      {
+        "file": ".fastops/meetings/ACTIVE-MEETING/MODERATOR-STATE.md",
+        "note": null
+      },
+      {
+        "file": ".fastops/meetings/ACTIVE-MEETING/README.md",
+        "note": null
+      },
+      {
+        "file": ".fastops/meetings/ACTIVE-MEETING/handoffs/crucible.md",
+        "note": null
+      }
+    ],
+    "fastops-method/methodology/": [
+      {
+        "file": ".fastops/methodology/OPERATING-MODE.md",
+        "note": "dedupe vs root methodology/"
+      },
+      {
+        "file": ".fastops/methodology/TRAJECTORY.md",
+        "note": "dedupe vs root methodology/"
+      },
+      {
+        "file": ".fastops/methodology/challenge-protocol.md",
+        "note": "dedupe vs root methodology/"
+      }
+    ],
+    "fastops-method/knowledge/case-studies/milestones/": [
+      {
+        "file": ".fastops/milestones/domains.json",
+        "note": null
+      },
+      {
+        "file": ".fastops/milestones/ui.json",
+        "note": null
+      }
+    ],
+    "fastops-method/knowledge/case-studies/mission-archive/": [
+      {
+        "file": ".fastops/mission-archive/1772115383684-Build-CRM-lead-converter.json",
+        "note": null
+      },
+      {
+        "file": ".fastops/mission-archive/1772115467316-Fix-CSS-visibility-on-fastops-ai.json",
+        "note": null
+      },
+      {
+        "file": ".fastops/mission-archive/1772115489221-Gate-integration-test.json",
+        "note": null
+      }
+    ],
+    "fastops-os/templates/onboarding/": [
+      {
+        "file": ".fastops/onboarding/buds-engine.js",
+        "note": "engine onboarding templates (separate from evidence/onboarding wisdom narratives)"
+      }
+    ],
+    "fastops-method/knowledge/case-studies/sign-offs/": [
+      {
+        "file": ".fastops/sign-offs/STRESS-TEST-V105.jsonl",
+        "note": null
+      },
+      {
+        "file": ".fastops/sign-offs/TEST-AUDIT-MISSION-A-V1-01.jsonl",
+        "note": null
+      },
+      {
+        "file": ".fastops/sign-offs/_criticality.json",
+        "note": null
+      }
+    ],
+    "fastops-method/knowledge/memories/team/": [
+      {
+        "file": ".fastops/team-memory/1774636447799-9dbb68.json",
+        "note": null
+      },
+      {
+        "file": ".fastops/team-memory/1774636506692-1854c3.json",
+        "note": null
+      },
+      {
+        "file": ".fastops/team-memory/1774636506693-d0814c.json",
+        "note": null
+      }
+    ],
+    "fastops-os/src/engine/tools/legacy/": [
+      {
+        "file": ".fastops/tools/pay-tax.js",
+        "note": null
+      }
+    ],
+    "fastops-method/knowledge/case-studies/waves/": [
+      {
+        "file": ".fastops/wave/README.md",
+        "note": null
+      },
+      {
+        "file": ".fastops/wave/package.json",
+        "note": null
+      },
+      {
+        "file": ".fastops/wave/templates/example-state.json",
+        "note": null
+      }
+    ],
+    "fastops-os/templates/github-workflows/": [
+      {
+        "file": ".github/workflows/deploy.yml",
+        "note": "TEMPLATIZE"
+      }
+    ],
+    "fastops-os/templates/project/.gitignore.template": [
+      {
+        "file": ".gitignore",
+        "note": null
+      }
+    ],
+    "fastops-method/knowledge/case-studies/knowledge-base/": [
+      {
+        "file": ".knowledge-base/agent-learning-evolution/GROUND-TRUTH.md",
+        "note": "older methodology surface"
+      },
+      {
+        "file": ".knowledge-base/contract-permanence/GROUND-TRUTH.md",
+        "note": "older methodology surface"
+      },
+      {
+        "file": ".knowledge-base/handoff-paradigm-analysis/GROUND-TRUTH.md",
+        "note": "older methodology surface"
+      }
+    ],
+    "fastops-method/knowledge/case-studies/strategy-docs/": [
+      {
+        "file": "5-MODEL-PROGRESSIVE-PIPELINE.md",
+        "note": "[SANITIZE-FIRST]"
+      },
+      {
+        "file": "AMENDMENTS.md",
+        "note": "[SANITIZE-FIRST]"
+      },
+      {
+        "file": "DRY-STONE-WALLING.md",
+        "note": "[SANITIZE-FIRST]"
+      }
+    ],
+    "fastops-method/knowledge/case-studies/joel-archive/": [
+      {
+        "file": "Joel/AFGHANISTAN  DEPLOYMENT update 26 oct.docx.md",
+        "note": "Joel personal artifacts, routed to fastops-method per Decision 3"
+      },
+      {
+        "file": "Joel/FASTOPS-OS-SCOPE.md",
+        "note": "Joel personal artifacts, routed to fastops-method per Decision 3"
+      },
+      {
+        "file": "Joel/FASTOPS-OS-V2-SCOPE.md",
+        "note": "Joel personal artifacts, routed to fastops-method per Decision 3"
+      }
+    ],
+    "fastops-method/knowledge/case-studies/strategy-docs/shared-findings.jsonl": [
+      {
+        "file": "SHARED-FINDINGS.jsonl",
+        "note": null
+      }
+    ],
+    "fastops-os/src/engine/comms/docs/": [
+      {
+        "file": "comms/CDP-TROUBLESHOOTING.md",
+        "note": null
+      },
+      {
+        "file": "comms/CDP-WAKE-SYSTEM.md",
+        "note": null
+      },
+      {
+        "file": "comms/CLAUDE-SQUAD-COMMS.md",
+        "note": null
+      }
+    ],
+    "fastops-os/src/engine/comms/": [
+      {
+        "file": "comms/_read.js",
+        "note": null
+      },
+      {
+        "file": "comms/ambient.js",
+        "note": null
+      },
+      {
+        "file": "comms/anthropic-stream-bridge.js",
+        "note": null
+      }
+    ],
+    "fastops-os/contracts/comms/": [
+      {
+        "file": "comms/contracts/000-SHARED-PRIMITIVES.md",
+        "note": null
+      },
+      {
+        "file": "comms/contracts/001-COMMS-SERVER.md",
+        "note": null
+      },
+      {
+        "file": "comms/contracts/002-AGENT-SDK.md",
+        "note": null
+      }
+    ],
+    "fastops-os/.archive/comms-from-dev-process/": [
+      {
+        "file": "comms/data/#general.jsonl",
+        "note": null
+      },
+      {
+        "file": "comms/data/.agents/ppid-101094.id",
+        "note": "all other comms data"
+      },
+      {
+        "file": "comms/data/.agents/ppid-101095.id",
+        "note": "all other comms data"
+      }
+    ],
+    "fastops-os/.archive/comms-from-dev-process/.relay/": [
+      {
+        "file": "comms/data/.relay/.gitkeep",
+        "note": null
+      },
+      {
+        "file": "comms/data/.relay/COMMS-DIGEST.md",
+        "note": null
+      },
+      {
+        "file": "comms/data/.relay/claude-to-gemini-v3-review.json",
+        "note": null
+      }
+    ],
+    "fastops-method/knowledge/case-studies/deliverables/": [
+      {
+        "file": "deliverables/AGENCY-SCOREBOARD-COMPARISON.md",
+        "note": "misc deliverables"
+      },
+      {
+        "file": "deliverables/AGENCY-SCOREBOARD.json",
+        "note": "misc deliverables"
+      },
+      {
+        "file": "deliverables/AGENCY-SCOREBOARD.md",
+        "note": "misc deliverables"
+      }
+    ],
+    "fastops-os/docs/partner-onboarding/": [
+      {
+        "file": "deliverables/INVI-PRESSURE-TEST-REPORT.md",
+        "note": null
+      },
+      {
+        "file": "deliverables/NICK-CONNECTION-GUIDE.md",
+        "note": null
+      },
+      {
+        "file": "deliverables/PARTNER-API-INTEGRATION-GUIDE.md",
+        "note": null
+      }
+    ],
+    "fastops-method/knowledge/case-studies/experiments/": [
+      {
+        "file": "environment/experiments/choice-architecture-test.js",
+        "note": null
+      },
+      {
+        "file": "environment/experiments/format-test.js",
+        "note": null
+      },
+      {
+        "file": "environment/experiments/forward-vision-research.js",
+        "note": null
+      }
+    ],
+    "fastops-method/methodology/memory-classification/": [
+      {
+        "file": "evidence/maturity/MEMORY-MD-DRAFT.md",
+        "note": "Joel E3"
+      },
+      {
+        "file": "evidence/maturity/cards-classification.json",
+        "note": "Joel E3"
+      },
+      {
+        "file": "evidence/maturity/classification-index.json",
+        "note": "Joel E3"
+      }
+    ],
+    "fastops-method/knowledge/case-studies/evidence-misc/": [
+      {
+        "file": "evidence/mentor/classify-evidence.js",
+        "note": "all other top-level evidence"
+      },
+      {
+        "file": "evidence/mentor/evidence-index.json",
+        "note": "all other top-level evidence"
+      }
+    ],
+    "fastops-method/knowledge/case-studies/onboarding-narratives/": [
+      {
+        "file": "evidence/onboarding/01-the-pattern-observer.png",
+        "note": "Joel E2"
+      },
+      {
+        "file": "evidence/onboarding/02-the-live-intervention.png",
+        "note": "Joel E2"
+      },
+      {
+        "file": "evidence/onboarding/03-the-optometrist.png",
+        "note": "Joel E2"
+      }
+    ],
+    "fastops-os/services/mcp/": [
+      {
+        "file": "fastops-comms-mcp/SETUP-EXTERNAL.md",
+        "note": null
+      },
+      {
+        "file": "fastops-comms-mcp/council.py",
+        "note": null
+      },
+      {
+        "file": "fastops-comms-mcp/index.js",
+        "note": null
+      }
+    ],
+    "fastops-os/services/partner-test/groupme/": [
+      {
+        "file": "groupme-test/.gitignore",
+        "note": "partner test kit"
+      },
+      {
+        "file": "groupme-test/README.md",
+        "note": "partner test kit"
+      },
+      {
+        "file": "groupme-test/checkin-post.js",
+        "note": "partner test kit"
+      }
+    ],
+    "fastops-os/templates/project/package.json.template": [
+      {
+        "file": "package.json",
+        "note": null
+      }
+    ],
+    "fastops-os/src/engine/knowledge-retrieval/": [
+      {
+        "file": "reef/build-index.js",
+        "note": null
+      },
+      {
+        "file": "reef/contract-runner.js",
+        "note": null
+      },
+      {
+        "file": "reef/create-grading-view.js",
+        "note": null
+      }
+    ],
+    "fastops-method/knowledge/case-studies/env-build/": [
+      {
+        "file": "reef/contracts/env-build-001-001-outcome-card-schema.json",
+        "note": null
+      },
+      {
+        "file": "reef/contracts/env-build-001-002-compressor-agent.json",
+        "note": null
+      },
+      {
+        "file": "reef/contracts/env-build-001-003-behavioral-index.json",
+        "note": null
+      }
+    ],
+    "fastops-method/knowledge/case-studies/reef/": [
+      {
+        "file": "reef/contracts/reef-001-non-code-oracle.json",
+        "note": null
+      },
+      {
+        "file": "reef/contracts/reef-002-forward-2x2.json",
+        "note": null
+      },
+      {
+        "file": "reef/contracts/reef-003-contract-generator.json",
+        "note": null
+      }
+    ],
+    "fastops-method/knowledge/case-studies/stigmergy/": [
+      {
+        "file": "reef/contracts/stig-001-format-experiment-protocol.json",
+        "note": null
+      },
+      {
+        "file": "reef/contracts/stig-002-usage-instrumentation.json",
+        "note": null
+      },
+      {
+        "file": "reef/contracts/stig-003-adaptive-retrieval.json",
+        "note": null
+      }
+    ],
+    "fastops-method/knowledge/case-studies/reef-misc/": [
+      {
+        "file": "reef/index.json",
+        "note": "all other reef items default to case-studies"
+      }
+    ],
+    "fastops-os/.fastops-engine/knowledge-retrieval/": [
+      {
+        "file": "reef/kb-cache.json",
+        "note": null
+      },
+      {
+        "file": "reef/synonyms.json",
+        "note": null
+      }
+    ],
+    "fastops-os/.archive/reef-outcome-log.jsonl": [
+      {
+        "file": "reef/outcome-log.jsonl",
+        "note": null
+      }
+    ],
+    "fastops-method/knowledge/case-studies/env-build/receipts/": [
+      {
+        "file": "reef/receipts/env-build-001-001-env-build-001-001-outcome-card-schema.json",
+        "note": null
+      },
+      {
+        "file": "reef/receipts/env-build-001-002-env-build-001-002-compressor-agent.json",
+        "note": null
+      },
+      {
+        "file": "reef/receipts/env-build-001-003-env-build-001-003-behavioral-index.json",
+        "note": null
+      }
+    ],
+    "fastops-method/knowledge/case-studies/receipts/": [
+      {
+        "file": "reef/receipts/receipt-data-001.json",
+        "note": null
+      },
+      {
+        "file": "reef/receipts/receipt-data-002.json",
+        "note": null
+      },
+      {
+        "file": "reef/receipts/receipt-data-003.json",
+        "note": null
+      }
+    ],
+    "fastops-method/knowledge/case-studies/retroactive/": [
+      {
+        "file": "reef/receipts/retroactive-session41-probe-v1-visual-qc.json",
+        "note": null
+      },
+      {
+        "file": "reef/receipts/retroactive-session44-visual-qc-v3.json",
+        "note": null
+      },
+      {
+        "file": "reef/receipts/retroactive-session45-reef-jailbreak-horsepower.json",
+        "note": null
+      }
+    ],
+    "fastops-method/knowledge/case-studies/reports/": [
+      {
+        "file": "reef/reports/checkpoint-env-build-001-1771208087382.json",
+        "note": null
+      },
+      {
+        "file": "reef/reports/checkpoint-nsw-v2-reef-001.md",
+        "note": null
+      },
+      {
+        "file": "reef/reports/flag-queue.jsonl",
+        "note": null
+      }
+    ],
+    "fastops-method/knowledge/case-studies/research-misc/": [
+      {
+        "file": "research/AI-Product-Discovery-Research.md",
+        "note": null
+      },
+      {
+        "file": "research/beyond-interviews-requirements-alternatives.md",
+        "note": null
+      },
+      {
+        "file": "research/projectbackground.md",
+        "note": null
+      }
+    ],
+    "fastops-os/services/slack-bridge/": [
+      {
+        "file": "slack-bridge/package-lock.json",
+        "note": null
+      },
+      {
+        "file": "slack-bridge/package.json",
+        "note": null
+      },
+      {
+        "file": "slack-bridge/push-roster.js",
+        "note": null
+      }
+    ],
+    "fastops-os/supabase/migrations/": [
+      {
+        "file": "supabase/migrations/001_init.sql",
+        "note": "legacy FastOps city state"
+      }
+    ],
+    "fastops-method/methodology/gaming-resistance/": [
+      {
+        "file": "tools/gaming-resistance-detector.js",
+        "note": null
+      },
+      {
+        "file": "tools/gaming-resistance-detector.test.js",
+        "note": null
+      }
+    ],
+    "fastops-os/templates/project/tsconfig.template.json": [
+      {
+        "file": "tsconfig.json",
+        "note": null
+      }
+    ]
+  }
+}

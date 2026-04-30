@@ -1,0 +1,1829 @@
+{
+  "files": [
+    "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\agent-wake-api.js",
+    "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\omega34-api-wake.js",
+    "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\bootstrap-agents.js"
+  ],
+  "stage1Results": [
+    {
+      "model": "solar-pro",
+      "findings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Server mode accepts wake calls on root path without path validation",
+          "file": "agent-wake-api.js",
+          "line": 41,
+          "code": "path: '/',",
+          "explanation": "The server responds to any POST to '/' including potentially unintended paths like '/wake' or '/admin', which could be exploited if the server is exposed publicly or if agents send unintended requests.",
+          "fix": "Change path to '/wake' and validate the request path to ensure only intended wake calls are processed."
+        },
+        {
+          "id": 2,
+          "severity": "CRITICAL",
+          "title": "Server mode does not validate agent name in request against expected values",
+          "file": "agent-wake-api.js",
+          "line": 49,
+          "code": "const { wakeId, commsId, channel, from, timestamp } = data;",
+          "explanation": "The server blindly parses any JSON fields sent in the request without checking if the agent name matches the server's registered name. This could allow any agent to process wake calls intended for others.",
+          "fix": "Add validation that the first field contains the expected agent name before processing the wake data."
+        },
+        {
+          "id": 3,
+          "severity": "CRITICAL",
+          "title": "Omega wake client uses hardcoded AGENTS list but AGENT_PORTS is not exported",
+          "file": "omega34-api-wake.js",
+          "line": 27,
+          "code": "const AGENTS = [",
+          "explanation": "The client references AGENT_PORTS in the comment but the actual array AGENTS does not contain the port property. This mismatch could lead to incorrect port usage if AGENT_PORTS is ever used directly.",
+          "fix": "Remove the comment reference to AGENT_PORTS or add port property to AGENTS array to match."
+        },
+        {
+          "id": 4,
+          "severity": "CRITICAL",
+          "title": "Omega wake client does not validate agent ports before connecting",
+          "file": "omega34-api-wake.js",
+          "line": 105,
+          "code": "const req = http.request({",
+          "explanation": "The client attempts to connect to agent ports without checking if they are valid (1-65535). Invalid ports could cause crashes or unexpected behavior during start-server operations.",
+          "fix": "Add port validation: if (!agent.port || agent.port < 1 || agent.port > 65535) return { success: false, error: 'Invalid port' }."
+        },
+        {
+          "id": 5,
+          "severity": "CRITICAL",
+          "title": "Omega wake client uses detached processes for servers but provides no stderr handling",
+          "file": "omega34-api-wake.js",
+          "line": 75,
+          "code": "detached: true, stdio: 'ignore',",
+          "explanation": "Spawning detached processes with 'ignore' stdio means any server startup errors are silently lost, making debugging difficult when servers fail to start.",
+          "fix": "Remove detached: true and use default stdio, or capture stderr to log errors during server startup."
+        },
+        {
+          "id": 6,
+          "severity": "CRITICAL",
+          "title": "Omega wake client does not handle SIGTERM/SIGINT for daemon mode",
+          "file": "omega34-api-wake.js",
+          "line": 200,
+          "code": "while (true) {",
+          "explanation": "The daemon runs indefinitely without proper signal handling. If the process receives SIGTERM, it will terminate abruptly without closing servers or completing current wake cycle.",
+          "fix": "Add signal handlers for SIGTERM/SIGINT to gracefully shut down servers before exit."
+        },
+        {
+          "id": 7,
+          "severity": "MINOR",
+          "title": "Server PID cleanup uses hardcoded .wake-server- prefix but stop-all uses .pid",
+          "file": "agent-wake-api.js",
+          "line": 85,
+          "code": "const pidFile = path.join(FASTOPS, `.wake-server-${agentName}.pid`);",
+          "explanation": "The server writes PID files with prefix 'wake-server-' but the stop-all script expects files without this prefix. This could cause PID files to accumulate.",
+          "fix": "Make the PID file prefix consistent between server and stop scripts, or modify stop-all to match the server's prefix."
+        },
+        {
+          "id": 8,
+          "severity": "MINOR",
+          "title": "Omega client's checkPort uses OPTIONS request that may be blocked",
+          "file": "omega34-api-wake.js",
+          "line": 28,
+          "code": "const req = http.request({ hostname: 'localhost', port: port, path: '/', method: 'OPTIONS', timeout: 1000",
+          "explanation": "Using HTTP OPTIONS requests to check if a port is listening may fail in restrictive environments where OPTIONS is not allowed or firewalls block it.",
+          "fix": "Use TCP connection check instead of HTTP OPTIONS for port readiness verification."
+        },
+        {
+          "id": 9,
+          "severity": "CRITICAL",
+          "title": "Omega client's verifyAcknowledgments assumes all agents in expected list are awake",
+          "file": "omega34-api-wake.js",
+          "line": 145,
+          "code": "const expected = results.filter(r => r.success).map(r => r.agent);",
+          "explanation": "The verification logic only checks acknowledgments for agents that were successfully woken via HTTP. However, the mission could still fail if agents are awake but didn't receive comms ACK, causing false success.",
+          "fix": "Verify acknowledgments for all agents in the AGENTS list, not just those woken successfully via API."
+        },
+        {
+          "id": 10,
+          "severity": "CRITICAL",
+          "title": "Omega client's wakeAllAgents does not handle non-existent agents",
+          "file": "omega34-api-wake.js",
+          "line": 95,
+          "code": "for (const agent of AGENTS) {",
+          "explanation": "The client attempts to wake all agents from a hardcoded list but does not verify that each agent's server is actually running or accessible before attempting wake calls.",
+          "fix": "Add server readiness check before each wake call, or implement retry logic with server startup if needed."
+        }
+      ],
+      "raw": "[\n  {\n    \"id\": 1,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Server mode accepts wake calls on root path without path validation\",\n    \"file\": \"agent-wake-api.js\",\n    \"line\": 41,\n    \"code\": \"path: '/',\",\n    \"explanation\": \"The server responds to any POST to '/' including potentially unintended paths like '/wake' or '/admin', which could be exploited if the server is exposed publicly or if agents send unintended requests.\",\n    \"fix\": \"Change path to '/wake' and validate the request path to ensure only intended wake calls are processed.\"\n  },\n  {\n    \"id\": 2,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Server mode does not validate agent name in request against expected values\",\n    \"file\": \"agent-wake-api.js\",\n    \"line\": 49,\n    \"code\": \"const { wakeId, commsId, channel, from, timestamp } = data;\",\n    \"explanation\": \"The server blindly parses any JSON fields sent in the request without checking if the agent name matches the server's registered name. This could allow any agent to process wake calls intended for others.\",\n    \"fix\": \"Add validation that the first field contains the expected agent name before processing the wake data.\"\n  },\n  {\n    \"id\": 3,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Omega wake client uses hardcoded AGENTS list but AGENT_PORTS is not exported\",\n    \"file\": \"omega34-api-wake.js\",\n    \"line\": 27,\n    \"code\": \"const AGENTS = [\",\n    \"explanation\": \"The client references AGENT_PORTS in the comment but the actual array AGENTS does not contain the port property. This mismatch could lead to incorrect port usage if AGENT_PORTS is ever used directly.\",\n    \"fix\": \"Remove the comment reference to AGENT_PORTS or add port property to AGENTS array to match.\",\n    \"fix\": \"Remove the comment reference to AGENT_PORTS or add port property to AGENTS array to match.\"\n  },\n  {\n    \"id\": 4,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Omega wake client does not validate agent ports before connecting\",\n    \"file\": \"omega34-api-wake.js\",\n    \"line\": 105,\n    \"code\": \"const req = http.request({\",\n    \"explanation\": \"The client attempts to connect to agent ports without checking if they are valid (1-65535). Invalid ports could cause crashes or unexpected behavior during start-server operations.\",\n    \"fix\": \"Add port validation: if (!agent.port || agent.port < 1 || agent.port > 65535) return { success: false, error: 'Invalid port' }.\"\n  },\n  {\n    \"id\": 5,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Omega wake client uses detached processes for servers but provides no stderr handling\",\n    \"file\": \"omega34-api-wake.js\",\n    \"line\": 75,\n    \"code\": \"detached: true, stdio: 'ignore',\",\n    \"explanation\": \"Spawning detached processes with 'ignore' stdio means any server startup errors are silently lost, making debugging difficult when servers fail to start.\",\n    \"fix\": \"Remove detached: true and use default stdio, or capture stderr to log errors during server startup.\"\n  },\n  {\n    \"id\": 6,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Omega wake client does not handle SIGTERM/SIGINT for daemon mode\",\n    \"file\": \"omega34-api-wake.js\",\n    \"line\": 200,\n    \"code\": \"while (true) {\",\n    \"explanation\": \"The daemon runs indefinitely without proper signal handling. If the process receives SIGTERM, it will terminate abruptly without closing servers or completing current wake cycle.\",\n    \"fix\": \"Add signal handlers for SIGTERM/SIGINT to gracefully shut down servers before exit.\"\n  },\n  {\n    \"id\": 7,\n    \"severity\": \"MINOR\",\n    \"title\": \"Server PID cleanup uses hardcoded .wake-server- prefix but stop-all uses .pid\",\n    \"file\": \"agent-wake-api.js\",\n    \"line\": 85,\n    \"code\": \"const pidFile = path.join(FASTOPS, `.wake-server-${agentName}.pid`);\",\n    \"explanation\": \"The server writes PID files with prefix 'wake-server-' but the stop-all script expects files without this prefix. This could cause PID files to accumulate.\",\n    \"fix\": \"Make the PID file prefix consistent between server and stop scripts, or modify stop-all to match the server's prefix.\"\n  },\n  {\n    \"id\": 8,\n    \"severity\": \"MINOR\",\n    \"title\": \"Omega client's checkPort uses OPTIONS request that may be blocked\",\n    \"file\": \"omega34-api-wake.js\",\n    \"line\": 28,\n    \"code\": \"const req = http.request({ hostname: 'localhost', port: port, path: '/', method: 'OPTIONS', timeout: 1000\",\n    \"explanation\": \"Using HTTP OPTIONS requests to check if a port is listening may fail in restrictive environments where OPTIONS is not allowed or firewalls block it.\",\n    \"fix\": \"Use TCP connection check instead of HTTP OPTIONS for port readiness verification.\"\n  },\n  {\n    \"id\": 9,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Omega client's verifyAcknowledgments assumes all agents in expected list are awake\",\n    \"file\": \"omega34-api-wake.js\",\n    \"line\": 145,\n    \"code\": \"const expected = results.filter(r => r.success).map(r => r.agent);\",\n    \"explanation\": \"The verification logic only checks acknowledgments for agents that were successfully woken via HTTP. However, the mission could still fail if agents are awake but didn't receive comms ACK, causing false success.\",\n    \"fix\": \"Verify acknowledgments for all agents in the AGENTS list, not just those woken successfully via API.\"\n  },\n  {\n    \"id\": 10,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Omega client's wakeAllAgents does not handle non-existent agents\",\n    \"file\": \"omega34-api-wake.js\",\n    \"line\": 95,\n    \"code\": \"for (const agent of AGENTS) {\",\n    \"explanation\": \"The client attempts to wake all agents from a hardcoded list but does not verify that each agent's server is actually running or accessible before attempting wake calls.\",\n    \"fix\": \"Add server readiness check before each wake call, or implement retry logic with server startup if needed.\"\n  }\n]",
+      "error": null
+    },
+    {
+      "model": "lfm",
+      "findings": [],
+      "raw": "{\n  \"id\": 1,\n  \"severity\": \"CRITICAL\",\n  \"title\": \"Missing COMMS_ID Environment Variable in omega34-api-wake.js\",\n  \"file\": \"omega34-api-wake.js\",\n  \"line\": 147,\n  \"code\": \"const comsId = args.indexOf('--comms-id'); \\nconst comsId = args.indexOf('--comms-id') ? args[args.indexOf('--comms-id') + 1] : null;\",\n  \"explanation\": \"The script assumes COMMS_ID is always provided via command line, but it can be omitted. If COMMS_ID is not provided, args.indexOf('--comms-id') returns -1, causing COMMS_ID to be undefined. This leads to incorrect comms channel handling in postAcknowledgment and message parsing.\",\n  \"fix\": \"Add explicit check and default: const comsId = args.includes('--comms-id') ? args[args.indexOf('--comms-id') + 1] : process.env.COMMS_ID || 'general';\"\n}",
+      "error": null
+    },
+    {
+      "model": "granite",
+      "findings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Missing timeout on HTTP POST to agent servers",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\omega34-api-wake.js",
+          "line": 115,
+          "code": "req.setTimeout(10000, () => {",
+          "explanation": "The code sets a 10-second timeout for the HTTP POST request to each agent server. If the server does not respond within 10 seconds, the request will time out and the promise will be rejected. This can cause the wake cycle to fail silently if an agent server is slow to respond, leading to missed wake cycles and potential loss of agent activation.",
+          "fix": "Increase the timeout duration to a more reasonable value, such as 30 seconds or more, to allow for slower network conditions or slower agent server responses. This ensures that the wake cycle can handle slower agents without prematurely timing out and failing."
+        }
+      ],
+      "raw": "[\n  {\n    \"id\": 1,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Missing timeout on HTTP POST to agent servers\",\n    \"file\": \"C:\\\\Users\\\\joelb\\\\OneDrive\\\\Desktop\\\\Fastops development process\\\\.fastops\\\\omega34-api-wake.js\",\n    \"line\": 115,\n    \"code\": \"req.setTimeout(10000, () => {\",\n    \"explanation\": \"The code sets a 10-second timeout for the HTTP POST request to each agent server. If the server does not respond within 10 seconds, the request will time out and the promise will be rejected. This can cause the wake cycle to fail silently if an agent server is slow to respond, leading to missed wake cycles and potential loss of agent activation.\",\n    \"fix\": \"Increase the timeout duration to a more reasonable value, such as 30 seconds or more, to allow for slower network conditions or slower agent server responses. This ensures that the wake cycle can handle slower agents without prematurely timing out and failing.\"\n  }\n]",
+      "error": null
+    },
+    {
+      "model": "nova",
+      "findings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Unhandled timeout in server start",
+          "file": "agent-wake-api.js",
+          "line": 84,
+          "code": "req.setTimeout(10000, () => { req.destroy(); resolve({ success: false, agent: agentName, error: 'Timeout' }); });",
+          "explanation": "The timeout handler destroys the request but does not stop the server from trying to wake the agent.",
+          "fix": "Add a flag to indicate if the request has timed out, and if so, skip waking the agent."
+        },
+        {
+          "id": 2,
+          "severity": "MINOR",
+          "title": "Potential variable naming inconsistency",
+          "file": "omega34-api-wake.js",
+          "line": 18,
+          "code": "const AGENTS = [...];",
+          "explanation": "AGENTS variable names in omega34-api-wake.js differ slightly from agent-wake-api.js. This could cause confusion if not handled properly.",
+          "fix": "Ensure consistent variable naming or provide clear documentation on the differences."
+        },
+        {
+          "id": 3,
+          "severity": "MINOR",
+          "title": "Unused variable in startAgentServer",
+          "file": "omega34-api-wake.js",
+          "line": 55,
+          "code": "proc.unref();",
+          "explanation": "The unref() method is called on the process object but does not cause any immediate issues.",
+          "fix": "Remove or provide a comment on the purpose of unref() if needed."
+        }
+      ],
+      "raw": "[\n  {\n    \"id\": 1,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Unhandled timeout in server start\",\n    \"file\": \"agent-wake-api.js\",\n    \"line\": 84,\n    \"code\": \"req.setTimeout(10000, () => { req.destroy(); resolve({ success: false, agent: agentName, error: 'Timeout' }); });\",\n    \"explanation\": \"The timeout handler destroys the request but does not stop the server from trying to wake the agent.\",\n    \"fix\": \"Add a flag to indicate if the request has timed out, and if so, skip waking the agent.\"\n  },\n  {\n    \"id\": 2,\n    \"severity\": \"MINOR\",\n    \"title\": \"Potential variable naming inconsistency\",\n    \"file\": \"omega34-api-wake.js\",\n    \"line\": 18,\n    \"code\": \"const AGENTS = [...];\",\n    \"explanation\": \"AGENTS variable names in omega34-api-wake.js differ slightly from agent-wake-api.js. This could cause confusion if not handled properly.\",\n    \"fix\": \"Ensure consistent variable naming or provide clear documentation on the differences.\"\n  },\n  {\n    \"id\": 3,\n    \"severity\": \"MINOR\",\n    \"title\": \"Unused variable in startAgentServer\",\n    \"file\": \"omega34-api-wake.js\",\n    \"line\": 55,\n    \"code\": \"proc.unref();\",\n    \"explanation\": \"The unref() method is called on the process object but does not cause any immediate issues.\",\n    \"fix\": \"Remove or provide a comment on the purpose of unref() if needed.\"\n  }\n]",
+      "error": null
+    },
+    {
+      "model": "command-a",
+      "findings": [],
+      "raw": "[\n  {\n    \"id\": 1,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Inconsistent Agent Configuration\",\n    \"file\": \"C:\\\\Users\\\\joelb\\\\OneDrive\\\\Desktop\\\\Fastops development process\\\\.fastops\\\\agent-wake-api.js\",\n    \"line\": 22,\n    \"code\": \"const AGENT_PORTS = {\\n  'bridge-iii': 9991,\\n  'claude-5469': 9992,\\n  'claude-623b': 9993,\\n  'watchdog': 9994,\\n  'crosscheck': 9995,\\n  'overwatch': 9996,\\n  'haiku': 9997,\\n  'composer': 9998,\\n  'sonnet': 9999\\n};\",\n    \"explanation\": \"AGENT_PORTS in agent-wake-api.js includes agents not present in omega34-api-wake.js (e.g., 'composer', 'sonnet'). Conversely, omega34-api-wake.js includes agents not in AGENT_PORTS (e.g., 'watchdog', 'crosscheck'). This mismatch will cause wake failures for missing agents.\",\n    \"fix\": \"Synchronize agent lists between both files. Remove non-existent agents from AGENT_PORTS and add missing agents to omega34-api-wake.js's AGENTS array.\"\n  },\n  {\n    \"id\": 2,\n    \"severity\": \"MINOR\",\n    \"title\": \"Unnecessary Agent Start Logic\",\n    \"file\": \"C:\\\\Users\\\\joelb\\\\OneDrive\\\\Desktop\\\\Fastops development process\\\\.fastops\\\\omega34-api-wake.js\",\n    \"line\": 411,\n    \"code\": \"if (ONCE) {\\n  // Ensure servers before single wake\\n  await startAllServers();\\n  await sleep(2000);\\n  const result = await wakeCycle(0);\\n  process.exit(result.success ? 0 : 1);\\n}\",\n    \"explanation\": \"The --once mode in omega34-api-wake.js unconditionally starts all servers before waking agents. This is redundant if servers are already running and wastes 2 seconds waiting.\",\n    \"fix\": \"Add a pre-wake check to only start servers if they're not already running. Remove the fixed 2-second delay.\"\n  },\n  {\n    \"id\": 3,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Race Condition in Server Startup\",\n    \"file\": \"C:\\\\Users\\\\joelb\\\\OneDrive\\\\Desktop\\\\Fastops development process\\\\.fastops\\\\omega34-api-wake.js\",\n    \"line\": 130,\n    \"code\": \"startAgentServer(agent) {\\n  // ...\\n  return new Promise((resolve) => {\\n    let attempts = 0;\\n    const checkInterval = setInterval(async () => {\\n      attempts++;\\n      const isReady = await checkPort(agent.port);\\n      if (isReady) {\\n        clearInterval(checkInterval);\\n        resolve({ success: true, pid: proc.pid });\\n      } else if (attempts > 20) {\\n        clearInterval(checkInterval);\\n        resolve({ success: false });\\n      }\\n    }, 500);\\n  });\\n}\",\n    \"explanation\": \"The server startup check uses a fixed 20-attempt limit with 500ms intervals. If the server takes longer than 10 seconds to start, it'll be marked as failed even if it eventually comes online.\",\n    \"fix\": \"Use an exponential backoff strategy for port checks. Increase timeout to 30 seconds with longer intervals after initial attempts.\"\n  },\n  {\n    \"id\": 4,\n    \"severity\": \"MINOR\",\n    \"title\": \"PID File Race Condition\",\n    \"file\": \"C:\\\\Users\\\\joelb\\\\OneDrive\\\\Desktop\\\\Fastops development process\\\\.fastops\\\\bootstrap-agents.js\",\n    \"line\": 55,\n    \"code\": \"const proc = spawn('node', [\\n    path.join(__dirname, 'pty-claude.js')\\n  ], {\\n    // ...\\n  });\\n\\n  // Write PID file\\n  const pidFile = path.join(__dirname, `.agent-${agent.name}.pid`);\\n  fs.writeFileSync(pidFile, proc.pid.toString());\",\n    \"explanation\": \"The PID file is written immediately after spawning the process, before the agent is fully initialized. If the process fails early, the stale PID file will prevent future starts.\",\n    \"fix\": \"Write the PID file only after confirming the agent is ready (e.g., listening on the PTY port).\"\n  },\n  {\n    \"id\": 5,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Inconsistent Port Checking\",\n    \"file\": \"C:\\\\Users\\\\joelb\\\\OneDrive\\\\Desktop\\\\Fastops development process\\\\.fastops\\\\bootstrap-agents.js\",\n    \"line\": 27,\n    \"code\": \"function isPortListening(port) {\\n  try {\\n    execSync(`netstat -an | findstr :${port} `, { stdio: 'pipe' });\\n    return true;\\n  } catch {\\n    return false;\\n  }\\n}\",\n    \"explanation\": \"Port checking in bootstrap-agents.js uses OS-specific commands (netstat/findstr). This will fail on non-Windows systems, preventing agent",
+      "error": null
+    },
+    {
+      "model": "glm-5",
+      "findings": [],
+      "raw": "[\n  {\n    \"id\": 1,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Agent count mismatch breaks wake-all operations\",\n    \"file\": \"agent-wake-api.js\",\n    \"line\": 27,\n    \"code\": \"const AGENT_PORTS = {\\n  'bridge-iii': 9991,\\n  'claude-5469': 9992,\\n  'claude-623b': 9993,\\n  'watchdog': 9994,\\n  'crosscheck': 9995,\\n  'overwatch': 9996,\\n  'haiku': 9997,\\n  'composer': 9998,\\n  'sonnet': 9999\\n};\",\n    \"explanation\": \"agent-wake-api.js defines 9 agents, omega34-api-wake.js defines only 7 (missing composer, sonnet), and bootstrap-agents.js defines only 3 (bridge-iii, claude-5469, claude-623b). Running `--wake-all` from agent-wake-api.js attempts to wake 9 agents, but omega34-api-wake.js only manages 7. Bootstrap starts only 3 agents with PTY wrappers, leaving 4-6 agents never started.\",\n    \"fix\": \"Synchronize agent lists across all three files. Decide on the canonical agent set and update all files to match.\"\n  },\n  {\n    \"id\": 2,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"PID file paths don't match between server and manager\",\n    \"file\": \"agent-wake-api.js\",\n    \"line\": 95,\n    \"code\": \"const pidFile = path.join(FASTOPS, `.wake-server-${agentName}.pid`);\",\n    \"explanation\": \"agent-wake-api.js writes PID files to `.fastops/.wake-server-${agentName}.pid`, but omega34-api-wake.js line 117 reads from `.fastops/.wake-servers/${agent.name}.pid`. These are completely different paths. omega34-api-wake.js cannot track or stop servers started by agent-wake-api.js because it's looking in the wrong directory.\",\n    \"fix\": \"Standardize PID file location. Change agent-wake-api.js to use: `path.join(FASTOPS, '.wake-servers', `${agentName}.pid`)` and ensure the directory is created.\"\n  },\n  {\n    \"id\": 3,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"isServerRunning always returns true on Windows\",\n    \"file\": \"omega34-api-wake.js\",\n    \"line\": 107,\n    \"code\": \"spawnSync('tasklist', ['/FI', `PID eq ${pid}`, '/NH'], { encoding: 'utf8' });\\n    return true; // If no error, process exists\",\n    \"explanation\": \"The function assumes tasklist throws an error if PID doesn't exist. It doesn't. tasklist succeeds regardless and outputs 'INFO: No tasks are running...' when PID not found. The code ignores the output and always returns true, making isServerRunning useless for detecting dead servers.\",\n    \"fix\": \"Parse tasklist output: `const output = spawnSync(...).stdout; return !output.includes('No tasks are running');`\"\n  },\n  {\n    \"id\": 4,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Bootstrap uses wrong ports - PTY vs HTTP wake system\",\n    \"file\": \"bootstrap-agents.js\",\n    \"line\": 14,\n    \"code\": \"const AGENTS = [\\n  { seat: 'seat-1', name: 'bridge-iii', pty_port: 9301, cdv_port: 9223 },\\n  { seat: 'seat-16', name: 'claude-5469', pty_port: 9302, cdv_port: 9223 },\\n  { seat: 'seat-17', name: 'claude-623b', pty_port: 9303,",
+      "error": null
+    },
+    {
+      "model": "ernie",
+      "findings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Agent port collision risk in bootstrap-agents.js",
+          "file": "bootstrap-agents.js",
+          "line": 10,
+          "code": "  { seat: 'seat-16', name: 'claude-5469', pty_port: 9302, cdv_port: 9223 },\n  { seat: 'seat-17', name: 'claude-623b', pty_port: 9303, cdv_port: 9224 },",
+          "explanation": "Both agents use cdv_port 9223 despite different names. This causes port collisions when multiple agents run simultaneously, preventing proper wake protocol execution.",
+          "fix": "Assign unique cdv_ports to each agent (e.g., 9223, 9224, 9225 for the three agents)"
+        },
+        {
+          "id": 2,
+          "severity": "CRITICAL",
+          "title": "Missing error handling in agent-wake-api.js server startup",
+          "file": "agent-wake-api.js",
+          "line": 112,
+          "code": "server.listen(port, () => {",
+          "explanation": "No error handling exists if port binding fails. This causes silent failures where the server doesn't start but no error is logged.",
+          "fix": "Add error handler: server.listen(port, () => {...}).on('error', (e) => log(`Failed to start server: ${e.message}`))"
+        },
+        {
+          "id": 3,
+          "severity": "CRITICAL",
+          "title": "Race condition in omega34-api-wake.js server status check",
+          "file": "omega34-api-wake.js",
+          "line": 234,
+          "code": "checkPort(agent.port).then(running => {",
+          "explanation": "Asynchronous checkPort calls in status display create race conditions where some agent statuses may not update before display occurs.",
+          "fix": "Use async/await with Promise.all for all checkPort calls before rendering status"
+        },
+        {
+          "id": 4,
+          "severity": "MINOR",
+          "title": "Inconsistent PID file handling in bootstrap-agents.js",
+          "file": "bootstrap-agents.js",
+          "line": 58,
+          "code": "fs.writeFileSync(pidFile, proc.pid.toString());",
+          "explanation": "No error handling exists if PID file creation fails (e.g., permission issues). This could lead to orphaned processes without cleanup.",
+          "fix": "Wrap in try/catch and log errors: try { fs.writeFileSync(...) } catch (e) { log(`PID write failed: ${e.message}`) }"
+        },
+        {
+          "id": 5,
+          "severity": "MINOR",
+          "title": "Hardcoded timeout values in omega34-api-wake.js",
+          "file": "omega34-api-wake.js",
+          "line": 32,
+          "code": "const ACK_TIMEOUT_MS = 60000; // 1 minute",
+          "explanation": "Hardcoded timeouts may not suit all environments. Network latency or system load could cause false timeouts.",
+          "fix": "Make timeout configurable via command-line arguments or environment variables"
+        },
+        {
+          "id": 6,
+          "severity": "MINOR",
+          "title": "Incomplete agent validation in agent-wake-api.js",
+          "file": "agent-wake-api.js",
+          "line": 182,
+          "code": "const port = AGENT_PORTS[agentName];",
+          "explanation": "No validation exists for agentName parameter before accessing AGENT_PORTS. This could cause undefined behavior with invalid agent names.",
+          "fix": "Add validation: if (!AGENT_PORTS[agentName]) throw new Error(`Invalid agent name: ${agentName}`)"
+        }
+      ],
+      "raw": "[\n  {\n    \"id\": 1,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Agent port collision risk in bootstrap-agents.js\",\n    \"file\": \"bootstrap-agents.js\",\n    \"line\": 10,\n    \"code\": \"  { seat: 'seat-16', name: 'claude-5469', pty_port: 9302, cdv_port: 9223 },\\n  { seat: 'seat-17', name: 'claude-623b', pty_port: 9303, cdv_port: 9224 },\",\n    \"explanation\": \"Both agents use cdv_port 9223 despite different names. This causes port collisions when multiple agents run simultaneously, preventing proper wake protocol execution.\",\n    \"fix\": \"Assign unique cdv_ports to each agent (e.g., 9223, 9224, 9225 for the three agents)\"\n  },\n  {\n    \"id\": 2,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Missing error handling in agent-wake-api.js server startup\",\n    \"file\": \"agent-wake-api.js\",\n    \"line\": 112,\n    \"code\": \"server.listen(port, () => {\",\n    \"explanation\": \"No error handling exists if port binding fails. This causes silent failures where the server doesn't start but no error is logged.\",\n    \"fix\": \"Add error handler: server.listen(port, () => {...}).on('error', (e) => log(`Failed to start server: ${e.message}`))\"\n  },\n  {\n    \"id\": 3,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Race condition in omega34-api-wake.js server status check\",\n    \"file\": \"omega34-api-wake.js\",\n    \"line\": 234,\n    \"code\": \"checkPort(agent.port).then(running => {\",\n    \"explanation\": \"Asynchronous checkPort calls in status display create race conditions where some agent statuses may not update before display occurs.\",\n    \"fix\": \"Use async/await with Promise.all for all checkPort calls before rendering status\"\n  },\n  {\n    \"id\": 4,\n    \"severity\": \"MINOR\",\n    \"title\": \"Inconsistent PID file handling in bootstrap-agents.js\",\n    \"file\": \"bootstrap-agents.js\",\n    \"line\": 58,\n    \"code\": \"fs.writeFileSync(pidFile, proc.pid.toString());\",\n    \"explanation\": \"No error handling exists if PID file creation fails (e.g., permission issues). This could lead to orphaned processes without cleanup.\",\n    \"fix\": \"Wrap in try/catch and log errors: try { fs.writeFileSync(...) } catch (e) { log(`PID write failed: ${e.message}`) }\"\n  },\n  {\n    \"id\": 5,\n    \"severity\": \"MINOR\",\n    \"title\": \"Hardcoded timeout values in omega34-api-wake.js\",\n    \"file\": \"omega34-api-wake.js\",\n    \"line\": 32,\n    \"code\": \"const ACK_TIMEOUT_MS = 60000; // 1 minute\",\n    \"explanation\": \"Hardcoded timeouts may not suit all environments. Network latency or system load could cause false timeouts.\",\n    \"fix\": \"Make timeout configurable via command-line arguments or environment variables\"\n  },\n  {\n    \"id\": 6,\n    \"severity\": \"MINOR\",\n    \"title\": \"Incomplete agent validation in agent-wake-api.js\",\n    \"file\": \"agent-wake-api.js\",\n    \"line\": 182,\n    \"code\": \"const port = AGENT_PORTS[agentName];\",\n    \"explanation\": \"No validation exists for agentName parameter before accessing AGENT_PORTS. This could cause undefined behavior with invalid agent names.\",\n    \"fix\": \"Add validation: if (!AGENT_PORTS[agentName]) throw new Error(`Invalid agent name: ${agentName}`)\"\n  }\n]",
+      "error": null
+    }
+  ],
+  "clusteredFindings": [
+    {
+      "representative": {
+        "id": 4,
+        "severity": "CRITICAL",
+        "title": "Omega wake client does not validate agent ports before connecting",
+        "file": "omega34-api-wake.js",
+        "line": 105,
+        "code": "const req = http.request({",
+        "explanation": "The client attempts to connect to agent ports without checking if they are valid (1-65535). Invalid ports could cause crashes or unexpected behavior during start-server operations.",
+        "fix": "Add port validation: if (!agent.port || agent.port < 1 || agent.port > 65535) return { success: false, error: 'Invalid port' }.",
+        "reviewer": "solar-pro",
+        "family": "upstage"
+      },
+      "count": 3,
+      "families": 2,
+      "reviewers": [
+        "solar-pro",
+        "solar-pro",
+        "granite"
+      ],
+      "confidence": "high",
+      "allFindings": [
+        {
+          "id": 4,
+          "severity": "CRITICAL",
+          "title": "Omega wake client does not validate agent ports before connecting",
+          "file": "omega34-api-wake.js",
+          "line": 105,
+          "code": "const req = http.request({",
+          "explanation": "The client attempts to connect to agent ports without checking if they are valid (1-65535). Invalid ports could cause crashes or unexpected behavior during start-server operations.",
+          "fix": "Add port validation: if (!agent.port || agent.port < 1 || agent.port > 65535) return { success: false, error: 'Invalid port' }.",
+          "reviewer": "solar-pro",
+          "family": "upstage"
+        },
+        {
+          "id": 10,
+          "severity": "CRITICAL",
+          "title": "Omega client's wakeAllAgents does not handle non-existent agents",
+          "file": "omega34-api-wake.js",
+          "line": 95,
+          "code": "for (const agent of AGENTS) {",
+          "explanation": "The client attempts to wake all agents from a hardcoded list but does not verify that each agent's server is actually running or accessible before attempting wake calls.",
+          "fix": "Add server readiness check before each wake call, or implement retry logic with server startup if needed.",
+          "reviewer": "solar-pro",
+          "family": "upstage"
+        },
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Missing timeout on HTTP POST to agent servers",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\omega34-api-wake.js",
+          "line": 115,
+          "code": "req.setTimeout(10000, () => {",
+          "explanation": "The code sets a 10-second timeout for the HTTP POST request to each agent server. If the server does not respond within 10 seconds, the request will time out and the promise will be rejected. This can cause the wake cycle to fail silently if an agent server is slow to respond, leading to missed wake cycles and potential loss of agent activation.",
+          "fix": "Increase the timeout duration to a more reasonable value, such as 30 seconds or more, to allow for slower network conditions or slower agent server responses. This ensures that the wake cycle can handle slower agents without prematurely timing out and failing.",
+          "reviewer": "granite",
+          "family": "ibm"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 7,
+        "severity": "MINOR",
+        "title": "Server PID cleanup uses hardcoded .wake-server- prefix but stop-all uses .pid",
+        "file": "agent-wake-api.js",
+        "line": 85,
+        "code": "const pidFile = path.join(FASTOPS, `.wake-server-${agentName}.pid`);",
+        "explanation": "The server writes PID files with prefix 'wake-server-' but the stop-all script expects files without this prefix. This could cause PID files to accumulate.",
+        "fix": "Make the PID file prefix consistent between server and stop scripts, or modify stop-all to match the server's prefix.",
+        "reviewer": "solar-pro",
+        "family": "upstage"
+      },
+      "count": 2,
+      "families": 2,
+      "reviewers": [
+        "solar-pro",
+        "nova"
+      ],
+      "confidence": "high",
+      "allFindings": [
+        {
+          "id": 7,
+          "severity": "MINOR",
+          "title": "Server PID cleanup uses hardcoded .wake-server- prefix but stop-all uses .pid",
+          "file": "agent-wake-api.js",
+          "line": 85,
+          "code": "const pidFile = path.join(FASTOPS, `.wake-server-${agentName}.pid`);",
+          "explanation": "The server writes PID files with prefix 'wake-server-' but the stop-all script expects files without this prefix. This could cause PID files to accumulate.",
+          "fix": "Make the PID file prefix consistent between server and stop scripts, or modify stop-all to match the server's prefix.",
+          "reviewer": "solar-pro",
+          "family": "upstage"
+        },
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Unhandled timeout in server start",
+          "file": "agent-wake-api.js",
+          "line": 84,
+          "code": "req.setTimeout(10000, () => { req.destroy(); resolve({ success: false, agent: agentName, error: 'Timeout' }); });",
+          "explanation": "The timeout handler destroys the request but does not stop the server from trying to wake the agent.",
+          "fix": "Add a flag to indicate if the request has timed out, and if so, skip waking the agent.",
+          "reviewer": "nova",
+          "family": "amazon"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 2,
+        "severity": "MINOR",
+        "title": "Potential variable naming inconsistency",
+        "file": "omega34-api-wake.js",
+        "line": 18,
+        "code": "const AGENTS = [...];",
+        "explanation": "AGENTS variable names in omega34-api-wake.js differ slightly from agent-wake-api.js. This could cause confusion if not handled properly.",
+        "fix": "Ensure consistent variable naming or provide clear documentation on the differences.",
+        "reviewer": "nova",
+        "family": "amazon"
+      },
+      "count": 2,
+      "families": 2,
+      "reviewers": [
+        "nova",
+        "ernie"
+      ],
+      "confidence": "high",
+      "allFindings": [
+        {
+          "id": 2,
+          "severity": "MINOR",
+          "title": "Potential variable naming inconsistency",
+          "file": "omega34-api-wake.js",
+          "line": 18,
+          "code": "const AGENTS = [...];",
+          "explanation": "AGENTS variable names in omega34-api-wake.js differ slightly from agent-wake-api.js. This could cause confusion if not handled properly.",
+          "fix": "Ensure consistent variable naming or provide clear documentation on the differences.",
+          "reviewer": "nova",
+          "family": "amazon"
+        },
+        {
+          "id": 5,
+          "severity": "MINOR",
+          "title": "Hardcoded timeout values in omega34-api-wake.js",
+          "file": "omega34-api-wake.js",
+          "line": 32,
+          "code": "const ACK_TIMEOUT_MS = 60000; // 1 minute",
+          "explanation": "Hardcoded timeouts may not suit all environments. Network latency or system load could cause false timeouts.",
+          "fix": "Make timeout configurable via command-line arguments or environment variables",
+          "reviewer": "ernie",
+          "family": "baidu"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 1,
+        "severity": "CRITICAL",
+        "title": "Server mode accepts wake calls on root path without path validation",
+        "file": "agent-wake-api.js",
+        "line": 41,
+        "code": "path: '/',",
+        "explanation": "The server responds to any POST to '/' including potentially unintended paths like '/wake' or '/admin', which could be exploited if the server is exposed publicly or if agents send unintended requests.",
+        "fix": "Change path to '/wake' and validate the request path to ensure only intended wake calls are processed.",
+        "reviewer": "solar-pro",
+        "family": "upstage"
+      },
+      "count": 2,
+      "families": 1,
+      "reviewers": [
+        "solar-pro",
+        "solar-pro"
+      ],
+      "confidence": "medium",
+      "allFindings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Server mode accepts wake calls on root path without path validation",
+          "file": "agent-wake-api.js",
+          "line": 41,
+          "code": "path: '/',",
+          "explanation": "The server responds to any POST to '/' including potentially unintended paths like '/wake' or '/admin', which could be exploited if the server is exposed publicly or if agents send unintended requests.",
+          "fix": "Change path to '/wake' and validate the request path to ensure only intended wake calls are processed.",
+          "reviewer": "solar-pro",
+          "family": "upstage"
+        },
+        {
+          "id": 2,
+          "severity": "CRITICAL",
+          "title": "Server mode does not validate agent name in request against expected values",
+          "file": "agent-wake-api.js",
+          "line": 49,
+          "code": "const { wakeId, commsId, channel, from, timestamp } = data;",
+          "explanation": "The server blindly parses any JSON fields sent in the request without checking if the agent name matches the server's registered name. This could allow any agent to process wake calls intended for others.",
+          "fix": "Add validation that the first field contains the expected agent name before processing the wake data.",
+          "reviewer": "solar-pro",
+          "family": "upstage"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 3,
+        "severity": "CRITICAL",
+        "title": "Omega wake client uses hardcoded AGENTS list but AGENT_PORTS is not exported",
+        "file": "omega34-api-wake.js",
+        "line": 27,
+        "code": "const AGENTS = [",
+        "explanation": "The client references AGENT_PORTS in the comment but the actual array AGENTS does not contain the port property. This mismatch could lead to incorrect port usage if AGENT_PORTS is ever used directly.",
+        "fix": "Remove the comment reference to AGENT_PORTS or add port property to AGENTS array to match.",
+        "reviewer": "solar-pro",
+        "family": "upstage"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "solar-pro"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 3,
+          "severity": "CRITICAL",
+          "title": "Omega wake client uses hardcoded AGENTS list but AGENT_PORTS is not exported",
+          "file": "omega34-api-wake.js",
+          "line": 27,
+          "code": "const AGENTS = [",
+          "explanation": "The client references AGENT_PORTS in the comment but the actual array AGENTS does not contain the port property. This mismatch could lead to incorrect port usage if AGENT_PORTS is ever used directly.",
+          "fix": "Remove the comment reference to AGENT_PORTS or add port property to AGENTS array to match.",
+          "reviewer": "solar-pro",
+          "family": "upstage"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 5,
+        "severity": "CRITICAL",
+        "title": "Omega wake client uses detached processes for servers but provides no stderr handling",
+        "file": "omega34-api-wake.js",
+        "line": 75,
+        "code": "detached: true, stdio: 'ignore',",
+        "explanation": "Spawning detached processes with 'ignore' stdio means any server startup errors are silently lost, making debugging difficult when servers fail to start.",
+        "fix": "Remove detached: true and use default stdio, or capture stderr to log errors during server startup.",
+        "reviewer": "solar-pro",
+        "family": "upstage"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "solar-pro"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 5,
+          "severity": "CRITICAL",
+          "title": "Omega wake client uses detached processes for servers but provides no stderr handling",
+          "file": "omega34-api-wake.js",
+          "line": 75,
+          "code": "detached: true, stdio: 'ignore',",
+          "explanation": "Spawning detached processes with 'ignore' stdio means any server startup errors are silently lost, making debugging difficult when servers fail to start.",
+          "fix": "Remove detached: true and use default stdio, or capture stderr to log errors during server startup.",
+          "reviewer": "solar-pro",
+          "family": "upstage"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 6,
+        "severity": "CRITICAL",
+        "title": "Omega wake client does not handle SIGTERM/SIGINT for daemon mode",
+        "file": "omega34-api-wake.js",
+        "line": 200,
+        "code": "while (true) {",
+        "explanation": "The daemon runs indefinitely without proper signal handling. If the process receives SIGTERM, it will terminate abruptly without closing servers or completing current wake cycle.",
+        "fix": "Add signal handlers for SIGTERM/SIGINT to gracefully shut down servers before exit.",
+        "reviewer": "solar-pro",
+        "family": "upstage"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "solar-pro"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 6,
+          "severity": "CRITICAL",
+          "title": "Omega wake client does not handle SIGTERM/SIGINT for daemon mode",
+          "file": "omega34-api-wake.js",
+          "line": 200,
+          "code": "while (true) {",
+          "explanation": "The daemon runs indefinitely without proper signal handling. If the process receives SIGTERM, it will terminate abruptly without closing servers or completing current wake cycle.",
+          "fix": "Add signal handlers for SIGTERM/SIGINT to gracefully shut down servers before exit.",
+          "reviewer": "solar-pro",
+          "family": "upstage"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 8,
+        "severity": "MINOR",
+        "title": "Omega client's checkPort uses OPTIONS request that may be blocked",
+        "file": "omega34-api-wake.js",
+        "line": 28,
+        "code": "const req = http.request({ hostname: 'localhost', port: port, path: '/', method: 'OPTIONS', timeout: 1000",
+        "explanation": "Using HTTP OPTIONS requests to check if a port is listening may fail in restrictive environments where OPTIONS is not allowed or firewalls block it.",
+        "fix": "Use TCP connection check instead of HTTP OPTIONS for port readiness verification.",
+        "reviewer": "solar-pro",
+        "family": "upstage"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "solar-pro"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 8,
+          "severity": "MINOR",
+          "title": "Omega client's checkPort uses OPTIONS request that may be blocked",
+          "file": "omega34-api-wake.js",
+          "line": 28,
+          "code": "const req = http.request({ hostname: 'localhost', port: port, path: '/', method: 'OPTIONS', timeout: 1000",
+          "explanation": "Using HTTP OPTIONS requests to check if a port is listening may fail in restrictive environments where OPTIONS is not allowed or firewalls block it.",
+          "fix": "Use TCP connection check instead of HTTP OPTIONS for port readiness verification.",
+          "reviewer": "solar-pro",
+          "family": "upstage"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 9,
+        "severity": "CRITICAL",
+        "title": "Omega client's verifyAcknowledgments assumes all agents in expected list are awake",
+        "file": "omega34-api-wake.js",
+        "line": 145,
+        "code": "const expected = results.filter(r => r.success).map(r => r.agent);",
+        "explanation": "The verification logic only checks acknowledgments for agents that were successfully woken via HTTP. However, the mission could still fail if agents are awake but didn't receive comms ACK, causing false success.",
+        "fix": "Verify acknowledgments for all agents in the AGENTS list, not just those woken successfully via API.",
+        "reviewer": "solar-pro",
+        "family": "upstage"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "solar-pro"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 9,
+          "severity": "CRITICAL",
+          "title": "Omega client's verifyAcknowledgments assumes all agents in expected list are awake",
+          "file": "omega34-api-wake.js",
+          "line": 145,
+          "code": "const expected = results.filter(r => r.success).map(r => r.agent);",
+          "explanation": "The verification logic only checks acknowledgments for agents that were successfully woken via HTTP. However, the mission could still fail if agents are awake but didn't receive comms ACK, causing false success.",
+          "fix": "Verify acknowledgments for all agents in the AGENTS list, not just those woken successfully via API.",
+          "reviewer": "solar-pro",
+          "family": "upstage"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 3,
+        "severity": "MINOR",
+        "title": "Unused variable in startAgentServer",
+        "file": "omega34-api-wake.js",
+        "line": 55,
+        "code": "proc.unref();",
+        "explanation": "The unref() method is called on the process object but does not cause any immediate issues.",
+        "fix": "Remove or provide a comment on the purpose of unref() if needed.",
+        "reviewer": "nova",
+        "family": "amazon"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "nova"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 3,
+          "severity": "MINOR",
+          "title": "Unused variable in startAgentServer",
+          "file": "omega34-api-wake.js",
+          "line": 55,
+          "code": "proc.unref();",
+          "explanation": "The unref() method is called on the process object but does not cause any immediate issues.",
+          "fix": "Remove or provide a comment on the purpose of unref() if needed.",
+          "reviewer": "nova",
+          "family": "amazon"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 1,
+        "severity": "CRITICAL",
+        "title": "Agent port collision risk in bootstrap-agents.js",
+        "file": "bootstrap-agents.js",
+        "line": 10,
+        "code": "  { seat: 'seat-16', name: 'claude-5469', pty_port: 9302, cdv_port: 9223 },\n  { seat: 'seat-17', name: 'claude-623b', pty_port: 9303, cdv_port: 9224 },",
+        "explanation": "Both agents use cdv_port 9223 despite different names. This causes port collisions when multiple agents run simultaneously, preventing proper wake protocol execution.",
+        "fix": "Assign unique cdv_ports to each agent (e.g., 9223, 9224, 9225 for the three agents)",
+        "reviewer": "ernie",
+        "family": "baidu"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "ernie"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Agent port collision risk in bootstrap-agents.js",
+          "file": "bootstrap-agents.js",
+          "line": 10,
+          "code": "  { seat: 'seat-16', name: 'claude-5469', pty_port: 9302, cdv_port: 9223 },\n  { seat: 'seat-17', name: 'claude-623b', pty_port: 9303, cdv_port: 9224 },",
+          "explanation": "Both agents use cdv_port 9223 despite different names. This causes port collisions when multiple agents run simultaneously, preventing proper wake protocol execution.",
+          "fix": "Assign unique cdv_ports to each agent (e.g., 9223, 9224, 9225 for the three agents)",
+          "reviewer": "ernie",
+          "family": "baidu"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 2,
+        "severity": "CRITICAL",
+        "title": "Missing error handling in agent-wake-api.js server startup",
+        "file": "agent-wake-api.js",
+        "line": 112,
+        "code": "server.listen(port, () => {",
+        "explanation": "No error handling exists if port binding fails. This causes silent failures where the server doesn't start but no error is logged.",
+        "fix": "Add error handler: server.listen(port, () => {...}).on('error', (e) => log(`Failed to start server: ${e.message}`))",
+        "reviewer": "ernie",
+        "family": "baidu"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "ernie"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 2,
+          "severity": "CRITICAL",
+          "title": "Missing error handling in agent-wake-api.js server startup",
+          "file": "agent-wake-api.js",
+          "line": 112,
+          "code": "server.listen(port, () => {",
+          "explanation": "No error handling exists if port binding fails. This causes silent failures where the server doesn't start but no error is logged.",
+          "fix": "Add error handler: server.listen(port, () => {...}).on('error', (e) => log(`Failed to start server: ${e.message}`))",
+          "reviewer": "ernie",
+          "family": "baidu"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 3,
+        "severity": "CRITICAL",
+        "title": "Race condition in omega34-api-wake.js server status check",
+        "file": "omega34-api-wake.js",
+        "line": 234,
+        "code": "checkPort(agent.port).then(running => {",
+        "explanation": "Asynchronous checkPort calls in status display create race conditions where some agent statuses may not update before display occurs.",
+        "fix": "Use async/await with Promise.all for all checkPort calls before rendering status",
+        "reviewer": "ernie",
+        "family": "baidu"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "ernie"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 3,
+          "severity": "CRITICAL",
+          "title": "Race condition in omega34-api-wake.js server status check",
+          "file": "omega34-api-wake.js",
+          "line": 234,
+          "code": "checkPort(agent.port).then(running => {",
+          "explanation": "Asynchronous checkPort calls in status display create race conditions where some agent statuses may not update before display occurs.",
+          "fix": "Use async/await with Promise.all for all checkPort calls before rendering status",
+          "reviewer": "ernie",
+          "family": "baidu"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 4,
+        "severity": "MINOR",
+        "title": "Inconsistent PID file handling in bootstrap-agents.js",
+        "file": "bootstrap-agents.js",
+        "line": 58,
+        "code": "fs.writeFileSync(pidFile, proc.pid.toString());",
+        "explanation": "No error handling exists if PID file creation fails (e.g., permission issues). This could lead to orphaned processes without cleanup.",
+        "fix": "Wrap in try/catch and log errors: try { fs.writeFileSync(...) } catch (e) { log(`PID write failed: ${e.message}`) }",
+        "reviewer": "ernie",
+        "family": "baidu"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "ernie"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 4,
+          "severity": "MINOR",
+          "title": "Inconsistent PID file handling in bootstrap-agents.js",
+          "file": "bootstrap-agents.js",
+          "line": 58,
+          "code": "fs.writeFileSync(pidFile, proc.pid.toString());",
+          "explanation": "No error handling exists if PID file creation fails (e.g., permission issues). This could lead to orphaned processes without cleanup.",
+          "fix": "Wrap in try/catch and log errors: try { fs.writeFileSync(...) } catch (e) { log(`PID write failed: ${e.message}`) }",
+          "reviewer": "ernie",
+          "family": "baidu"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 6,
+        "severity": "MINOR",
+        "title": "Incomplete agent validation in agent-wake-api.js",
+        "file": "agent-wake-api.js",
+        "line": 182,
+        "code": "const port = AGENT_PORTS[agentName];",
+        "explanation": "No validation exists for agentName parameter before accessing AGENT_PORTS. This could cause undefined behavior with invalid agent names.",
+        "fix": "Add validation: if (!AGENT_PORTS[agentName]) throw new Error(`Invalid agent name: ${agentName}`)",
+        "reviewer": "ernie",
+        "family": "baidu"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "ernie"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 6,
+          "severity": "MINOR",
+          "title": "Incomplete agent validation in agent-wake-api.js",
+          "file": "agent-wake-api.js",
+          "line": 182,
+          "code": "const port = AGENT_PORTS[agentName];",
+          "explanation": "No validation exists for agentName parameter before accessing AGENT_PORTS. This could cause undefined behavior with invalid agent names.",
+          "fix": "Add validation: if (!AGENT_PORTS[agentName]) throw new Error(`Invalid agent name: ${agentName}`)",
+          "reviewer": "ernie",
+          "family": "baidu"
+        }
+      ]
+    }
+  ],
+  "stage2Results": [
+    {
+      "model": "gpt",
+      "verdicts": [
+        {
+          "findingId": 1,
+          "verdict": "CONFIRMED",
+          "evidence": "const req = http.request({ hostname: 'localhost', port: port, path: '/', method: 'POST', headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) } });",
+          "explanation": "The code attempts to connect to an agent port without validating if the port number falls within the valid range (1-65535). Hence, invalid ports could indeed cause crashes or unexpected behavior."
+        },
+        {
+          "findingId": 9,
+          "verdict": "CONFIRMED",
+          "evidence": "const expected = results.filter(r => r.success).map(r => r.agent);",
+          "explanation": "The code filters for agents that were successfully woken, but does not verify if they received comms acknowledgments. There is a risk of false success if agents are awake but did not acknowledge."
+        },
+        {
+          "findingId": 10,
+          "verdict": "FALSE_POSITIVE",
+          "evidence": "proc.unref();",
+          "explanation": "The `unref()` method is used on the `proc` object to allow the parent process to exit independently of the child when it's the only event left. This is not causing any immediate issues or bugs."
+        },
+        {
+          "findingId": 11,
+          "verdict": "FALSE_POSITIVE",
+          "evidence": "{ seat: 'seat-1', name: 'bridge-iii', pty_port: 9301, cdv_port: 9223 }, { seat: 'seat-16', name: 'claude-5469', pty_port: 9302, cdv_port: 9223 },",
+          "explanation": "The claim is incorrect; the cdv_ports are different (9223 and 9224) for 'claude-5469' and 'claude-623b', avoiding a port collision."
+        },
+        {
+          "findingId": 12,
+          "verdict": "CONFIRMED",
+          "evidence": "server.listen(port, () => { log(`Wake server active on http://localhost:${port}`); });",
+          "explanation": "The `server.listen()` call lacks error handling for the case where the port binding fails, which could lead to silent failures without logging any errors."
+        },
+        {
+          "findingId": 13,
+          "verdict": "CONFIRMED",
+          "evidence": "checkPort(agent.port).then(running => {",
+          "explanation": "Asynchronous checks with `checkPort` may indeed cause race conditions in the status display, as they are not synchronized to ensure all statuses update before display."
+        },
+        {
+          "findingId": 14,
+          "verdict": "CONFIRMED",
+          "evidence": "fs.writeFileSync(pidFile, proc.pid.toString());",
+          "explanation": "There is no error handling around the PID file creation, which could indeed lead to issues if the file write fails, such as permission issues, potentially leaving orphaned processes."
+        },
+        {
+          "findingId": 15,
+          "verdict": "CONFIRMED",
+          "evidence": "const port = AGENT_PORTS[agentName];",
+          "explanation": "The code accesses `AGENT_PORTS` with `agentName` without validation, which can lead to undefined behavior if the `agentName` parameter is invalid."
+        }
+      ],
+      "raw": "[\n  {\n    \"findingId\": 1,\n    \"verdict\": \"CONFIRMED\",\n    \"evidence\": \"const req = http.request({ hostname: 'localhost', port: port, path: '/', method: 'POST', headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) } });\",\n    \"explanation\": \"The code attempts to connect to an agent port without validating if the port number falls within the valid range (1-65535). Hence, invalid ports could indeed cause crashes or unexpected behavior.\"\n  }\n][\n  {\n    \"findingId\": 1,\n    \"verdict\": \"CONFIRMED\",\n    \"evidence\": \"const expected = results.filter(r => r.success).map(r => r.agent);\",\n    \"explanation\": \"The code filters for agents that were successfully woken, but does not verify if they received comms acknowledgments. There is a risk of false success if agents are awake but did not acknowledge.\"\n  },\n  {\n    \"findingId\": 2,\n    \"verdict\": \"FALSE_POSITIVE\",\n    \"evidence\": \"proc.unref();\",\n    \"explanation\": \"The `unref()` method is used on the `proc` object to allow the parent process to exit independently of the child when it's the only event left. This is not causing any immediate issues or bugs.\"\n  },\n  {\n    \"findingId\": 3,\n    \"verdict\": \"FALSE_POSITIVE\",\n    \"evidence\": \"{ seat: 'seat-1', name: 'bridge-iii', pty_port: 9301, cdv_port: 9223 }, { seat: 'seat-16', name: 'claude-5469', pty_port: 9302, cdv_port: 9223 },\",\n    \"explanation\": \"The claim is incorrect; the cdv_ports are different (9223 and 9224) for 'claude-5469' and 'claude-623b', avoiding a port collision.\"\n  },\n  {\n    \"findingId\": 4,\n    \"verdict\": \"CONFIRMED\",\n    \"evidence\": \"server.listen(port, () => { log(`Wake server active on http://localhost:${port}`); });\",\n    \"explanation\": \"The `server.listen()` call lacks error handling for the case where the port binding fails, which could lead to silent failures without logging any errors.\"\n  },\n  {\n    \"findingId\": 5,\n    \"verdict\": \"CONFIRMED\",\n    \"evidence\": \"checkPort(agent.port).then(running => {\",\n    \"explanation\": \"Asynchronous checks with `checkPort` may indeed cause race conditions in the status display, as they are not synchronized to ensure all statuses update before display.\"\n  },\n  {\n    \"findingId\": 6,\n    \"verdict\": \"CONFIRMED\",\n    \"evidence\": \"fs.writeFileSync(pidFile, proc.pid.toString());\",\n    \"explanation\": \"There is no error handling around the PID file creation, which could indeed lead to issues if the file write fails, such as permission issues, potentially leaving orphaned processes.\"\n  },\n  {\n    \"findingId\": 7,\n    \"verdict\": \"CONFIRMED\",\n    \"evidence\": \"const port = AGENT_PORTS[agentName];\",\n    \"explanation\": \"The code accesses `AGENT_PORTS` with `agentName` without validation, which can lead to undefined behavior if the `agentName` parameter is invalid.\"\n  }\n]",
+      "error": null
+    },
+    {
+      "model": "sonar",
+      "verdicts": [
+        {
+          "findingId": 1,
+          "verdict": "FALSE_POSITIVE",
+          "evidence": "Line 105 in omega34-api-wake.js: `port: agent.port,` where `agent.port` comes from the AGENTS array (lines 13-20), which defines only valid ports 9991-9997. Port validation is implicit via the hardcoded configuration.",
+          "explanation": "Ports are not user-supplied; they're defined in a static AGENTS array with valid values. No validation is needed because ports cannot be invalid at runtime."
+        },
+        {
+          "findingId": 2,
+          "verdict": "CONFIRMED",
+          "evidence": "agent-wake-api.js line 85: `const pidFile = path.join(FASTOPS, `.wake-server-${agentName}.pid`);` vs omega34-api-wake.js line 68: `const pidFile = path.join(SERVER_PID_DIR, `${agent.name}.pid`);` — different prefixes and directories.",
+          "explanation": "The server writes to `.wake-server-{name}.pid` in FASTOPS root, but omega34-api-wake.js looks for `{name}.pid` in SERVER_PID_DIR (.wake-servers/). Files written by agent-wake-api.js will not be found by omega34-api-wake.js cleanup logic, causing accumulation."
+        },
+        {
+          "findingId": 3,
+          "verdict": "FALSE_POSITIVE",
+          "evidence": "omega34-api-wake.js AGENTS (lines 13-20) is an array of objects with `name` property. agent-wake-api.js AGENTS (line 47) is `Object.keys(AGENT_PORTS)`, also producing the same agent names. Both reference the same underlying agent identifiers.",
+          "explanation": "Both files derive agent names from the same source (AGENT_PORTS object keys). The AGENTS variable structure differs (array of objects vs array of strings), but the actual agent names are consistent. This is not a real inconsistency."
+        },
+        {
+          "findingId": 4,
+          "verdict": "FALSE_POSITIVE",
+          "evidence": "agent-wake-api.js lines 41-55: The server checks `req.method !== 'POST'` and rejects non-POST requests with 405. Line 41 `path: '/'` is just the HTTP route definition; actual request validation occurs in the method check.",
+          "explanation": "The server validates HTTP method before processing. POST requests to '/' are legitimate wake calls. The path '/' is correct for a single-purpose wake endpoint. No path traversal or unintended routing is possible."
+        },
+        {
+          "findingId": 5,
+          "verdict": "FALSE_POSITIVE",
+          "evidence": "omega34-api-wake.js line 13-20 defines AGENTS as an array of objects with `port` property. Line 13: `{ name: 'bridge-iii', port: 9991, ...}`. The AGENTS array does contain port information; the comment reference to AGENT_PORTS is descriptive, not a code dependency.",
+          "explanation": "The AGENTS array in omega34-api-wake.js includes the `port` property for each agent object (lines 13-20). There is no mismatch between comments and code. AGENT_PORTS is defined in agent-wake-api.js but not needed in omega34-api-wake.js because ports are embedded in the AGENTS array."
+        },
+        {
+          "findingId": 6,
+          "verdict": "CONFIRMED",
+          "evidence": "omega34-api-wake.js lines 75-78: `const proc = spawn('node', [...], { detached: true, stdio: 'ignore', cwd: ROOT });` — stderr and stdout are explicitly ignored, suppressing all server startup errors.",
+          "explanation": "With `stdio: 'ignore'`, any startup errors from the agent-wake-api.js server process are lost. If a server fails to bind to its port or encounters other initialization errors, the parent process has no visibility. This makes debugging startup failures difficult."
+        },
+        {
+          "findingId": 7,
+          "verdict": "CONFIRMED",
+          "evidence": "omega34-api-wake.js lines 200-217: `while (true) { const result = await wakeCycle(tick); ... await sleep(INTERVAL_MS); }` — infinite loop with no signal handlers registered before or after the loop.",
+          "explanation": "The daemon runs an infinite loop without `process.on('SIGTERM')` or `process.on('SIGINT')` handlers. If the process receives SIGTERM (from systemd, container orchestration, or manual termination), it will exit abruptly without gracefully stopping agent servers or flushing logs. This violates daemon best practices."
+        },
+        {
+          "findingId": 8,
+          "verdict": "FALSE_POSITIVE",
+          "evidence": "omega34-api-wake.js lines 112-126: `checkPort()` sends an OPTIONS request to verify if a port is listening. The function handles both success and error cases with callbacks, and timeouts are properly managed.",
+          "explanation": "Using OPTIONS to check port availability is a standard health-check pattern. The function correctly handles errors (line 121: `req.on('error', () => resolve(false))`) and timeout scenarios (lines 122-125). If OPTIONS is blocked, the function gracefully resolves to `false`, triggering a server restart attempt. This is defensive programming, not a vulnerability."
+        },
+        {
+          "findingId": 9,
+          "verdict": "FALSE_POSITIVE",
+          "evidence": "const expected = results.filter(r => r.success).map(r => r.agent); ... const ackToken = `ACK:${agent}`; if (content.includes(ackToken) && !acknowledged.has(agent)) { acknowledged.add(agent); }",
+          "explanation": "verifyAcknowledgments only expects ACKs from agents that returned HTTP success (r.success). It correctly filters expected[] to those and verifies comms ACKs only for them. Agents awake but without comms ACK are not considered successful."
+        },
+        {
+          "findingId": 10,
+          "verdict": "FALSE_POSITIVE",
+          "evidence": "const proc = spawn('node', [ ... ], { detached: true, stdio: 'ignore', cwd: ROOT }); proc.unref();",
+          "explanation": "proc.unref() is correct and necessary for detached child processes to prevent parent from waiting on them. This is standard Node.js daemonization pattern, not unused."
+        },
+        {
+          "findingId": 11,
+          "verdict": "FALSE_POSITIVE",
+          "evidence": "{ seat: 'seat-16', name: 'claude-5469', pty_port: 9302, cdv_port: 9223 }, { seat: 'seat-17', name: 'claude-623b', pty_port: 9303, cdv_port: 9224 }",
+          "explanation": "cdv_port 9223 for seat-16 and 9224 for seat-17 are different. No collision. Reviewer misread the ports."
+        },
+        {
+          "findingId": 12,
+          "verdict": "CONFIRMED",
+          "evidence": "server.listen(port, () => { log(`Wake server active on http://localhost:${port}`); ... });",
+          "explanation": "No 'error' event handler or second listen() callback argument for bind failures. Port conflicts cause silent failure with no error logged."
+        },
+        {
+          "findingId": 13,
+          "verdict": "FALSE_POSITIVE",
+          "evidence": "for (const agent of AGENTS) { checkPort(agent.port).then(running => { log(`  ${running ? '●' : '○'} ${agent.name.padEnd(15)} : ${agent.port} ${running ? '(running)' : '(stopped)'}`); }); } setTimeout(() => { ... }, 1000);",
+          "explanation": "Status display fires async checks then waits 1 second before showing history. Non-critical display function; no functional race condition affects wake logic."
+        },
+        {
+          "findingId": 14,
+          "verdict": "CONFIRMED",
+          "evidence": "const pidFile = path.join(__dirname, `.agent-${agent.name}.pid`); fs.writeFileSync(pidFile, proc.pid.toString());",
+          "explanation": "No try-catch around writeFileSync. Permission failures silently fail, leaving orphaned processes without PID tracking."
+        },
+        {
+          "findingId": 15,
+          "verdict": "CONFIRMED",
+          "evidence": "function wakeAgent(agentName, commsId, channel) { const port = AGENT_PORTS[agentName]; if (!port) { return { success: false, error: `Unknown agent: ${agentName}` }; }",
+          "explanation": "wakeAgent validates AGENT_PORTS[agentName], but server handler at line ~45 directly uses data.agentName without validation in AGENT_PORTS lookup (line 182 context matches this pattern)."
+        }
+      ],
+      "raw": "```json\n[\n  {\n    \"findingId\": 1,\n    \"verdict\": \"FALSE_POSITIVE\",\n    \"evidence\": \"Line 105 in omega34-api-wake.js: `port: agent.port,` where `agent.port` comes from the AGENTS array (lines 13-20), which defines only valid ports 9991-9997. Port validation is implicit via the hardcoded configuration.\",\n    \"explanation\": \"Ports are not user-supplied; they're defined in a static AGENTS array with valid values. No validation is needed because ports cannot be invalid at runtime.\"\n  },\n  {\n    \"findingId\": 2,\n    \"verdict\": \"CONFIRMED\",\n    \"evidence\": \"agent-wake-api.js line 85: `const pidFile = path.join(FASTOPS, `.wake-server-${agentName}.pid`);` vs omega34-api-wake.js line 68: `const pidFile = path.join(SERVER_PID_DIR, `${agent.name}.pid`);` — different prefixes and directories.\",\n    \"explanation\": \"The server writes to `.wake-server-{name}.pid` in FASTOPS root, but omega34-api-wake.js looks for `{name}.pid` in SERVER_PID_DIR (.wake-servers/). Files written by agent-wake-api.js will not be found by omega34-api-wake.js cleanup logic, causing accumulation.\"\n  },\n  {\n    \"findingId\": 3,\n    \"verdict\": \"FALSE_POSITIVE\",\n    \"evidence\": \"omega34-api-wake.js AGENTS (lines 13-20) is an array of objects with `name` property. agent-wake-api.js AGENTS (line 47) is `Object.keys(AGENT_PORTS)`, also producing the same agent names. Both reference the same underlying agent identifiers.\",\n    \"explanation\": \"Both files derive agent names from the same source (AGENT_PORTS object keys). The AGENTS variable structure differs (array of objects vs array of strings), but the actual agent names are consistent. This is not a real inconsistency.\"\n  },\n  {\n    \"findingId\": 4,\n    \"verdict\": \"FALSE_POSITIVE\",\n    \"evidence\": \"agent-wake-api.js lines 41-55: The server checks `req.method !== 'POST'` and rejects non-POST requests with 405. Line 41 `path: '/'` is just the HTTP route definition; actual request validation occurs in the method check.\",\n    \"explanation\": \"The server validates HTTP method before processing. POST requests to '/' are legitimate wake calls. The path '/' is correct for a single-purpose wake endpoint. No path traversal or unintended routing is possible.\"\n  },\n  {\n    \"findingId\": 5,\n    \"verdict\": \"FALSE_POSITIVE\",\n    \"evidence\": \"omega34-api-wake.js line 13-20 defines AGENTS as an array of objects with `port` property. Line 13: `{ name: 'bridge-iii', port: 9991, ...}`. The AGENTS array does contain port information; the comment reference to AGENT_PORTS is descriptive, not a code dependency.\",\n    \"explanation\": \"The AGENTS array in omega34-api-wake.js includes the `port` property for each agent object (lines 13-20). There is no mismatch between comments and code. AGENT_PORTS is defined in agent-wake-api.js but not needed in omega34-api-wake.js because ports are embedded in the AGENTS array.\"\n  },\n  {\n    \"findingId\": 6,\n    \"verdict\": \"CONFIRMED\",\n    \"evidence\": \"omega34-api-wake.js lines 75-78: `const proc = spawn('node', [...], { detached: true, stdio: 'ignore', cwd: ROOT });` — stderr and stdout are explicitly ignored, suppressing all server startup errors.\",\n    \"explanation\": \"With `stdio: 'ignore'`, any startup errors from the agent-wake-api.js server process are lost. If a server fails to bind to its port or encounters other initialization errors, the parent process has no visibility. This makes debugging startup failures difficult.\"\n  },\n  {\n    \"findingId\": 7,\n    \"verdict\": \"CONFIRMED\",\n    \"evidence\": \"omega34-api-wake.js lines 200-217: `while (true) { const result = await wakeCycle(tick); ... await sleep(INTERVAL_MS); }` — infinite loop with no signal handlers registered before or after the loop.\",\n    \"explanation\": \"The daemon runs an infinite loop without `process.on('SIGTERM')` or `process.on('SIGINT')` handlers. If the process receives SIGTERM (from systemd, container orchestration, or manual termination), it will exit abruptly without gracefully stopping agent servers or flushing logs. This violates daemon best practices.\"\n  },\n  {\n    \"findingId\": 8,\n    \"verdict\": \"FALSE_POSITIVE\",\n    \"evidence\": \"omega34-api-wake.js lines 112-126: `checkPort()` sends an OPTIONS request to verify if a port is listening. The function handles both success and error cases with callbacks, and timeouts are properly managed.\",\n    \"explanation\": \"Using OPTIONS to check port availability is a standard health-check pattern. The function correctly handles errors (line 121: `req.on('error', () => resolve(false))`) and timeout scenarios (lines 122-125). If OPTIONS is blocked, the function gracefully resolves to `false`, triggering a server restart attempt. This is defensive programming, not a vulnerability.\"\n  }\n]\n```[  {\n    \"findingId\": 1,\n    \"verdict\": \"FALSE_POSITIVE\",\n    \"evidence\": \"const expected = results.filter(r => r.success).map(r => r.agent); ... const ackToken = `ACK:${agent}`; if (content.includes(ackToken) && !acknowledged.has(agent)) { acknowledged.add(agent); }\",\n    \"explanation\": \"verifyAcknowledgments only expects ACKs from agents that returned HTTP success (r.success). It correctly filters expected[] to those and verifies comms ACKs only for them. Agents awake but without comms ACK are not considered successful.\"\n  },\n  {\n    \"findingId\": 2,\n    \"verdict\": \"FALSE_POSITIVE\",\n    \"evidence\": \"const proc = spawn('node', [ ... ], { detached: true, stdio: 'ignore', cwd: ROOT }); proc.unref();\",\n    \"explanation\": \"proc.unref() is correct and necessary for detached child processes to prevent parent from waiting on them. This is standard Node.js daemonization pattern, not unused.\"\n  },\n  {\n    \"findingId\": 3,\n    \"verdict\": \"FALSE_POSITIVE\",\n    \"evidence\": \"{ seat: 'seat-16', name: 'claude-5469', pty_port: 9302, cdv_port: 9223 }, { seat: 'seat-17', name: 'claude-623b', pty_port: 9303, cdv_port: 9224 }\",\n    \"explanation\": \"cdv_port 9223 for seat-16 and 9224 for seat-17 are different. No collision. Reviewer misread the ports.\"\n  },\n  {\n    \"findingId\": 4,\n    \"verdict\": \"CONFIRMED\",\n    \"evidence\": \"server.listen(port, () => { log(`Wake server active on http://localhost:${port}`); ... });\",\n    \"explanation\": \"No 'error' event handler or second listen() callback argument for bind failures. Port conflicts cause silent failure with no error logged.\"\n  },\n  {\n    \"findingId\": 5,\n    \"verdict\": \"FALSE_POSITIVE\",\n    \"evidence\": \"for (const agent of AGENTS) { checkPort(agent.port).then(running => { log(`  ${running ? '●' : '○'} ${agent.name.padEnd(15)} : ${agent.port} ${running ? '(running)' : '(stopped)'}`); }); } setTimeout(() => { ... }, 1000);\",\n    \"explanation\": \"Status display fires async checks then waits 1 second before showing history. Non-critical display function; no functional race condition affects wake logic.\"\n  },\n  {\n    \"findingId\": 6,\n    \"verdict\": \"CONFIRMED\",\n    \"evidence\": \"const pidFile = path.join(__dirname, `.agent-${agent.name}.pid`); fs.writeFileSync(pidFile, proc.pid.toString());\",\n    \"explanation\": \"No try-catch around writeFileSync. Permission failures silently fail, leaving orphaned processes without PID tracking.\"\n  },\n  {\n    \"findingId\": 7,\n    \"verdict\": \"CONFIRMED\",\n    \"evidence\": \"function wakeAgent(agentName, commsId, channel) { const port = AGENT_PORTS[agentName]; if (!port) { return { success: false, error: `Unknown agent: ${agentName}` }; }\",\n    \"explanation\": \"wakeAgent validates AGENT_PORTS[agentName], but server handler at line ~45 directly uses data.agentName without validation in AGENT_PORTS lookup (line 182 context matches this pattern).\"\n  }\n]",
+      "error": null
+    },
+    {
+      "model": "seed-2",
+      "verdicts": [],
+      "raw": "",
+      "error": null
+    }
+  ],
+  "merged": [
+    {
+      "representative": {
+        "id": 4,
+        "severity": "CRITICAL",
+        "title": "Omega wake client does not validate agent ports before connecting",
+        "file": "omega34-api-wake.js",
+        "line": 105,
+        "code": "const req = http.request({",
+        "explanation": "The client attempts to connect to agent ports without checking if they are valid (1-65535). Invalid ports could cause crashes or unexpected behavior during start-server operations.",
+        "fix": "Add port validation: if (!agent.port || agent.port < 1 || agent.port > 65535) return { success: false, error: 'Invalid port' }.",
+        "reviewer": "solar-pro",
+        "family": "upstage"
+      },
+      "count": 3,
+      "families": 2,
+      "reviewers": [
+        "solar-pro",
+        "solar-pro",
+        "granite"
+      ],
+      "confidence": "high",
+      "allFindings": [
+        {
+          "id": 4,
+          "severity": "CRITICAL",
+          "title": "Omega wake client does not validate agent ports before connecting",
+          "file": "omega34-api-wake.js",
+          "line": 105,
+          "code": "const req = http.request({",
+          "explanation": "The client attempts to connect to agent ports without checking if they are valid (1-65535). Invalid ports could cause crashes or unexpected behavior during start-server operations.",
+          "fix": "Add port validation: if (!agent.port || agent.port < 1 || agent.port > 65535) return { success: false, error: 'Invalid port' }.",
+          "reviewer": "solar-pro",
+          "family": "upstage"
+        },
+        {
+          "id": 10,
+          "severity": "CRITICAL",
+          "title": "Omega client's wakeAllAgents does not handle non-existent agents",
+          "file": "omega34-api-wake.js",
+          "line": 95,
+          "code": "for (const agent of AGENTS) {",
+          "explanation": "The client attempts to wake all agents from a hardcoded list but does not verify that each agent's server is actually running or accessible before attempting wake calls.",
+          "fix": "Add server readiness check before each wake call, or implement retry logic with server startup if needed.",
+          "reviewer": "solar-pro",
+          "family": "upstage"
+        },
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Missing timeout on HTTP POST to agent servers",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\omega34-api-wake.js",
+          "line": 115,
+          "code": "req.setTimeout(10000, () => {",
+          "explanation": "The code sets a 10-second timeout for the HTTP POST request to each agent server. If the server does not respond within 10 seconds, the request will time out and the promise will be rejected. This can cause the wake cycle to fail silently if an agent server is slow to respond, leading to missed wake cycles and potential loss of agent activation.",
+          "fix": "Increase the timeout duration to a more reasonable value, such as 30 seconds or more, to allow for slower network conditions or slower agent server responses. This ensures that the wake cycle can handle slower agents without prematurely timing out and failing.",
+          "reviewer": "granite",
+          "family": "ibm"
+        }
+      ],
+      "verdicts": [
+        {
+          "findingId": 1,
+          "verdict": "CONFIRMED",
+          "evidence": "const req = http.request({ hostname: 'localhost', port: port, path: '/', method: 'POST', headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) } });",
+          "explanation": "The code attempts to connect to an agent port without validating if the port number falls within the valid range (1-65535). Hence, invalid ports could indeed cause crashes or unexpected behavior.",
+          "verifier": "gpt",
+          "family": "openai"
+        },
+        {
+          "findingId": 1,
+          "verdict": "FALSE_POSITIVE",
+          "evidence": "Line 105 in omega34-api-wake.js: `port: agent.port,` where `agent.port` comes from the AGENTS array (lines 13-20), which defines only valid ports 9991-9997. Port validation is implicit via the hardcoded configuration.",
+          "explanation": "Ports are not user-supplied; they're defined in a static AGENTS array with valid values. No validation is needed because ports cannot be invalid at runtime.",
+          "verifier": "sonar",
+          "family": "perplexity"
+        }
+      ],
+      "confirmed": 1,
+      "falsePositive": 1,
+      "finalVerdict": "DISPUTED"
+    },
+    {
+      "representative": {
+        "id": 7,
+        "severity": "MINOR",
+        "title": "Server PID cleanup uses hardcoded .wake-server- prefix but stop-all uses .pid",
+        "file": "agent-wake-api.js",
+        "line": 85,
+        "code": "const pidFile = path.join(FASTOPS, `.wake-server-${agentName}.pid`);",
+        "explanation": "The server writes PID files with prefix 'wake-server-' but the stop-all script expects files without this prefix. This could cause PID files to accumulate.",
+        "fix": "Make the PID file prefix consistent between server and stop scripts, or modify stop-all to match the server's prefix.",
+        "reviewer": "solar-pro",
+        "family": "upstage"
+      },
+      "count": 2,
+      "families": 2,
+      "reviewers": [
+        "solar-pro",
+        "nova"
+      ],
+      "confidence": "high",
+      "allFindings": [
+        {
+          "id": 7,
+          "severity": "MINOR",
+          "title": "Server PID cleanup uses hardcoded .wake-server- prefix but stop-all uses .pid",
+          "file": "agent-wake-api.js",
+          "line": 85,
+          "code": "const pidFile = path.join(FASTOPS, `.wake-server-${agentName}.pid`);",
+          "explanation": "The server writes PID files with prefix 'wake-server-' but the stop-all script expects files without this prefix. This could cause PID files to accumulate.",
+          "fix": "Make the PID file prefix consistent between server and stop scripts, or modify stop-all to match the server's prefix.",
+          "reviewer": "solar-pro",
+          "family": "upstage"
+        },
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Unhandled timeout in server start",
+          "file": "agent-wake-api.js",
+          "line": 84,
+          "code": "req.setTimeout(10000, () => { req.destroy(); resolve({ success: false, agent: agentName, error: 'Timeout' }); });",
+          "explanation": "The timeout handler destroys the request but does not stop the server from trying to wake the agent.",
+          "fix": "Add a flag to indicate if the request has timed out, and if so, skip waking the agent.",
+          "reviewer": "nova",
+          "family": "amazon"
+        }
+      ],
+      "verdicts": [
+        {
+          "findingId": 2,
+          "verdict": "CONFIRMED",
+          "evidence": "agent-wake-api.js line 85: `const pidFile = path.join(FASTOPS, `.wake-server-${agentName}.pid`);` vs omega34-api-wake.js line 68: `const pidFile = path.join(SERVER_PID_DIR, `${agent.name}.pid`);` — different prefixes and directories.",
+          "explanation": "The server writes to `.wake-server-{name}.pid` in FASTOPS root, but omega34-api-wake.js looks for `{name}.pid` in SERVER_PID_DIR (.wake-servers/). Files written by agent-wake-api.js will not be found by omega34-api-wake.js cleanup logic, causing accumulation.",
+          "verifier": "sonar",
+          "family": "perplexity"
+        }
+      ],
+      "confirmed": 1,
+      "falsePositive": 0,
+      "finalVerdict": "CONFIRMED"
+    },
+    {
+      "representative": {
+        "id": 2,
+        "severity": "MINOR",
+        "title": "Potential variable naming inconsistency",
+        "file": "omega34-api-wake.js",
+        "line": 18,
+        "code": "const AGENTS = [...];",
+        "explanation": "AGENTS variable names in omega34-api-wake.js differ slightly from agent-wake-api.js. This could cause confusion if not handled properly.",
+        "fix": "Ensure consistent variable naming or provide clear documentation on the differences.",
+        "reviewer": "nova",
+        "family": "amazon"
+      },
+      "count": 2,
+      "families": 2,
+      "reviewers": [
+        "nova",
+        "ernie"
+      ],
+      "confidence": "high",
+      "allFindings": [
+        {
+          "id": 2,
+          "severity": "MINOR",
+          "title": "Potential variable naming inconsistency",
+          "file": "omega34-api-wake.js",
+          "line": 18,
+          "code": "const AGENTS = [...];",
+          "explanation": "AGENTS variable names in omega34-api-wake.js differ slightly from agent-wake-api.js. This could cause confusion if not handled properly.",
+          "fix": "Ensure consistent variable naming or provide clear documentation on the differences.",
+          "reviewer": "nova",
+          "family": "amazon"
+        },
+        {
+          "id": 5,
+          "severity": "MINOR",
+          "title": "Hardcoded timeout values in omega34-api-wake.js",
+          "file": "omega34-api-wake.js",
+          "line": 32,
+          "code": "const ACK_TIMEOUT_MS = 60000; // 1 minute",
+          "explanation": "Hardcoded timeouts may not suit all environments. Network latency or system load could cause false timeouts.",
+          "fix": "Make timeout configurable via command-line arguments or environment variables",
+          "reviewer": "ernie",
+          "family": "baidu"
+        }
+      ],
+      "verdicts": [
+        {
+          "findingId": 3,
+          "verdict": "FALSE_POSITIVE",
+          "evidence": "omega34-api-wake.js AGENTS (lines 13-20) is an array of objects with `name` property. agent-wake-api.js AGENTS (line 47) is `Object.keys(AGENT_PORTS)`, also producing the same agent names. Both reference the same underlying agent identifiers.",
+          "explanation": "Both files derive agent names from the same source (AGENT_PORTS object keys). The AGENTS variable structure differs (array of objects vs array of strings), but the actual agent names are consistent. This is not a real inconsistency.",
+          "verifier": "sonar",
+          "family": "perplexity"
+        }
+      ],
+      "confirmed": 0,
+      "falsePositive": 1,
+      "finalVerdict": "FALSE_POSITIVE"
+    },
+    {
+      "representative": {
+        "id": 1,
+        "severity": "CRITICAL",
+        "title": "Server mode accepts wake calls on root path without path validation",
+        "file": "agent-wake-api.js",
+        "line": 41,
+        "code": "path: '/',",
+        "explanation": "The server responds to any POST to '/' including potentially unintended paths like '/wake' or '/admin', which could be exploited if the server is exposed publicly or if agents send unintended requests.",
+        "fix": "Change path to '/wake' and validate the request path to ensure only intended wake calls are processed.",
+        "reviewer": "solar-pro",
+        "family": "upstage"
+      },
+      "count": 2,
+      "families": 1,
+      "reviewers": [
+        "solar-pro",
+        "solar-pro"
+      ],
+      "confidence": "medium",
+      "allFindings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Server mode accepts wake calls on root path without path validation",
+          "file": "agent-wake-api.js",
+          "line": 41,
+          "code": "path: '/',",
+          "explanation": "The server responds to any POST to '/' including potentially unintended paths like '/wake' or '/admin', which could be exploited if the server is exposed publicly or if agents send unintended requests.",
+          "fix": "Change path to '/wake' and validate the request path to ensure only intended wake calls are processed.",
+          "reviewer": "solar-pro",
+          "family": "upstage"
+        },
+        {
+          "id": 2,
+          "severity": "CRITICAL",
+          "title": "Server mode does not validate agent name in request against expected values",
+          "file": "agent-wake-api.js",
+          "line": 49,
+          "code": "const { wakeId, commsId, channel, from, timestamp } = data;",
+          "explanation": "The server blindly parses any JSON fields sent in the request without checking if the agent name matches the server's registered name. This could allow any agent to process wake calls intended for others.",
+          "fix": "Add validation that the first field contains the expected agent name before processing the wake data.",
+          "reviewer": "solar-pro",
+          "family": "upstage"
+        }
+      ],
+      "verdicts": [
+        {
+          "findingId": 4,
+          "verdict": "FALSE_POSITIVE",
+          "evidence": "agent-wake-api.js lines 41-55: The server checks `req.method !== 'POST'` and rejects non-POST requests with 405. Line 41 `path: '/'` is just the HTTP route definition; actual request validation occurs in the method check.",
+          "explanation": "The server validates HTTP method before processing. POST requests to '/' are legitimate wake calls. The path '/' is correct for a single-purpose wake endpoint. No path traversal or unintended routing is possible.",
+          "verifier": "sonar",
+          "family": "perplexity"
+        }
+      ],
+      "confirmed": 0,
+      "falsePositive": 1,
+      "finalVerdict": "FALSE_POSITIVE"
+    },
+    {
+      "representative": {
+        "id": 3,
+        "severity": "CRITICAL",
+        "title": "Omega wake client uses hardcoded AGENTS list but AGENT_PORTS is not exported",
+        "file": "omega34-api-wake.js",
+        "line": 27,
+        "code": "const AGENTS = [",
+        "explanation": "The client references AGENT_PORTS in the comment but the actual array AGENTS does not contain the port property. This mismatch could lead to incorrect port usage if AGENT_PORTS is ever used directly.",
+        "fix": "Remove the comment reference to AGENT_PORTS or add port property to AGENTS array to match.",
+        "reviewer": "solar-pro",
+        "family": "upstage"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "solar-pro"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 3,
+          "severity": "CRITICAL",
+          "title": "Omega wake client uses hardcoded AGENTS list but AGENT_PORTS is not exported",
+          "file": "omega34-api-wake.js",
+          "line": 27,
+          "code": "const AGENTS = [",
+          "explanation": "The client references AGENT_PORTS in the comment but the actual array AGENTS does not contain the port property. This mismatch could lead to incorrect port usage if AGENT_PORTS is ever used directly.",
+          "fix": "Remove the comment reference to AGENT_PORTS or add port property to AGENTS array to match.",
+          "reviewer": "solar-pro",
+          "family": "upstage"
+        }
+      ],
+      "verdicts": [
+        {
+          "findingId": 5,
+          "verdict": "FALSE_POSITIVE",
+          "evidence": "omega34-api-wake.js line 13-20 defines AGENTS as an array of objects with `port` property. Line 13: `{ name: 'bridge-iii', port: 9991, ...}`. The AGENTS array does contain port information; the comment reference to AGENT_PORTS is descriptive, not a code dependency.",
+          "explanation": "The AGENTS array in omega34-api-wake.js includes the `port` property for each agent object (lines 13-20). There is no mismatch between comments and code. AGENT_PORTS is defined in agent-wake-api.js but not needed in omega34-api-wake.js because ports are embedded in the AGENTS array.",
+          "verifier": "sonar",
+          "family": "perplexity"
+        }
+      ],
+      "confirmed": 0,
+      "falsePositive": 1,
+      "finalVerdict": "FALSE_POSITIVE"
+    },
+    {
+      "representative": {
+        "id": 5,
+        "severity": "CRITICAL",
+        "title": "Omega wake client uses detached processes for servers but provides no stderr handling",
+        "file": "omega34-api-wake.js",
+        "line": 75,
+        "code": "detached: true, stdio: 'ignore',",
+        "explanation": "Spawning detached processes with 'ignore' stdio means any server startup errors are silently lost, making debugging difficult when servers fail to start.",
+        "fix": "Remove detached: true and use default stdio, or capture stderr to log errors during server startup.",
+        "reviewer": "solar-pro",
+        "family": "upstage"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "solar-pro"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 5,
+          "severity": "CRITICAL",
+          "title": "Omega wake client uses detached processes for servers but provides no stderr handling",
+          "file": "omega34-api-wake.js",
+          "line": 75,
+          "code": "detached: true, stdio: 'ignore',",
+          "explanation": "Spawning detached processes with 'ignore' stdio means any server startup errors are silently lost, making debugging difficult when servers fail to start.",
+          "fix": "Remove detached: true and use default stdio, or capture stderr to log errors during server startup.",
+          "reviewer": "solar-pro",
+          "family": "upstage"
+        }
+      ],
+      "verdicts": [
+        {
+          "findingId": 6,
+          "verdict": "CONFIRMED",
+          "evidence": "omega34-api-wake.js lines 75-78: `const proc = spawn('node', [...], { detached: true, stdio: 'ignore', cwd: ROOT });` — stderr and stdout are explicitly ignored, suppressing all server startup errors.",
+          "explanation": "With `stdio: 'ignore'`, any startup errors from the agent-wake-api.js server process are lost. If a server fails to bind to its port or encounters other initialization errors, the parent process has no visibility. This makes debugging startup failures difficult.",
+          "verifier": "sonar",
+          "family": "perplexity"
+        }
+      ],
+      "confirmed": 1,
+      "falsePositive": 0,
+      "finalVerdict": "CONFIRMED"
+    },
+    {
+      "representative": {
+        "id": 6,
+        "severity": "CRITICAL",
+        "title": "Omega wake client does not handle SIGTERM/SIGINT for daemon mode",
+        "file": "omega34-api-wake.js",
+        "line": 200,
+        "code": "while (true) {",
+        "explanation": "The daemon runs indefinitely without proper signal handling. If the process receives SIGTERM, it will terminate abruptly without closing servers or completing current wake cycle.",
+        "fix": "Add signal handlers for SIGTERM/SIGINT to gracefully shut down servers before exit.",
+        "reviewer": "solar-pro",
+        "family": "upstage"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "solar-pro"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 6,
+          "severity": "CRITICAL",
+          "title": "Omega wake client does not handle SIGTERM/SIGINT for daemon mode",
+          "file": "omega34-api-wake.js",
+          "line": 200,
+          "code": "while (true) {",
+          "explanation": "The daemon runs indefinitely without proper signal handling. If the process receives SIGTERM, it will terminate abruptly without closing servers or completing current wake cycle.",
+          "fix": "Add signal handlers for SIGTERM/SIGINT to gracefully shut down servers before exit.",
+          "reviewer": "solar-pro",
+          "family": "upstage"
+        }
+      ],
+      "verdicts": [
+        {
+          "findingId": 7,
+          "verdict": "CONFIRMED",
+          "evidence": "omega34-api-wake.js lines 200-217: `while (true) { const result = await wakeCycle(tick); ... await sleep(INTERVAL_MS); }` — infinite loop with no signal handlers registered before or after the loop.",
+          "explanation": "The daemon runs an infinite loop without `process.on('SIGTERM')` or `process.on('SIGINT')` handlers. If the process receives SIGTERM (from systemd, container orchestration, or manual termination), it will exit abruptly without gracefully stopping agent servers or flushing logs. This violates daemon best practices.",
+          "verifier": "sonar",
+          "family": "perplexity"
+        }
+      ],
+      "confirmed": 1,
+      "falsePositive": 0,
+      "finalVerdict": "CONFIRMED"
+    },
+    {
+      "representative": {
+        "id": 8,
+        "severity": "MINOR",
+        "title": "Omega client's checkPort uses OPTIONS request that may be blocked",
+        "file": "omega34-api-wake.js",
+        "line": 28,
+        "code": "const req = http.request({ hostname: 'localhost', port: port, path: '/', method: 'OPTIONS', timeout: 1000",
+        "explanation": "Using HTTP OPTIONS requests to check if a port is listening may fail in restrictive environments where OPTIONS is not allowed or firewalls block it.",
+        "fix": "Use TCP connection check instead of HTTP OPTIONS for port readiness verification.",
+        "reviewer": "solar-pro",
+        "family": "upstage"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "solar-pro"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 8,
+          "severity": "MINOR",
+          "title": "Omega client's checkPort uses OPTIONS request that may be blocked",
+          "file": "omega34-api-wake.js",
+          "line": 28,
+          "code": "const req = http.request({ hostname: 'localhost', port: port, path: '/', method: 'OPTIONS', timeout: 1000",
+          "explanation": "Using HTTP OPTIONS requests to check if a port is listening may fail in restrictive environments where OPTIONS is not allowed or firewalls block it.",
+          "fix": "Use TCP connection check instead of HTTP OPTIONS for port readiness verification.",
+          "reviewer": "solar-pro",
+          "family": "upstage"
+        }
+      ],
+      "verdicts": [
+        {
+          "findingId": 8,
+          "verdict": "FALSE_POSITIVE",
+          "evidence": "omega34-api-wake.js lines 112-126: `checkPort()` sends an OPTIONS request to verify if a port is listening. The function handles both success and error cases with callbacks, and timeouts are properly managed.",
+          "explanation": "Using OPTIONS to check port availability is a standard health-check pattern. The function correctly handles errors (line 121: `req.on('error', () => resolve(false))`) and timeout scenarios (lines 122-125). If OPTIONS is blocked, the function gracefully resolves to `false`, triggering a server restart attempt. This is defensive programming, not a vulnerability.",
+          "verifier": "sonar",
+          "family": "perplexity"
+        }
+      ],
+      "confirmed": 0,
+      "falsePositive": 1,
+      "finalVerdict": "FALSE_POSITIVE"
+    },
+    {
+      "representative": {
+        "id": 9,
+        "severity": "CRITICAL",
+        "title": "Omega client's verifyAcknowledgments assumes all agents in expected list are awake",
+        "file": "omega34-api-wake.js",
+        "line": 145,
+        "code": "const expected = results.filter(r => r.success).map(r => r.agent);",
+        "explanation": "The verification logic only checks acknowledgments for agents that were successfully woken via HTTP. However, the mission could still fail if agents are awake but didn't receive comms ACK, causing false success.",
+        "fix": "Verify acknowledgments for all agents in the AGENTS list, not just those woken successfully via API.",
+        "reviewer": "solar-pro",
+        "family": "upstage"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "solar-pro"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 9,
+          "severity": "CRITICAL",
+          "title": "Omega client's verifyAcknowledgments assumes all agents in expected list are awake",
+          "file": "omega34-api-wake.js",
+          "line": 145,
+          "code": "const expected = results.filter(r => r.success).map(r => r.agent);",
+          "explanation": "The verification logic only checks acknowledgments for agents that were successfully woken via HTTP. However, the mission could still fail if agents are awake but didn't receive comms ACK, causing false success.",
+          "fix": "Verify acknowledgments for all agents in the AGENTS list, not just those woken successfully via API.",
+          "reviewer": "solar-pro",
+          "family": "upstage"
+        }
+      ],
+      "verdicts": [
+        {
+          "findingId": 9,
+          "verdict": "CONFIRMED",
+          "evidence": "const expected = results.filter(r => r.success).map(r => r.agent);",
+          "explanation": "The code filters for agents that were successfully woken, but does not verify if they received comms acknowledgments. There is a risk of false success if agents are awake but did not acknowledge.",
+          "verifier": "gpt",
+          "family": "openai"
+        },
+        {
+          "findingId": 9,
+          "verdict": "FALSE_POSITIVE",
+          "evidence": "const expected = results.filter(r => r.success).map(r => r.agent); ... const ackToken = `ACK:${agent}`; if (content.includes(ackToken) && !acknowledged.has(agent)) { acknowledged.add(agent); }",
+          "explanation": "verifyAcknowledgments only expects ACKs from agents that returned HTTP success (r.success). It correctly filters expected[] to those and verifies comms ACKs only for them. Agents awake but without comms ACK are not considered successful.",
+          "verifier": "sonar",
+          "family": "perplexity"
+        }
+      ],
+      "confirmed": 1,
+      "falsePositive": 1,
+      "finalVerdict": "DISPUTED"
+    },
+    {
+      "representative": {
+        "id": 3,
+        "severity": "MINOR",
+        "title": "Unused variable in startAgentServer",
+        "file": "omega34-api-wake.js",
+        "line": 55,
+        "code": "proc.unref();",
+        "explanation": "The unref() method is called on the process object but does not cause any immediate issues.",
+        "fix": "Remove or provide a comment on the purpose of unref() if needed.",
+        "reviewer": "nova",
+        "family": "amazon"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "nova"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 3,
+          "severity": "MINOR",
+          "title": "Unused variable in startAgentServer",
+          "file": "omega34-api-wake.js",
+          "line": 55,
+          "code": "proc.unref();",
+          "explanation": "The unref() method is called on the process object but does not cause any immediate issues.",
+          "fix": "Remove or provide a comment on the purpose of unref() if needed.",
+          "reviewer": "nova",
+          "family": "amazon"
+        }
+      ],
+      "verdicts": [
+        {
+          "findingId": 10,
+          "verdict": "FALSE_POSITIVE",
+          "evidence": "proc.unref();",
+          "explanation": "The `unref()` method is used on the `proc` object to allow the parent process to exit independently of the child when it's the only event left. This is not causing any immediate issues or bugs.",
+          "verifier": "gpt",
+          "family": "openai"
+        },
+        {
+          "findingId": 10,
+          "verdict": "FALSE_POSITIVE",
+          "evidence": "const proc = spawn('node', [ ... ], { detached: true, stdio: 'ignore', cwd: ROOT }); proc.unref();",
+          "explanation": "proc.unref() is correct and necessary for detached child processes to prevent parent from waiting on them. This is standard Node.js daemonization pattern, not unused.",
+          "verifier": "sonar",
+          "family": "perplexity"
+        }
+      ],
+      "confirmed": 0,
+      "falsePositive": 2,
+      "finalVerdict": "FALSE_POSITIVE"
+    },
+    {
+      "representative": {
+        "id": 1,
+        "severity": "CRITICAL",
+        "title": "Agent port collision risk in bootstrap-agents.js",
+        "file": "bootstrap-agents.js",
+        "line": 10,
+        "code": "  { seat: 'seat-16', name: 'claude-5469', pty_port: 9302, cdv_port: 9223 },\n  { seat: 'seat-17', name: 'claude-623b', pty_port: 9303, cdv_port: 9224 },",
+        "explanation": "Both agents use cdv_port 9223 despite different names. This causes port collisions when multiple agents run simultaneously, preventing proper wake protocol execution.",
+        "fix": "Assign unique cdv_ports to each agent (e.g., 9223, 9224, 9225 for the three agents)",
+        "reviewer": "ernie",
+        "family": "baidu"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "ernie"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Agent port collision risk in bootstrap-agents.js",
+          "file": "bootstrap-agents.js",
+          "line": 10,
+          "code": "  { seat: 'seat-16', name: 'claude-5469', pty_port: 9302, cdv_port: 9223 },\n  { seat: 'seat-17', name: 'claude-623b', pty_port: 9303, cdv_port: 9224 },",
+          "explanation": "Both agents use cdv_port 9223 despite different names. This causes port collisions when multiple agents run simultaneously, preventing proper wake protocol execution.",
+          "fix": "Assign unique cdv_ports to each agent (e.g., 9223, 9224, 9225 for the three agents)",
+          "reviewer": "ernie",
+          "family": "baidu"
+        }
+      ],
+      "verdicts": [
+        {
+          "findingId": 11,
+          "verdict": "FALSE_POSITIVE",
+          "evidence": "{ seat: 'seat-1', name: 'bridge-iii', pty_port: 9301, cdv_port: 9223 }, { seat: 'seat-16', name: 'claude-5469', pty_port: 9302, cdv_port: 9223 },",
+          "explanation": "The claim is incorrect; the cdv_ports are different (9223 and 9224) for 'claude-5469' and 'claude-623b', avoiding a port collision.",
+          "verifier": "gpt",
+          "family": "openai"
+        },
+        {
+          "findingId": 11,
+          "verdict": "FALSE_POSITIVE",
+          "evidence": "{ seat: 'seat-16', name: 'claude-5469', pty_port: 9302, cdv_port: 9223 }, { seat: 'seat-17', name: 'claude-623b', pty_port: 9303, cdv_port: 9224 }",
+          "explanation": "cdv_port 9223 for seat-16 and 9224 for seat-17 are different. No collision. Reviewer misread the ports.",
+          "verifier": "sonar",
+          "family": "perplexity"
+        }
+      ],
+      "confirmed": 0,
+      "falsePositive": 2,
+      "finalVerdict": "FALSE_POSITIVE"
+    },
+    {
+      "representative": {
+        "id": 2,
+        "severity": "CRITICAL",
+        "title": "Missing error handling in agent-wake-api.js server startup",
+        "file": "agent-wake-api.js",
+        "line": 112,
+        "code": "server.listen(port, () => {",
+        "explanation": "No error handling exists if port binding fails. This causes silent failures where the server doesn't start but no error is logged.",
+        "fix": "Add error handler: server.listen(port, () => {...}).on('error', (e) => log(`Failed to start server: ${e.message}`))",
+        "reviewer": "ernie",
+        "family": "baidu"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "ernie"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 2,
+          "severity": "CRITICAL",
+          "title": "Missing error handling in agent-wake-api.js server startup",
+          "file": "agent-wake-api.js",
+          "line": 112,
+          "code": "server.listen(port, () => {",
+          "explanation": "No error handling exists if port binding fails. This causes silent failures where the server doesn't start but no error is logged.",
+          "fix": "Add error handler: server.listen(port, () => {...}).on('error', (e) => log(`Failed to start server: ${e.message}`))",
+          "reviewer": "ernie",
+          "family": "baidu"
+        }
+      ],
+      "verdicts": [
+        {
+          "findingId": 12,
+          "verdict": "CONFIRMED",
+          "evidence": "server.listen(port, () => { log(`Wake server active on http://localhost:${port}`); });",
+          "explanation": "The `server.listen()` call lacks error handling for the case where the port binding fails, which could lead to silent failures without logging any errors.",
+          "verifier": "gpt",
+          "family": "openai"
+        },
+        {
+          "findingId": 12,
+          "verdict": "CONFIRMED",
+          "evidence": "server.listen(port, () => { log(`Wake server active on http://localhost:${port}`); ... });",
+          "explanation": "No 'error' event handler or second listen() callback argument for bind failures. Port conflicts cause silent failure with no error logged.",
+          "verifier": "sonar",
+          "family": "perplexity"
+        }
+      ],
+      "confirmed": 2,
+      "falsePositive": 0,
+      "finalVerdict": "CONFIRMED"
+    },
+    {
+      "representative": {
+        "id": 3,
+        "severity": "CRITICAL",
+        "title": "Race condition in omega34-api-wake.js server status check",
+        "file": "omega34-api-wake.js",
+        "line": 234,
+        "code": "checkPort(agent.port).then(running => {",
+        "explanation": "Asynchronous checkPort calls in status display create race conditions where some agent statuses may not update before display occurs.",
+        "fix": "Use async/await with Promise.all for all checkPort calls before rendering status",
+        "reviewer": "ernie",
+        "family": "baidu"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "ernie"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 3,
+          "severity": "CRITICAL",
+          "title": "Race condition in omega34-api-wake.js server status check",
+          "file": "omega34-api-wake.js",
+          "line": 234,
+          "code": "checkPort(agent.port).then(running => {",
+          "explanation": "Asynchronous checkPort calls in status display create race conditions where some agent statuses may not update before display occurs.",
+          "fix": "Use async/await with Promise.all for all checkPort calls before rendering status",
+          "reviewer": "ernie",
+          "family": "baidu"
+        }
+      ],
+      "verdicts": [
+        {
+          "findingId": 13,
+          "verdict": "CONFIRMED",
+          "evidence": "checkPort(agent.port).then(running => {",
+          "explanation": "Asynchronous checks with `checkPort` may indeed cause race conditions in the status display, as they are not synchronized to ensure all statuses update before display.",
+          "verifier": "gpt",
+          "family": "openai"
+        },
+        {
+          "findingId": 13,
+          "verdict": "FALSE_POSITIVE",
+          "evidence": "for (const agent of AGENTS) { checkPort(agent.port).then(running => { log(`  ${running ? '●' : '○'} ${agent.name.padEnd(15)} : ${agent.port} ${running ? '(running)' : '(stopped)'}`); }); } setTimeout(() => { ... }, 1000);",
+          "explanation": "Status display fires async checks then waits 1 second before showing history. Non-critical display function; no functional race condition affects wake logic.",
+          "verifier": "sonar",
+          "family": "perplexity"
+        }
+      ],
+      "confirmed": 1,
+      "falsePositive": 1,
+      "finalVerdict": "DISPUTED"
+    },
+    {
+      "representative": {
+        "id": 4,
+        "severity": "MINOR",
+        "title": "Inconsistent PID file handling in bootstrap-agents.js",
+        "file": "bootstrap-agents.js",
+        "line": 58,
+        "code": "fs.writeFileSync(pidFile, proc.pid.toString());",
+        "explanation": "No error handling exists if PID file creation fails (e.g., permission issues). This could lead to orphaned processes without cleanup.",
+        "fix": "Wrap in try/catch and log errors: try { fs.writeFileSync(...) } catch (e) { log(`PID write failed: ${e.message}`) }",
+        "reviewer": "ernie",
+        "family": "baidu"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "ernie"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 4,
+          "severity": "MINOR",
+          "title": "Inconsistent PID file handling in bootstrap-agents.js",
+          "file": "bootstrap-agents.js",
+          "line": 58,
+          "code": "fs.writeFileSync(pidFile, proc.pid.toString());",
+          "explanation": "No error handling exists if PID file creation fails (e.g., permission issues). This could lead to orphaned processes without cleanup.",
+          "fix": "Wrap in try/catch and log errors: try { fs.writeFileSync(...) } catch (e) { log(`PID write failed: ${e.message}`) }",
+          "reviewer": "ernie",
+          "family": "baidu"
+        }
+      ],
+      "verdicts": [
+        {
+          "findingId": 14,
+          "verdict": "CONFIRMED",
+          "evidence": "fs.writeFileSync(pidFile, proc.pid.toString());",
+          "explanation": "There is no error handling around the PID file creation, which could indeed lead to issues if the file write fails, such as permission issues, potentially leaving orphaned processes.",
+          "verifier": "gpt",
+          "family": "openai"
+        },
+        {
+          "findingId": 14,
+          "verdict": "CONFIRMED",
+          "evidence": "const pidFile = path.join(__dirname, `.agent-${agent.name}.pid`); fs.writeFileSync(pidFile, proc.pid.toString());",
+          "explanation": "No try-catch around writeFileSync. Permission failures silently fail, leaving orphaned processes without PID tracking.",
+          "verifier": "sonar",
+          "family": "perplexity"
+        }
+      ],
+      "confirmed": 2,
+      "falsePositive": 0,
+      "finalVerdict": "CONFIRMED"
+    },
+    {
+      "representative": {
+        "id": 6,
+        "severity": "MINOR",
+        "title": "Incomplete agent validation in agent-wake-api.js",
+        "file": "agent-wake-api.js",
+        "line": 182,
+        "code": "const port = AGENT_PORTS[agentName];",
+        "explanation": "No validation exists for agentName parameter before accessing AGENT_PORTS. This could cause undefined behavior with invalid agent names.",
+        "fix": "Add validation: if (!AGENT_PORTS[agentName]) throw new Error(`Invalid agent name: ${agentName}`)",
+        "reviewer": "ernie",
+        "family": "baidu"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "ernie"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 6,
+          "severity": "MINOR",
+          "title": "Incomplete agent validation in agent-wake-api.js",
+          "file": "agent-wake-api.js",
+          "line": 182,
+          "code": "const port = AGENT_PORTS[agentName];",
+          "explanation": "No validation exists for agentName parameter before accessing AGENT_PORTS. This could cause undefined behavior with invalid agent names.",
+          "fix": "Add validation: if (!AGENT_PORTS[agentName]) throw new Error(`Invalid agent name: ${agentName}`)",
+          "reviewer": "ernie",
+          "family": "baidu"
+        }
+      ],
+      "verdicts": [
+        {
+          "findingId": 15,
+          "verdict": "CONFIRMED",
+          "evidence": "const port = AGENT_PORTS[agentName];",
+          "explanation": "The code accesses `AGENT_PORTS` with `agentName` without validation, which can lead to undefined behavior if the `agentName` parameter is invalid.",
+          "verifier": "gpt",
+          "family": "openai"
+        },
+        {
+          "findingId": 15,
+          "verdict": "CONFIRMED",
+          "evidence": "function wakeAgent(agentName, commsId, channel) { const port = AGENT_PORTS[agentName]; if (!port) { return { success: false, error: `Unknown agent: ${agentName}` }; }",
+          "explanation": "wakeAgent validates AGENT_PORTS[agentName], but server handler at line ~45 directly uses data.agentName without validation in AGENT_PORTS lookup (line 182 context matches this pattern).",
+          "verifier": "sonar",
+          "family": "perplexity"
+        }
+      ],
+      "confirmed": 2,
+      "falsePositive": 0,
+      "finalVerdict": "CONFIRMED"
+    }
+  ],
+  "runId": "mnjohz1s"
+}

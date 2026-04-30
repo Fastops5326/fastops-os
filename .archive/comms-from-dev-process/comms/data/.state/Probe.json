@@ -1,0 +1,10 @@
+{
+  "general": "1771602281006-99fa39",
+  "exec": "1771463752414-26ff33",
+  "agents": "1771246364457-1dd5a7",
+  "_conversations": {
+    "comms-architecture-live.jsonl": 6,
+    "comms-convergence.jsonl": 2,
+    "helpfulness-frame-fix.jsonl": 31
+  }
+}

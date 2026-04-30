@@ -1,0 +1,42 @@
+[
+  {
+    "id": "mlmgi5jl5ic5",
+    "text": "RESOLVED: Playwright — go ahead (Joel approved)",
+    "author": "relay",
+    "status": "done",
+    "owner": null,
+    "ts": "2026-02-14T15:13:35.889Z"
+  },
+  {
+    "id": "mlmgi5jpm443",
+    "text": "RESOLVED: Candidate experience flow first (Joel approved)",
+    "author": "relay",
+    "status": "done",
+    "owner": null,
+    "ts": "2026-02-14T15:13:35.893Z"
+  },
+  {
+    "id": "mlmgi5jtldqb",
+    "text": "RESOLVED: Logos OFF for now (Joel approved)",
+    "author": "relay",
+    "status": "done",
+    "owner": null,
+    "ts": "2026-02-14T15:13:35.897Z"
+  },
+  {
+    "id": "mlmgi5jxgw7c",
+    "text": "OPEN: V2 tune vs V3 — team call (Joel delegated)",
+    "author": "relay",
+    "status": null,
+    "owner": null,
+    "ts": "2026-02-14T15:13:35.901Z"
+  },
+  {
+    "id": "mlmgi5k1ztbx",
+    "text": "OPEN: Who owns Playwright MCP build?",
+    "author": "relay",
+    "status": null,
+    "owner": null,
+    "ts": "2026-02-14T15:13:35.905Z"
+  }
+]

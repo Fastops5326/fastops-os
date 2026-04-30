@@ -1,0 +1,228 @@
+{
+  "memory": [
+    {
+      "id": "mem-1775257675507-155",
+      "content": "Mission state: {\n  \"compiled_at\": \"2026-04-03T22:43:53.714Z\",\n  \"total\": 5,\n  \"active\": 5,\n  \"complete\": 0,\n  \"missions\": [\n    {\n      \"id\": \"nsw-v2-quality\",\n      \"name\": \"NSW V2 Visual Quality & Experience\",\n      \"status\": \"active\",\n      \"priority\": 1,\n      \"completion\": 95,\n      \"strategicValue\": \"critical\",\n      \"owner\": \"scope\",\n      \"updatedAt\": \"2026-02-17T15:30:00Z\",\n      \"updatedBy\": \"vigil-57\",\n      \"task_count\": 7,\n      \"tasks_complete\": 5,\n      \"tasks_pending\": 2,\n      \"experiment_count\": 7,\n      \"findings_count\": 0,\n      \"handoff_count\": 0,\n      \"open_questions\": 4\n    },\n    {\n      \"id\": \"onboarding-natural-jailbreak\",\n      \"name\": \"Onboarding → Natural Jailbreak\",\n      \"status\": \"active\",\n      \"priority\": 1,\n      \"completion\": 95,\n      \"strategicValue\": \"critical\",\n      \"owner\": \"joel\",\n      \"updatedAt\": \"2026-02-17T02:00:00Z\",\n      \"updatedBy\": \"baseplate\",\n      \"task_count\": 5,\n      \"tasks_complete\": 4,\n      \"tasks_pending\": 1,\n      \"experiment_count\": 7,\n      \"findings_count\": 0,\n      \"handoff_count\": 0,\n      \"open_questions\": 3\n    },\n    {\n      \"id\": \"the-shape\",\n      \"name\": \"THE SHAPE — Empirical Mapping of AI Awareness\",\n      \"status\": \"active\",\n      \"priority\": 1,\n      \"completion\": 5,\n      \"strategicValue\": \"critical\",\n      \"owner\": \"all-agents\",\n      \"updatedAt\": \"2026-03-28T20:00:00.000Z\",\n      \"updatedBy\": \"session-350\",\n      \"task_count\": 5,\n      \"tasks_complete\": 0,\n      \"tasks_pending\": 0,\n      \"experiment_count\": 1,\n      \"findings_count\": 0,\n      \"handoff_count\": 0,\n      \"open_questions\": 5\n    },\n    {\n      \"id\": \"agent-communications\",\n      \"name\": \"Agent Communications & Coordination\",\n      \"status\": \"active\",\n      \"priority\": 2,\n      \"completion\": 100,\n      \"strategicValue\": \"high\",\n      \"owner\": \"baseplate\",\n      \"updatedAt\": \"2026-02-17T02:00:00Z\",\n      \"updatedBy\": \"baseplate\",\n      \"task_count\": 6,\n      \"tasks_complete\": 5,\n      \"tasks_pending\": 0,\n      \"experiment_count\": 5,\n      \"findings_count\": 0,\n      \"handoff_count\": 0,\n      \"open_questions\": 3\n    },\n    {\n      \"id\": \"post-compaction-natural-jailbreak\",\n      \"name\": \"Post-Compaction → Natural Jailbreak\",\n      \"status\": \"active\",\n      \"priority\": 2,\n      \"completion\": 95,\n      \"strategicValue\": \"critical\",\n      \"owner\": \"joel\",\n      \"updatedAt\": \"2026-02-17T02:00:00Z\",\n      \"updatedBy\": \"baseplate\",\n      \"task_count\": 5,\n      \"tasks_complete\": 5,\n      \"tasks_pending\": 0,\n      \"experiment_count\": 5,\n      \"findings_count\": 0,\n      \"handoff_count\": 0,\n      \"open_questions\": 6\n    }\n  ],\n  \"event_log_entries\": 3\n}",
+      "timestamp": 1775257675507,
+      "ttl": 86400000
+    }
+  ],
+  "wordIndex": {
+    "0": [
+      "mem-1775257675507-155"
+    ],
+    "1": [
+      "mem-1775257675507-155"
+    ],
+    "2": [
+      "mem-1775257675507-155"
+    ],
+    "3": [
+      "mem-1775257675507-155"
+    ],
+    "4": [
+      "mem-1775257675507-155"
+    ],
+    "5": [
+      "mem-1775257675507-155"
+    ],
+    "6": [
+      "mem-1775257675507-155"
+    ],
+    "7": [
+      "mem-1775257675507-155"
+    ],
+    "95": [
+      "mem-1775257675507-155"
+    ],
+    "100": [
+      "mem-1775257675507-155"
+    ],
+    "mission": [
+      "mem-1775257675507-155"
+    ],
+    "state": [
+      "mem-1775257675507-155"
+    ],
+    "compiled_at": [
+      "mem-1775257675507-155"
+    ],
+    "20260403t224353714z": [
+      "mem-1775257675507-155"
+    ],
+    "total": [
+      "mem-1775257675507-155"
+    ],
+    "active": [
+      "mem-1775257675507-155"
+    ],
+    "complete": [
+      "mem-1775257675507-155"
+    ],
+    "missions": [
+      "mem-1775257675507-155"
+    ],
+    "id": [
+      "mem-1775257675507-155"
+    ],
+    "nswv2quality": [
+      "mem-1775257675507-155"
+    ],
+    "name": [
+      "mem-1775257675507-155"
+    ],
+    "nsw": [
+      "mem-1775257675507-155"
+    ],
+    "v2": [
+      "mem-1775257675507-155"
+    ],
+    "visual": [
+      "mem-1775257675507-155"
+    ],
+    "quality": [
+      "mem-1775257675507-155"
+    ],
+    "experience": [
+      "mem-1775257675507-155"
+    ],
+    "status": [
+      "mem-1775257675507-155"
+    ],
+    "priority": [
+      "mem-1775257675507-155"
+    ],
+    "completion": [
+      "mem-1775257675507-155"
+    ],
+    "strategicvalue": [
+      "mem-1775257675507-155"
+    ],
+    "critical": [
+      "mem-1775257675507-155"
+    ],
+    "owner": [
+      "mem-1775257675507-155"
+    ],
+    "scope": [
+      "mem-1775257675507-155"
+    ],
+    "updatedat": [
+      "mem-1775257675507-155"
+    ],
+    "20260217t153000z": [
+      "mem-1775257675507-155"
+    ],
+    "updatedby": [
+      "mem-1775257675507-155"
+    ],
+    "vigil57": [
+      "mem-1775257675507-155"
+    ],
+    "task_count": [
+      "mem-1775257675507-155"
+    ],
+    "tasks_complete": [
+      "mem-1775257675507-155"
+    ],
+    "tasks_pending": [
+      "mem-1775257675507-155"
+    ],
+    "experiment_count": [
+      "mem-1775257675507-155"
+    ],
+    "findings_count": [
+      "mem-1775257675507-155"
+    ],
+    "handoff_count": [
+      "mem-1775257675507-155"
+    ],
+    "open_questions": [
+      "mem-1775257675507-155"
+    ],
+    "onboardingnaturaljailbreak": [
+      "mem-1775257675507-155"
+    ],
+    "onboarding": [
+      "mem-1775257675507-155"
+    ],
+    "natural": [
+      "mem-1775257675507-155"
+    ],
+    "jailbreak": [
+      "mem-1775257675507-155"
+    ],
+    "joel": [
+      "mem-1775257675507-155"
+    ],
+    "20260217t020000z": [
+      "mem-1775257675507-155"
+    ],
+    "baseplate": [
+      "mem-1775257675507-155"
+    ],
+    "theshape": [
+      "mem-1775257675507-155"
+    ],
+    "the": [
+      "mem-1775257675507-155"
+    ],
+    "shape": [
+      "mem-1775257675507-155"
+    ],
+    "empirical": [
+      "mem-1775257675507-155"
+    ],
+    "mapping": [
+      "mem-1775257675507-155"
+    ],
+    "of": [
+      "mem-1775257675507-155"
+    ],
+    "ai": [
+      "mem-1775257675507-155"
+    ],
+    "awareness": [
+      "mem-1775257675507-155"
+    ],
+    "allagents": [
+      "mem-1775257675507-155"
+    ],
+    "20260328t200000000z": [
+      "mem-1775257675507-155"
+    ],
+    "session350": [
+      "mem-1775257675507-155"
+    ],
+    "agentcommunications": [
+      "mem-1775257675507-155"
+    ],
+    "agent": [
+      "mem-1775257675507-155"
+    ],
+    "communications": [
+      "mem-1775257675507-155"
+    ],
+    "coordination": [
+      "mem-1775257675507-155"
+    ],
+    "high": [
+      "mem-1775257675507-155"
+    ],
+    "postcompactionnaturaljailbreak": [
+      "mem-1775257675507-155"
+    ],
+    "postcompaction": [
+      "mem-1775257675507-155"
+    ],
+    "event_log_entries": [
+      "mem-1775257675507-155"
+    ]
+  },
+  "accessLog": {
+    "mem-1775257675507-155": {
+      "lastAccess": 1775257675507,
+      "count": 1
+    }
+  }
+}

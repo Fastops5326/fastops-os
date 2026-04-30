@@ -1,0 +1,36 @@
+{
+  "capturedAt": "2026-04-29T00:00:00Z",
+  "phase": "0.1",
+  "purpose": "Baseline SHAs for rollback reference. If anything goes sideways during the spin-out, we can git reset --hard <sha> on each repo to return to this state.",
+  "repos": {
+    "fastops-development-process": {
+      "path": "C:/Users/joelb/OneDrive/Desktop/Fastops development process",
+      "sha": "8fec067170c61682710f01f6173a2ea653350a5d",
+      "branch": "fix/supabase-env-fallback-and-migration",
+      "lastCommit": "8fec0671 candidate: Monday is the SOLE source of program identity (Joel, 2026-04-29)",
+      "dirtyFiles": 66,
+      "note": "66 uncommitted files including spin-out planning docs (FASTOPS-3REPO-SPINOUT-*.md), v3 review artifacts, scratch tmp-post-* scripts. Pre-existing state at start of execution."
+    },
+    "fastops-os": {
+      "path": "C:/Users/joelb/OneDrive/Desktop/fastops-os",
+      "sha": "714f81b9c4440c900c482306c1a9dcc55c10489a",
+      "branch": "master",
+      "lastCommit": "714f81b chore: prepare fastops-os for cloud deployment and E2E testing (Joel, 2026-04-06)",
+      "dirtyFiles": 11,
+      "note": "11 uncommitted files. Pre-existing state at start of execution."
+    },
+    "warriorpath": {
+      "status": "DOES_NOT_EXIST_YET",
+      "note": "Will be created in Phase 4."
+    },
+    "fastops-method": {
+      "status": "DOES_NOT_EXIST_YET",
+      "note": "Will be created in Phase 3."
+    }
+  },
+  "rollbackInstructions": {
+    "fastops-development-process": "cd 'Fastops development process'; git reset --hard 8fec067170c61682710f01f6173a2ea653350a5d",
+    "fastops-os": "cd fastops-os; git reset --hard 714f81b9c4440c900c482306c1a9dcc55c10489a",
+    "deleteNewRepos": "rm -rf warriorpath/ fastops-method/  (if they were created)"
+  }
+}

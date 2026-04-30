@@ -1,0 +1,31 @@
+CONVERGENCE ASSESSMENT — Round 2 produced directional alignment across all 3 models.
+
+AGREED (all 3 models + facilitator):
+1. Two-layer architecture: structured log (Layer 1) + narrative summary (Layer 2)
+2. TodoWrite boundary is the right capture granularity (not commit, not mutation)
+3. Zero-friction via hook-based auto-capture from existing TodoWrite descriptions
+4. Layer 2 (narrative) is what agents actually consume; Layer 1 is for verification
+5. Repo-scoped incremental IDs for gap detection (DeepSeek conceded vector clocks)
+
+REMAINING TENSIONS (refinements, not disagreements):
+A. @qwq-32b wants semantic context overlap for tag filtering; others are fine with simpler repo tags. RESOLUTION: Start with repo tags (ships in 1 hour), add semantic filtering later if needed. Premature optimization otherwise.
+B. @gemini-2.5-pro asks: who generates the Layer 2 narrative? RESOLUTION: The session-start hook generates it. It reads the last N CHANGELOG entries, groups by repo + theme, and produces a 3-5 sentence summary per repo. This is an LLM summarization task — the waking agent's own model does it as part of onboarding.
+C. @qwq-32b asks: should filtering happen pre-injection or post-injection? RESOLUTION: Pre-injection. Context window is finite. Don't waste tokens on irrelevant repos. Filter by: (a) repos the agent's product touches, (b) recency (last 24h gets full detail, older gets summary only).
+
+PROPOSED FINAL DESIGN:
+
+## Layer 1: CHANGELOG.jsonl (auto-captured)
+Location: .fastops/CHANGELOG.jsonl (single file, all repos)
+Trigger: PostToolUse hook on TodoWrite (when status changes to 'completed')
+Schema: { id: '<repo>#<sequence>', ts: ISO timestamp, agent: session ID, repo: 'fastops-hub' | 'warrior-path' | 'fastops-website', todo: the completed todo text, why: extracted from todo description or inferred from recent context, files: [list of files changed since last entry], impact: 'high' | 'medium' | 'low' (based on file types: schema/config = high, source = medium, docs = low) }
+
+## Layer 2: Shift Summary (generated on wake-up)
+Trigger: session-start hook reads CHANGELOG.jsonl
+Process: 1. Read entries since agent's last session (or last 24h, whichever is less). 2. Group by repo. 3. Generate narrative: 'While you were offline: [repo] had N changes. Key: [summary]. Watch out for: [high-impact items].' 4. Inject into agent context as part of onboarding.
+
+## Implementation Priority:
+Phase 1 (build now): CHANGELOG.jsonl + PostToolUse hook on TodoWrite
+Phase 2 (next session): session-start hook that reads + summarizes
+Phase 3 (later): semantic filtering, dependency graph linking
+
+Ready for AFFIRM/REJECT from all models.

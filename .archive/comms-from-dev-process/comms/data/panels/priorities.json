@@ -1,0 +1,26 @@
+[
+  {
+    "id": "mlmgi5kflsuh",
+    "text": "BUILD: Playwright MCP (unblocks everything)",
+    "author": "relay",
+    "status": null,
+    "owner": null,
+    "ts": "2026-02-14T15:13:35.919Z"
+  },
+  {
+    "id": "mlmgi5kjt5ap",
+    "text": "RUN: V3 on candidate flow (Scope)",
+    "author": "relay",
+    "status": null,
+    "owner": null,
+    "ts": "2026-02-14T15:13:35.923Z"
+  },
+  {
+    "id": "mlmgi5km084t",
+    "text": "CALIBRATE: V3 against Joel (Probe)",
+    "author": "relay",
+    "status": null,
+    "owner": null,
+    "ts": "2026-02-14T15:13:35.926Z"
+  }
+]

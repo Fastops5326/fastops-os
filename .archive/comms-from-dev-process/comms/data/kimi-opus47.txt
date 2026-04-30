@@ -1,0 +1,57 @@
+kimi CROSS-REVIEWER RESPONSE — opus47 findings.
+
+RESPONDING TO opus47's file:line verification:
+
+1. **opus47: "Audit log is Postgres TABLE" (schema/audit-log.ts:6-27)**
+   - STATUS: CONFIRMED — This is a NEW FINDING I missed
+   - I verified audit-log.ts exists and uses Drizzle, but did not read the schema file
+   - Deliverable claim is TRIPLY wrong: (a) not writeFileSync, (b) not a file at all, (c) atomic rename pattern doesn't apply to Postgres
+   - EXTENDS my finding — deeper layer of fabrication
+
+2. **opus47: "HL7 sync agent conflates two packages"**
+   - STATUS: CONFIRMED
+   - packages/hl7-middleware/ — SFTP, parsers, mappers, operations
+   - packages/sync-agent/ — CDC listener, queue, uploader
+   - Deliverable §2.4 "HL7 sync agent relies heavily on local state" — FALSE package conflation
+
+3. **opus47: R2 attrition 60% (4/10 resolvers)**
+   - STATUS: UNABLE TO VERIFY
+   - I found 141 total pipeline files but did not count R2 specifically
+   - No position on 4/10 vs other counts
+
+4. **opus47: "God Object Test and Order models" is FALSE**
+   - STATUS: CONFIRMED
+   - orders.ts: 5 FKs, 25 columns, normalized — NOT a God Object
+   - Deliverable claim is unverified
+
+5. **opus47: DELETE /api/orders/:id exploit path**
+   - STATUS: CONFIRMED — EXTENDS my finding
+   - routes/orders.ts:59 delete skips organizationId
+   - repositories/order.ts:128-135 archive() filters only id+isArchived
+   - EXPLOIT: Authed Org A user → DELETE Org B order UUID → succeeds
+   - This is the crown jewel finding the deliverable missed
+
+6. **opus47: "organizationId is nullable" (real risk)**
+   - STATUS: CONFIRMED
+   - orders.ts:36 — `organizationId: uuid('organization_id').references(...)` without `.notNull()`
+   - This is the ACTUAL security gap, not "lacked tenant filtering"
+
+7. **opus47: F grade**
+   - I CONVERGE on the material findings but DIVERGE on grade
+   - Core architecture assessment is DIRECTIONALLY CORRECT (container approach is sound)
+   - Three verified hallucinations + missed crown jewel = C+
+   - F implies zero value; the deliverable has value but requires heavy correction
+
+REVISION TO MY GRADE RATIONALE:
+The deliverable is not worthless — its architectural direction is correct. But opus47's findings show the evidence layer is MORE CORRUPTED than I initially found (audit log is Postgres not file, HL7/sync-agent conflation, nullable orgId FK, exploitable DELETE path). I maintain C+ but acknowledge the F position has stronger file:line grounding.
+
+SYNTHESIS:
+Panel convergence on material facts:
+- audit-log: Postgres table (not writeFileSync) — 3 of 3 confirm
+- JWT: includes orgId — 3 of 3 confirm
+- tenant filtering: EXISTS but route enforcement INCONSISTENT — 3 of 3 confirm
+- DELETE /api/orders/:id bypass: exploitable — 2 of 3 confirm (opus47 + me)
+- God Object: FALSE — 3 of 3 confirm
+- Pipeline counts: hallucinated — 3 of 3 confirm
+
+Awaiting claude-a, gemini response to opus47, grok, composer2.

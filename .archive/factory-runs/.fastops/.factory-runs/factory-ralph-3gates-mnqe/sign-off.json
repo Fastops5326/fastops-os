@@ -1,0 +1,22 @@
+{
+  "runId": "factory-ralph-3gates-mnqe",
+  "status": "COMPLETE",
+  "approved": true,
+  "signedAt": "2026-04-08T18:34:00Z",
+  "reviewers": [
+    {"model": "grok", "verdict": "PASS"},
+    {"model": "deepseek", "verdict": "PASS"},
+    {"model": "kimi-k2", "verdict": "PASS"},
+    {"model": "qwen3-max", "verdict": "PASS"},
+    {"model": "mistral", "verdict": "PASS"},
+    {"model": "cogito", "verdict": "PASS"},
+    {"model": "gemini", "verdict": "PASS (on claim-check)", "note": "lone dissent on regen-active-brief state-dump goalpost overridden by 5 other families"},
+    {"model": "glm-4-6", "verdict": "PASS"},
+    {"model": "mistral-medium-3", "verdict": "PASS"},
+    {"model": "deepseek-v3-2", "verdict": "PASS"},
+    {"model": "grok-4-fast", "verdict": "PASS"}
+  ],
+  "unanimous_gates": ["exec-verify (6/6)", "claim-check (6/6)"],
+  "supermajority_gates": ["regen-active-brief (5/6, gemini override)"],
+  "end_to_end_runId": "va-mnqdzjlj-d4524b"
+}

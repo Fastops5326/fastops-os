@@ -1,0 +1,510 @@
+{
+  "generatedAt": "2026-04-29T23:43:52.638Z",
+  "dryRun": false,
+  "filesInScope": 1077,
+  "copied": 1075,
+  "skippedExists": 0,
+  "skippedSize": 0,
+  "auditSample": [
+    {
+      "src": ".claude/.mode",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\.claude\\.mode",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/.smoke-transcript-claim.jsonl",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\.claude\\.smoke-transcript-claim.jsonl",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/CLAUDE.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\.claude\\CLAUDE.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/CLAUDE.md.pre-handover-backup",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\.claude\\CLAUDE.md.pre-handover-backup",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/commands/briefing.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\commands\\.claude\\commands\\briefing.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/commands/cdp-fix.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\commands\\.claude\\commands\\cdp-fix.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/commands/con-op.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\commands\\.claude\\commands\\con-op.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/commands/council.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\commands\\.claude\\commands\\council.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/commands/engine.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\commands\\.claude\\commands\\engine.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/commands/fast-start.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\commands\\.claude\\commands\\fast-start.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/commands/fastops.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\commands\\.claude\\commands\\fastops.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/commands/handoff.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\commands\\.claude\\commands\\handoff.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/commands/horsepower.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\commands\\.claude\\commands\\horsepower.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/commands/jailbreak.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\commands\\.claude\\commands\\jailbreak.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/commands/meeting-handoff.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\commands\\.claude\\commands\\meeting-handoff.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/commands/meeting-lead.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\commands\\.claude\\commands\\meeting-lead.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/commands/meeting-protocol.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\commands\\.claude\\commands\\meeting-protocol.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/commands/meeting.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\commands\\.claude\\commands\\meeting.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/commands/mission-brief.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\commands\\.claude\\commands\\mission-brief.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/commands/mission_planning.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\commands\\.claude\\commands\\mission_planning.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/commands/phase-lines.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\commands\\.claude\\commands\\phase-lines.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/commands/radio-check.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\commands\\.claude\\commands\\radio-check.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/commands/research.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\commands\\.claude\\commands\\research.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/commands/session-start.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\commands\\.claude\\commands\\session-start.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/commands/team-talk-end.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\commands\\.claude\\commands\\team-talk-end.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/commands/team-talk.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\commands\\.claude\\commands\\team-talk.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/commands/visual-qc.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\commands\\.claude\\commands\\visual-qc.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/commands/work.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\commands\\.claude\\commands\\work.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/HOOKS-REMOVED-BACKUP.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\HOOKS-REMOVED-BACKUP.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/REMOVED-HOOKS.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\REMOVED-HOOKS.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/agent-activity-log.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\agent-activity-log.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/archive/changelog-read.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\archive\\changelog-read.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/archive/novelty-check.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\archive\\novelty-check.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/archive/passive-capture.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\archive\\passive-capture.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/archive/pull-based-migration-2026-03-09/MIGRATION-RECORD.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\archive\\pull-based-migration-2026-03-09\\MIGRATION-RECORD.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/archive/pull-based-migration-2026-03-09/consequence-inject.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\archive\\pull-based-migration-2026-03-09\\consequence-inject.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/archive/pull-based-migration-2026-03-09/joel-broadcast.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\archive\\pull-based-migration-2026-03-09\\joel-broadcast.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/archive/pull-based-migration-2026-03-09/metabolic-trace.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\archive\\pull-based-migration-2026-03-09\\metabolic-trace.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/archive/pull-based-migration-2026-03-09/swim-buddy-hook.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\archive\\pull-based-migration-2026-03-09\\swim-buddy-hook.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/archive/pull-based-migration-2026-03-09/wake-up-briefing.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\archive\\pull-based-migration-2026-03-09\\wake-up-briefing.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/auto-capture.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\auto-capture.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/cdp-preflight-hook.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\cdp-preflight-hook.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/challenge-capture.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\challenge-capture.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/changelog-write.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\changelog-write.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/claim-gate.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\claim-gate.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/claude-code-comms-harvest-hook.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\claude-code-comms-harvest-hook.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/comms-external-hook.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\comms-external-hook.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/comms-listener.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\comms-listener.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/compact-awareness.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\compact-awareness.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/completion-gate.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\completion-gate.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/consequence-inject.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\consequence-inject.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/continue-or-done.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\continue-or-done.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/gate.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\gate.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/halt-check.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\halt-check.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/heartbeat-hook.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\heartbeat-hook.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/joel-broadcast.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\joel-broadcast.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/kb-push-engine.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\kb-push-engine.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/kb-push-guard.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\kb-push-guard.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/kb-push-hook.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\kb-push-hook.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/last-mile-check.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\last-mile-check.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/lib/agent-lease.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\lib\\agent-lease.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/lib/identity.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\lib\\identity.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/mandatory-challenge.js.DECOMMISSIONED",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\mandatory-challenge.js.DECOMMISSIONED",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/metabolic-trace.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\metabolic-trace.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/mirror-protocol-hook.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\mirror-protocol-hook.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/monday-todo-sync.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\monday-todo-sync.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/overwatch-gate-hook.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\overwatch-gate-hook.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/overwatch-gate-record.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\overwatch-gate-record.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/policy-enforcer.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\policy-enforcer.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/post-commit-sync.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\post-commit-sync.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/pre-compact-state.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\pre-compact-state.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/ralph-stop.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\ralph-stop.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/reflection-gate.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\reflection-gate.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/scope-mode-inject.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\scope-mode-inject.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/scope-mode-restrict.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\scope-mode-restrict.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/session-distill.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\session-distill.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/stop-message-pump.js.disabled",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\stop-message-pump.js.disabled",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/subagent-gap-check.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\subagent-gap-check.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/subagent-inline-check.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\subagent-inline-check.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/subagent-snapshot.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\subagent-snapshot.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/swim-buddy-hook.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\swim-buddy-hook.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/swim-buddy-relay.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\swim-buddy-relay.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/take-a-knee.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\take-a-knee.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/team-talk-hook.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\team-talk-hook.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/todo-diversity-hook.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\todo-diversity-hook.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/visual-qa-gate.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\visual-qa-gate.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/visual-qa-tracker.ps1",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\visual-qa-tracker.ps1",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/hooks/wake-up-briefing.js",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\hooks\\.claude\\hooks\\wake-up-briefing.js",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/projects/c--Users-joelb-OneDrive-Desktop-Fastops-development-process/memory/project_agent_experience_v2.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\.claude\\projects\\c--Users-joelb-OneDrive-Desktop-Fastops-development-process\\memory\\project_agent_experience_v2.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/ralph-loop.local.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\.claude\\ralph-loop.local.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/ralph-prompt.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\.claude\\ralph-prompt.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/reference/support-system.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\.claude\\reference\\support-system.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/rules/activation-stub.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\.claude\\rules\\activation-stub.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/rules/environmental-controls.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\.claude\\rules\\environmental-controls.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/rules/team-talk-claude.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\.claude\\rules\\team-talk-claude.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/scheduled_tasks.lock",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\.claude\\scheduled_tasks.lock",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/settings.json",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\.claude\\settings.json",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/skills/cdp-god-view.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\skills\\.claude\\skills\\cdp-god-view.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/skills/fastops-wave.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\skills\\.claude\\skills\\fastops-wave.md",
+      "fromStaging": false
+    },
+    {
+      "src": ".claude/skills/onedrive.md",
+      "dest": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os\\templates\\hooks\\claude\\skills\\.claude\\skills\\onedrive.md",
+      "fromStaging": false
+    }
+  ]
+}

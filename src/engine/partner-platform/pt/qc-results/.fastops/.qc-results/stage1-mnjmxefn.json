@@ -1,0 +1,1277 @@
+{
+  "files": [
+    "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-spawn-claude.js",
+    "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\cdp\\seat-map.json",
+    "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\pt-platoon-api-health.js"
+  ],
+  "stage1Results": [
+    {
+      "model": "mistral",
+      "findings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Race condition in seat-map.json atomic write",
+          "file": "city-spawn-claude.js",
+          "line": 162,
+          "code": "fs.renameSync(tmpFile, SEAT_MAP_FILE);",
+          "explanation": "The atomic write pattern (write to tmp, then rename) is correct, but the lock is released BEFORE the rename operation. If another process acquires the lock immediately after releaseLock() but before renameSync(), it could read an inconsistent state of seat-map.json. This violates the atomicity guarantee of the write operation.",
+          "fix": "Move the releaseLock() call AFTER the fs.renameSync() operation to ensure the lock is held during the entire atomic write sequence."
+        },
+        {
+          "id": 2,
+          "severity": "CRITICAL",
+          "title": "Port collision risk due to incorrect static port filtering",
+          "file": "city-spawn-claude.js",
+          "line": 124,
+          "code": "const staticPtyPorts = Array.from(usedPorts).filter(p => p < 10000); // Assuming static ports are below 10000",
+          "explanation": "The code assumes all ports below 10000 are static and should be treated as a separate range. However, seat-map.json shows dynamically allocated ports (e.g., 9306 for seat-17) that are below 10000. This causes the port finder to incorrectly treat dynamic ports as static, leading to potential port collisions when allocating new seats.",
+          "fix": "Remove the static/dynamic port distinction entirely. Use the entire usedPorts set for collision detection without any range-based filtering."
+        },
+        {
+          "id": 3,
+          "severity": "CRITICAL",
+          "title": "VS Code port allocation ignores PTY port collision",
+          "file": "city-spawn-claude.js",
+          "line": 135,
+          "code": "const vsCodePort = await findFreePort(highestUsedVsCodePort + 1, usedPorts);",
+          "explanation": "The VS Code port allocation uses the same usedPorts set as the PTY port allocation, but the PTY port is added to usedPorts AFTER the VS Code port search begins. This creates a race condition where the VS Code port could be assigned the same value as the PTY port that was just allocated.",
+          "fix": "Move the usedPorts.add(ptyPort) call BEFORE the VS Code port allocation to ensure the PTY port is reserved before searching for the VS Code port."
+        },
+        {
+          "id": 4,
+          "severity": "MINOR",
+          "title": "Inconsistent port range assumptions",
+          "file": "city-spawn-claude.js",
+          "line": 122,
+          "code": "const highestUsedPtyPort = Math.max(9300, ...staticPtyPorts, 0);",
+          "explanation": "The code assumes PTY ports start at 9300, but seat-map.json shows PTY ports at 9301 and 9302. While this works, it creates a magic number dependency that could cause issues if the port range assumptions change. The hardcoded 9300 should be derived from the actual minimum PTY port in use.",
+          "fix": "Replace 9300 with Math.min(...staticPtyPorts.filter(p => p >= 9000)) to dynamically determine the minimum PTY port range."
+        },
+        {
+          "id": 5,
+          "severity": "CRITICAL",
+          "title": "Lock file cleanup race during spawn failure",
+          "file": "city-spawn-claude.js",
+          "line": 215,
+          "code": "try { fs.unlinkSync(LOCK_FILE); } catch(e) {}",
+          "explanation": "During spawn failure cleanup, the lock file is released unconditionally. If multiple processes are trying to spawn simultaneously, this could lead to a race where Process A releases the lock, Process B acquires it, then Process A's cleanup deletes Process B's lock, breaking the locking mechanism.",
+          "fix": "Only release the lock in the failure cleanup if the current process actually holds it (check the PID in the lock file matches process.pid)."
+        },
+        {
+          "id": 6,
+          "severity": "MINOR",
+          "title": "Redundant port reservation in usedPorts",
+          "file": "city-spawn-claude.js",
+          "line": 130,
+          "code": "usedPorts.add(ptyPort); // Claim it immediately so vsCodePort doesn't reuse it",
+          "explanation": "NOT A BUG. The port reservation is correctly handled by adding the PTY port to usedPorts before searching for the VS Code port. This prevents collision and is the correct pattern."
+        }
+      ],
+      "raw": "```json\n[\n  {\n    \"id\": 1,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Race condition in seat-map.json atomic write\",\n    \"file\": \"city-spawn-claude.js\",\n    \"line\": 162,\n    \"code\": \"fs.renameSync(tmpFile, SEAT_MAP_FILE);\",\n    \"explanation\": \"The atomic write pattern (write to tmp, then rename) is correct, but the lock is released BEFORE the rename operation. If another process acquires the lock immediately after releaseLock() but before renameSync(), it could read an inconsistent state of seat-map.json. This violates the atomicity guarantee of the write operation.\",\n    \"fix\": \"Move the releaseLock() call AFTER the fs.renameSync() operation to ensure the lock is held during the entire atomic write sequence.\"\n  },\n  {\n    \"id\": 2,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Port collision risk due to incorrect static port filtering\",\n    \"file\": \"city-spawn-claude.js\",\n    \"line\": 124,\n    \"code\": \"const staticPtyPorts = Array.from(usedPorts).filter(p => p < 10000); // Assuming static ports are below 10000\",\n    \"explanation\": \"The code assumes all ports below 10000 are static and should be treated as a separate range. However, seat-map.json shows dynamically allocated ports (e.g., 9306 for seat-17) that are below 10000. This causes the port finder to incorrectly treat dynamic ports as static, leading to potential port collisions when allocating new seats.\",\n    \"fix\": \"Remove the static/dynamic port distinction entirely. Use the entire usedPorts set for collision detection without any range-based filtering.\"\n  },\n  {\n    \"id\": 3,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"VS Code port allocation ignores PTY port collision\",\n    \"file\": \"city-spawn-claude.js\",\n    \"line\": 135,\n    \"code\": \"const vsCodePort = await findFreePort(highestUsedVsCodePort + 1, usedPorts);\",\n    \"explanation\": \"The VS Code port allocation uses the same usedPorts set as the PTY port allocation, but the PTY port is added to usedPorts AFTER the VS Code port search begins. This creates a race condition where the VS Code port could be assigned the same value as the PTY port that was just allocated.\",\n    \"fix\": \"Move the usedPorts.add(ptyPort) call BEFORE the VS Code port allocation to ensure the PTY port is reserved before searching for the VS Code port.\"\n  },\n  {\n    \"id\": 4,\n    \"severity\": \"MINOR\",\n    \"title\": \"Inconsistent port range assumptions\",\n    \"file\": \"city-spawn-claude.js\",\n    \"line\": 122,\n    \"code\": \"const highestUsedPtyPort = Math.max(9300, ...staticPtyPorts, 0);\",\n    \"explanation\": \"The code assumes PTY ports start at 9300, but seat-map.json shows PTY ports at 9301 and 9302. While this works, it creates a magic number dependency that could cause issues if the port range assumptions change. The hardcoded 9300 should be derived from the actual minimum PTY port in use.\",\n    \"fix\": \"Replace 9300 with Math.min(...staticPtyPorts.filter(p => p >= 9000)) to dynamically determine the minimum PTY port range.\"\n  },\n  {\n    \"id\": 5,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Lock file cleanup race during spawn failure\",\n    \"file\": \"city-spawn-claude.js\",\n    \"line\": 215,\n    \"code\": \"try { fs.unlinkSync(LOCK_FILE); } catch(e) {}\",\n    \"explanation\": \"During spawn failure cleanup, the lock file is released unconditionally. If multiple processes are trying to spawn simultaneously, this could lead to a race where Process A releases the lock, Process B acquires it, then Process A's cleanup deletes Process B's lock, breaking the locking mechanism.\",\n    \"fix\": \"Only release the lock in the failure cleanup if the current process actually holds it (check the PID in the lock file matches process.pid).\"\n  },\n  {\n    \"id\": 6,\n    \"severity\": \"MINOR\",\n    \"title\": \"Redundant port reservation in usedPorts\",\n    \"file\": \"city-spawn-claude.js\",\n    \"line\": 130,\n    \"code\": \"usedPorts.add(ptyPort); // Claim it immediately so vsCodePort doesn't reuse it\",\n    \"explanation\": \"NOT A BUG. The port reservation is correctly handled by adding the PTY port to usedPorts before searching for the VS Code port. This prevents collision and is the correct pattern.\"\n  }\n]\n```",
+      "error": null
+    },
+    {
+      "model": "sonar",
+      "findings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Log file descriptor not closed on successful spawn",
+          "file": "city-spawn-claude.js",
+          "line": 164,
+          "code": "const logFd = fs.openSync(logFile, 'a');",
+          "explanation": "logFd opened at line 164 but only closed in finally block after spawn (line ~220). On successful spawn, child.unref() called but logFd remains open indefinitely since finally executes after unref but process continues running. Open FDs accumulate with each spawn, exhausting system limits and causing future spawns to fail with EMFILE.",
+          "fix": "Move fs.closeSync(logFd) immediately after child.unref() in success path, before console.log success message."
+        },
+        {
+          "id": 2,
+          "severity": "CRITICAL",
+          "title": "Lock acquisition race in spawn error undo loop",
+          "file": "city-spawn-claude.js",
+          "line": 192,
+          "code": "fs.writeFileSync(LOCK_FILE, process.pid.toString(), { flag: 'wx' });",
+          "explanation": "Undo loop uses same busy-wait acquireLock logic without calling acquireLock() function. If lock file exists (another process holds it), enters infinite tight CPU spin loop: `while (Date.now() < endSleep) {}` with 100ms sleep. No timeout or exponential backoff. Will hang forever or thrash CPU if contention during cleanup window.",
+          "fix": "Extract undo logic into async function that calls acquireLock() properly. Add max retry limit with exponential backoff."
+        },
+        {
+          "id": 3,
+          "severity": "MINOR",
+          "title": "Port exhaustion guaranteed by conflicting port ranges",
+          "file": "city-spawn-claude.js",
+          "line": 117,
+          "code": "const staticPtyPorts = Array.from(usedPorts).filter(p => p < 10000);",
+          "explanation": "PTY ports calculated from ports <10000, VSCode ports also from ports <10000. seat-map.json shows existing seats using 9223-9224,9301-9306. After ~20 spawns, highestUsedPtyPort and highestUsedVsCodePort converge to same value. findFreePort() scans same exhausted range twice, but works (just inefficient). No crash but port scan becomes O(n²) slow.",
+          "fix": "Use separate port ranges: PTY >10000, VSCode 8000-9000. Or scan all used ports once."
+        },
+        {
+          "id": 4,
+          "severity": "MINOR",
+          "title": "fetch polyfill before dotenv breaks .env loading",
+          "file": "pt-platoon-api-health.js",
+          "line": 11,
+          "code": "if (typeof fetch === 'undefined') { global.fetch = require('node-fetch'); }",
+          "explanation": "fetch polyfill executes before require('dotenv').config(). node-fetch modifies global environment in way that interferes with dotenv parsing (seen in Node 16-18). PT_SHARED_SECRET etc. become undefined even when .env exists. Key fallback to send-pt-welcome.js parsing works around it.",
+          "fix": "Move dotenv.config() before fetch polyfill."
+        }
+      ],
+      "raw": "```json\n[  {\n    \"id\": 1,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Log file descriptor not closed on successful spawn\",\n    \"file\": \"city-spawn-claude.js\",\n    \"line\": 164,\n    \"code\": \"const logFd = fs.openSync(logFile, 'a');\",\n    \"explanation\": \"logFd opened at line 164 but only closed in finally block after spawn (line ~220). On successful spawn, child.unref() called but logFd remains open indefinitely since finally executes after unref but process continues running. Open FDs accumulate with each spawn, exhausting system limits and causing future spawns to fail with EMFILE.\",\n    \"fix\": \"Move fs.closeSync(logFd) immediately after child.unref() in success path, before console.log success message.\"\n  },\n  {\n    \"id\": 2,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Lock acquisition race in spawn error undo loop\",\n    \"file\": \"city-spawn-claude.js\",\n    \"line\": 192,\n    \"code\": \"fs.writeFileSync(LOCK_FILE, process.pid.toString(), { flag: 'wx' });\",\n    \"explanation\": \"Undo loop uses same busy-wait acquireLock logic without calling acquireLock() function. If lock file exists (another process holds it), enters infinite tight CPU spin loop: `while (Date.now() < endSleep) {}` with 100ms sleep. No timeout or exponential backoff. Will hang forever or thrash CPU if contention during cleanup window.\",\n    \"fix\": \"Extract undo logic into async function that calls acquireLock() properly. Add max retry limit with exponential backoff.\"\n  },\n  {\n    \"id\": 3,\n    \"severity\": \"MINOR\",\n    \"title\": \"Port exhaustion guaranteed by conflicting port ranges\",\n    \"file\": \"city-spawn-claude.js\",\n    \"line\": 117,\n    \"code\": \"const staticPtyPorts = Array.from(usedPorts).filter(p => p < 10000);\",\n    \"explanation\": \"PTY ports calculated from ports <10000, VSCode ports also from ports <10000. seat-map.json shows existing seats using 9223-9224,9301-9306. After ~20 spawns, highestUsedPtyPort and highestUsedVsCodePort converge to same value. findFreePort() scans same exhausted range twice, but works (just inefficient). No crash but port scan becomes O(n²) slow.\",\n    \"fix\": \"Use separate port ranges: PTY >10000, VSCode 8000-9000. Or scan all used ports once.\"\n  },\n  {\n    \"id\": 4,\n    \"severity\": \"MINOR\",\n    \"title\": \"fetch polyfill before dotenv breaks .env loading\",\n    \"file\": \"pt-platoon-api-health.js\",\n    \"line\": 11,\n    \"code\": \"if (typeof fetch === 'undefined') { global.fetch = require('node-fetch'); }\",\n    \"explanation\": \"fetch polyfill executes before require('dotenv').config(). node-fetch modifies global environment in way that interferes with dotenv parsing (seen in Node 16-18). PT_SHARED_SECRET etc. become undefined even when .env exists. Key fallback to send-pt-welcome.js parsing works around it.\",\n    \"fix\": \"Move dotenv.config() before fetch polyfill.\"\n  }\n]\n```",
+      "error": null
+    },
+    {
+      "model": "gpt",
+      "findings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Port collision in seat-map.json",
+          "file": "seat-map.json",
+          "line": 10,
+          "code": "\"port\": 9223,",
+          "explanation": "Multiple seats in seat-map.json are using the same port 9223, which can lead to port binding errors when trying to start services.",
+          "fix": "Assign unique ports to each seat entry in seat-map.json to prevent collisions."
+        },
+        {
+          "id": 2,
+          "severity": "MINOR",
+          "title": "Unused variable 'r'",
+          "file": "pt-platoon-api-health.js",
+          "line": 64,
+          "code": "let r;",
+          "explanation": "The variable 'r' is declared but not used until it is reassigned a value. This is unnecessary and could be removed to clean up the code.",
+          "fix": "Remove the declaration 'let r;' and declare 'r' only when it's assigned a value."
+        },
+        {
+          "id": 3,
+          "severity": "CRITICAL",
+          "title": "Hardcoded port range assumption",
+          "file": "city-spawn-claude.js",
+          "line": 137,
+          "code": "const staticPtyPorts = Array.from(usedPorts).filter(p => p < 10000);",
+          "explanation": "The code assumes static ports are below 10000, which might not be the case if seat-map.json is configured differently. This assumption can lead to incorrect port allocation.",
+          "fix": "Update the logic to dynamically check the current configuration instead of assuming a static range."
+        }
+      ],
+      "raw": "```json\n[\n  {\n    \"id\": 1,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Port collision in seat-map.json\",\n    \"file\": \"seat-map.json\",\n    \"line\": 10,\n    \"code\": \"\\\"port\\\": 9223,\",\n    \"explanation\": \"Multiple seats in seat-map.json are using the same port 9223, which can lead to port binding errors when trying to start services.\",\n    \"fix\": \"Assign unique ports to each seat entry in seat-map.json to prevent collisions.\"\n  },\n  {\n    \"id\": 2,\n    \"severity\": \"MINOR\",\n    \"title\": \"Unused variable 'r'\",\n    \"file\": \"pt-platoon-api-health.js\",\n    \"line\": 64,\n    \"code\": \"let r;\",\n    \"explanation\": \"The variable 'r' is declared but not used until it is reassigned a value. This is unnecessary and could be removed to clean up the code.\",\n    \"fix\": \"Remove the declaration 'let r;' and declare 'r' only when it's assigned a value.\"\n  },\n  {\n    \"id\": 3,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Hardcoded port range assumption\",\n    \"file\": \"city-spawn-claude.js\",\n    \"line\": 137,\n    \"code\": \"const staticPtyPorts = Array.from(usedPorts).filter(p => p < 10000);\",\n    \"explanation\": \"The code assumes static ports are below 10000, which might not be the case if seat-map.json is configured differently. This assumption can lead to incorrect port allocation.\",\n    \"fix\": \"Update the logic to dynamically check the current configuration instead of assuming a static range.\"\n  }\n]\n```",
+      "error": null
+    },
+    {
+      "model": "kimi-k2",
+      "findings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Port collision on 9223 – multiple seats hard-coded to same port",
+          "file": "cdp\\seat-map.json",
+          "line": 6,
+          "code": "\"port\": 9223,",
+          "explanation": "seat-1, seat-2, seat-3, seat-4, seat-5, seat-6, seat-7, and seat-16 all claim port 9223.  city-spawn-claude.js uses findFreePort() to avoid re-use, but it only consults the dynamic algorithm when spawning; the static map is never validated for duplicates.  Starting any two of these seats simultaneously will trigger EADDRINUSE and crash the second agent.",
+          "fix": "Run a one-time validation script that exits non-zero if any two seats share the same non-null port, or teach city-spawn-claude.js to refuse starting while duplicates exist in seat-map.json."
+        },
+        {
+          "id": 2,
+          "severity": "CRITICAL",
+          "title": "Unchecked fs.renameSync() can silently fail on Windows",
+          "file": "city-spawn-claude.js",
+          "line": 175,
+          "code": "fs.renameSync(tmpFile, SEAT_MAP_FILE);",
+          "explanation": "On Windows renameSync throws if the target is open by another process (common with aggressive AV or editors).  The error is not caught, so the seat map stays in tmp state and the next locker sees corrupted JSON, breaking all future spawns.",
+          "fix": "Wrap in try/catch, retry a few times with exponential back-off, or use fs.copyFileSync + fs.unlinkSync as fallback."
+        },
+        {
+          "id": 3,
+          "severity": "MINOR",
+          "title": "Deadlock window during spawn failure rollback",
+          "file": "city-spawn-claude.js",
+          "line": 209,
+          "code": "while (Date.now() - startUndo < 15000 && !undone) { … fs.writeFileSync(LOCK_FILE, …, { flag: 'wx' }) … }",
+          "explanation": "If the original lock file still exists (PID alive), the rollback loop spins hot for 15 s doing CPU-bound sleep, blocking the exit path.  This is not lethal but wastes an entire core and delays agent recovery.",
+          "fix": "Use setTimeout inside async function instead of the blocking sleep loop."
+        }
+      ],
+      "raw": "[\n  {\n    \"id\": 1,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Port collision on 9223 – multiple seats hard-coded to same port\",\n    \"file\": \"cdp\\\\seat-map.json\",\n    \"line\": 6,\n    \"code\": \"\\\"port\\\": 9223,\",\n    \"explanation\": \"seat-1, seat-2, seat-3, seat-4, seat-5, seat-6, seat-7, and seat-16 all claim port 9223.  city-spawn-claude.js uses findFreePort() to avoid re-use, but it only consults the dynamic algorithm when spawning; the static map is never validated for duplicates.  Starting any two of these seats simultaneously will trigger EADDRINUSE and crash the second agent.\",\n    \"fix\": \"Run a one-time validation script that exits non-zero if any two seats share the same non-null port, or teach city-spawn-claude.js to refuse starting while duplicates exist in seat-map.json.\"\n  },\n  {\n    \"id\": 2,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Unchecked fs.renameSync() can silently fail on Windows\",\n    \"file\": \"city-spawn-claude.js\",\n    \"line\": 175,\n    \"code\": \"fs.renameSync(tmpFile, SEAT_MAP_FILE);\",\n    \"explanation\": \"On Windows renameSync throws if the target is open by another process (common with aggressive AV or editors).  The error is not caught, so the seat map stays in tmp state and the next locker sees corrupted JSON, breaking all future spawns.\",\n    \"fix\": \"Wrap in try/catch, retry a few times with exponential back-off, or use fs.copyFileSync + fs.unlinkSync as fallback.\"\n  },\n  {\n    \"id\": 3,\n    \"severity\": \"MINOR\",\n    \"title\": \"Deadlock window during spawn failure rollback\",\n    \"file\": \"city-spawn-claude.js\",\n    \"line\": 209,\n    \"code\": \"while (Date.now() - startUndo < 15000 && !undone) { … fs.writeFileSync(LOCK_FILE, …, { flag: 'wx' }) … }\",\n    \"explanation\": \"If the original lock file still exists (PID alive), the rollback loop spins hot for 15 s doing CPU-bound sleep, blocking the exit path.  This is not lethal but wastes an entire core and delays agent recovery.\",\n    \"fix\": \"Use setTimeout inside async function instead of the blocking sleep loop.\"\n  }\n]",
+      "error": null
+    },
+    {
+      "model": "minimax-m2.7",
+      "findings": [],
+      "raw": "(no response)",
+      "error": null
+    },
+    {
+      "model": "jamba",
+      "findings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Incorrect port reuse assumption in findFreePort",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-spawn-claude.js",
+          "line": 103,
+          "code": "const staticVsCodePorts = Array.from(usedPorts).filter(p => p < 10000);",
+          "explanation": "The logic assumes that all used ports below 10000 are 'static' and should be excluded from dynamic port allocation. However, there is no guarantee that dynamically allocated ports (like `ptyPort` or `vsCodePort`) won't overlap with this range, potentially leading to a collision when `findFreePort` is called again for `vsCodePort`. This could cause port exhaustion or conflict if a dynamically allocated port is reused in the filtered set.",
+          "fix": "Explicitly track and exclude `ptyPort` and `vsCodePort` in the `usedPorts` set before determining the ranges for new ports to avoid overlap."
+        },
+        {
+          "id": 2,
+          "severity": "MINOR",
+          "title": "Unnecessary log file creation before spawn validation",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-spawn-claude.js",
+          "line": 168,
+          "code": "const logFd = fs.openSync(logFile, 'a');",
+          "explanation": "The log file descriptor is created before the child process is validated to spawn successfully. If the spawn fails and the process exits, the log file descriptor is closed, but the file is still created unnecessarily. This is wasteful but does not break functionality.",
+          "fix": "Delay creating the log file descriptor until after the child process is confirmed to spawn successfully."
+        },
+        {
+          "id": 3,
+          "severity": "CRITICAL",
+          "title": "Undefined behavior on invalid seatMap structure",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-spawn-claude.js",
+          "line": 72,
+          "code": "if (typeof seatMap !== 'object' || seatMap === null) {",
+          "explanation": "If `seatMap` is not an object or is null, a default empty structure is used. However, the subsequent logic assumes `seatMap.seats` and `seatMap.aliases` exist and are objects. If the input `seatMap` JSON is malformed or partially corrupted (e.g., missing required keys), this could lead to runtime errors when attempting to iterate over or modify non-existent properties. This breaks the seat map update process.",
+          "fix": "Validate the full structure of `seatMap` (including `seats` and `aliases` being non-null objects) before proceeding with dynamic updates. Provide a clear fallback or error handling for unexpected structures."
+        },
+        {
+          "id": 4,
+          "severity": "MINOR",
+          "title": "Redundant error logging in main health check",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\pt-platoon-api-health.js",
+          "line": 31,
+          "code": "console.error('[host] GET https://pt-ai-os.vercel.app/ failed:', err.message);",
+          "explanation": "If the `fetch` call to the host endpoint fails, the error is logged, but the script immediately exits with `process.exit(1)`. While not breaking, this is redundant because the script will terminate without further action. A single clear exit message would suffice.",
+          "fix": "Remove the redundant error log and let the exit code indicate failure."
+        }
+      ],
+      "raw": "[\n    {\n        \"id\": 1,\n        \"severity\": \"CRITICAL\",\n        \"title\": \"Incorrect port reuse assumption in findFreePort\",\n        \"file\": \"C:\\\\Users\\\\joelb\\\\OneDrive\\\\Desktop\\\\Fastops development process\\\\.fastops\\\\city-spawn-claude.js\",\n        \"line\": 103,\n        \"code\": \"const staticVsCodePorts = Array.from(usedPorts).filter(p => p < 10000);\",\n        \"explanation\": \"The logic assumes that all used ports below 10000 are 'static' and should be excluded from dynamic port allocation. However, there is no guarantee that dynamically allocated ports (like `ptyPort` or `vsCodePort`) won't overlap with this range, potentially leading to a collision when `findFreePort` is called again for `vsCodePort`. This could cause port exhaustion or conflict if a dynamically allocated port is reused in the filtered set.\",\n        \"fix\": \"Explicitly track and exclude `ptyPort` and `vsCodePort` in the `usedPorts` set before determining the ranges for new ports to avoid overlap.\"\n    },\n    {\n        \"id\": 2,\n        \"severity\": \"MINOR\",\n        \"title\": \"Unnecessary log file creation before spawn validation\",\n        \"file\": \"C:\\\\Users\\\\joelb\\\\OneDrive\\\\Desktop\\\\Fastops development process\\\\.fastops\\\\city-spawn-claude.js\",\n        \"line\": 168,\n        \"code\": \"const logFd = fs.openSync(logFile, 'a');\",\n        \"explanation\": \"The log file descriptor is created before the child process is validated to spawn successfully. If the spawn fails and the process exits, the log file descriptor is closed, but the file is still created unnecessarily. This is wasteful but does not break functionality.\",\n        \"fix\": \"Delay creating the log file descriptor until after the child process is confirmed to spawn successfully.\"\n    },\n    {\n        \"id\": 3,\n        \"severity\": \"CRITICAL\",\n        \"title\": \"Undefined behavior on invalid seatMap structure\",\n        \"file\": \"C:\\\\Users\\\\joelb\\\\OneDrive\\\\Desktop\\\\Fastops development process\\\\.fastops\\\\city-spawn-claude.js\",\n        \"line\": 72,\n        \"code\": \"if (typeof seatMap !== 'object' || seatMap === null) {\",\n        \"explanation\": \"If `seatMap` is not an object or is null, a default empty structure is used. However, the subsequent logic assumes `seatMap.seats` and `seatMap.aliases` exist and are objects. If the input `seatMap` JSON is malformed or partially corrupted (e.g., missing required keys), this could lead to runtime errors when attempting to iterate over or modify non-existent properties. This breaks the seat map update process.\",\n        \"fix\": \"Validate the full structure of `seatMap` (including `seats` and `aliases` being non-null objects) before proceeding with dynamic updates. Provide a clear fallback or error handling for unexpected structures.\"\n    },\n    {\n        \"id\": 4,\n        \"severity\": \"MINOR\",\n        \"title\": \"Redundant error logging in main health check\",\n        \"file\": \"C:\\\\Users\\\\joelb\\\\OneDrive\\\\Desktop\\\\Fastops development process\\\\.fastops\\\\pt-platoon-api-health.js\",\n        \"line\": 31,\n        \"code\": \"console.error('[host] GET https://pt-ai-os.vercel.app/ failed:', err.message);\",\n        \"explanation\": \"If the `fetch` call to the host endpoint fails, the error is logged, but the script immediately exits with `process.exit(1)`. While not breaking, this is redundant because the script will terminate without further action. A single clear exit message would suffice.\",\n        \"fix\": \"Remove the redundant error log and let the exit code indicate failure.\"\n    }\n]",
+      "error": null
+    },
+    {
+      "model": "granite",
+      "findings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Missing file lock handling in seat-map.json",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-spawn-claude.js",
+          "line": 42,
+          "code": "const SEAT_MAP_FILE = path.join(__dirname, 'cdp', 'seat-map.json');",
+          "explanation": "The code does not handle the case where the seat-map.json file is deleted or becomes inaccessible after the lock is acquired. This can lead to a deadlock where the lock is held indefinitely, preventing other processes from acquiring the lock and modifying the seat-map.",
+          "fix": "Add a check to verify the file exists and is readable after acquiring the lock. If the file is missing or unreadable, the function should throw an error or handle it gracefully to prevent deadlocks. For example, add a fs.statSync call after acquiring the lock to ensure the file is still valid."
+        }
+      ],
+      "raw": "[\n  {\n    \"id\": 1,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Missing file lock handling in seat-map.json\",\n    \"file\": \"C:\\\\Users\\\\joelb\\\\OneDrive\\\\Desktop\\\\Fastops development process\\\\.fastops\\\\city-spawn-claude.js\",\n    \"line\": 42,\n    \"code\": \"const SEAT_MAP_FILE = path.join(__dirname, 'cdp', 'seat-map.json');\",\n    \"explanation\": \"The code does not handle the case where the seat-map.json file is deleted or becomes inaccessible after the lock is acquired. This can lead to a deadlock where the lock is held indefinitely, preventing other processes from acquiring the lock and modifying the seat-map.\",\n    \"fix\": \"Add a check to verify the file exists and is readable after acquiring the lock. If the file is missing or unreadable, the function should throw an error or handle it gracefully to prevent deadlocks. For example, add a fs.statSync call after acquiring the lock to ensure the file is still valid.\"\n  }\n]",
+      "error": null
+    },
+    {
+      "model": "grok",
+      "findings": [
+        {
+          "id": 1,
+          "severity": "MINOR",
+          "title": "Busy-wait loop blocks event loop during undo operation",
+          "file": "city-spawn-claude.js",
+          "line": 164,
+          "code": "while (Date.now() < endSleep) {}",
+          "explanation": "The busy-wait loop synchronously blocks the Node.js event loop for up to 100ms per iteration during seat-map undo on spawn failure, causing potential delays in other operations and inefficiency. If the lock cannot be acquired, undo may fail, leaving orphan seat entries in seat-map.json, but this does not cause crashes or data loss as the system can still function with manual cleanup.",
+          "fix": "Replace the busy-wait with an asynchronous delay using setTimeout to avoid blocking the event loop, e.g., await new Promise(resolve => setTimeout(resolve, 100));"
+        }
+      ],
+      "raw": "[\n  {\n    \"id\": 1,\n    \"severity\": \"MINOR\",\n    \"title\": \"Busy-wait loop blocks event loop during undo operation\",\n    \"file\": \"city-spawn-claude.js\",\n    \"line\": 164,\n    \"code\": \"while (Date.now() < endSleep) {}\",\n    \"explanation\": \"The busy-wait loop synchronously blocks the Node.js event loop for up to 100ms per iteration during seat-map undo on spawn failure, causing potential delays in other operations and inefficiency. If the lock cannot be acquired, undo may fail, leaving orphan seat entries in seat-map.json, but this does not cause crashes or data loss as the system can still function with manual cleanup.\",\n    \"fix\": \"Replace the busy-wait with an asynchronous delay using setTimeout to avoid blocking the event loop, e.g., await new Promise(resolve => setTimeout(resolve, 100));\"\n  }\n]",
+      "error": null
+    },
+    {
+      "model": "hunyuan",
+      "findings": [],
+      "raw": "[\n  {\n    \"id\": 1,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Potential lock file deletion race condition\",\n    \"file\": \"C:\\\\Users\\\\joelb\\\\OneDrive\\\\Desktop\\\\Fastops development process\\\\.fastops\\\\city-spawn-claude.js\",\n    \"line\": 35,\n    \"code\": \"if (!isNaN(lockPid)) {\\n    try {\\n        process.kill(lockPid, 0); // test signal\\n    } catch(err) {\\n        if (err.code === 'ESRCH') {\\n            isRunning = false; // process doesn't exist\\n        }\\n    }\\n}\",\n    \"explanation\": \"The check for `isNaN(lockPid)` and the subsequent `process.kill` do not guarantee atomicity with file deletion. Between the check and the kill, the file could be deleted and recreated, leading to a race condition where the stale PID check passes but the process no longer exists, potentially causing the system to incorrectly proceed with a stale lock.\",\n    \"fix\": \"Use `fs.stat` with a timeout or a more robust file locking mechanism to ensure atomicity. Alternatively, use a library like `proper-lockfile` to handle locking more reliably.\"\n  },\n  {\n    \"id\": 2,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Unsafe file write operation\",\n    \"file\": \"C:\\\\Users\\\\joelb\\\\OneDrive\\\\Desktop\\\\Fastops development process\\\\.fastops\\\\city-spawn-claude.js\",\n    \"line\": 112,\n    \"code\": \"fs.writeFileSync(tmpFile, dataToWrite);\\nfs.fsyncSync(fd);\\nfs.closeSync(fd);\",\n    \"explanation\": \"The `fs.writeFileSync` and `fs.fsyncSync` calls are not wrapped in a try-catch block, which means any error during the write or sync operation could leave the temporary file in an inconsistent state, potentially corrupting the seat-map.json file during the rename operation.\",\n    \"fix\": \"Wrap the write and sync operations in a try-catch block to ensure proper error handling and cleanup. If an error occurs, delete the temporary file to avoid corruption.\"\n  },\n  {\n    \"id\": 3,\n    \"severity\": \"MINOR\",\n    \"title\": \"Port reuse risk\",\n    \"file\": \"C:\\\\Users\\\\joelb\\\\OneDrive\\\\Desktop\\\\Fastops development process\\\\.fastops\\\\city-spawn-claude.js\",\n    \"line\": 73,\n    \"code\": \"const staticPtyPorts = Array.from(usedPorts).filter(p => p < 10000); // Assuming static ports are below 10000\\nconst highestUsedPtyPort = Math.max(9300, ...staticPtyPorts, 0);\",\n    \"explanation\": \"The assumption that static PTY ports are below 10000 may not hold true, especially if the seat-map.json is manually modified or if the application is deployed in an environment with a different port allocation strategy, leading to potential port collisions.\",\n    \"fix\": \"Dynamically determine the highest used PTY port from the current seat-map instead of relying on a hardcoded threshold. This ensures that the application adapts to the actual port usage.\"\n  },\n  {\n    \"id\": 4,\n    \"severity\": \"MINOR\",\n    \"title\": \"Potential hang in lock cleanup\",\n    \"file\": \"C:\\\\Users\\\\joelb\\\\OneDrive\\\\Desktop\\\\Fastops development process\\\\.fastops\\\\city-spawn-claude.js\",\n    \"line\": 47,\n    \"code\": \"while (Date.now() < endSleep) {}\",\n    \"explanation\": \"The busy-wait loop in the lock cleanup process can consume significant CPU resources, especially if the lock file contention is high, leading to performance degradation.\",\n    \"fix\": \"Replace the busy-wait loop with a `setTimeout` or `setInterval` to reduce CPU usage while waiting.\"\n  },\n  {\n    \"id\": 5,\n    \"severity\": \"MINOR\",\n    \"title\": \"Redundant port check\",\n    \"file\": \"C:\\\\Users\\\\joelb\\\\OneDrive\\\\Desktop\\\\Fastops development process\\\\.fastops\\\\city-spawn-claude.js\",\n    \"line\": 80,\n    \"code\": \"const staticVsCodePorts = Array.from(usedPorts).filter(p => p < 10000);\",\n    \"explanation\": \"This line is redundant since `staticPtyPorts` already contains the same filtering logic, leading to unnecessary computation.\",\n    \"fix\": \"Remove the redundant code to improve readability and maintainability.\"\n  },\n  {\n    \"id\": 6,\n    \"severity\": \"MINOR\",\n    \"title\": \"Error handling in `findFreePort`\",\n    \"file\": \"C:\\\\Users\\\\joelb\\\\OneDrive\\\\Desktop\\\\Fastops development process\\\\.fastops\\\\city-spawn-claude.js\",\n    \"line\": 52,\n    \"code\": \"if (err.code === 'EADDRINUSE') {\\n  resolve(null); // Signal port is in use\\n}\",\n    \"explanation\": \"The `findFreePort` function resolves `null` when the port is in use, but this is not explicitly documented, which could lead to confusion for callers expecting an error.\",\n    \"fix\": \"Add a comment or throw an error to make the behavior clear to callers.\"\n  },\n  {\n    \"id\": 7,\n    \"severity\": \"MINOR\",\n    \"title\": \"Hardcoded port ranges\",\n    \"file\": \"C:\\\\Users\\\\joelb\\\\OneDrive\\\\Desktop\\\\Fastops development process\\\\.fastops\\\\city-spawn-claude.js\",\n    \"line\": 71,\n    \"code\": \"const highestUsedPtyPort = Math.max(9300, ...staticPtyPorts, 0);\",\n    \"explanation\": \"The hardcoded port ranges (e.g., 9300 for PTY ports) may not align with future port allocation strategies or conflicts with other services, leading to unpredictability.\",\n    \"fix\": \"Dynamically determine the base port for PTY and VS Code ports based on the current seat-map or configuration settings.\"\n  },\n  {\n    \"id\": 8,\n    \"severity\": \"MINOR\",\n    \"title\": \"Unused variable in `main`\",\n    \"file\": \"C:\\\\Users\\\\joelb\\\\OneDrive\\\\Desktop\\\\Fastops development process\\\\.fastops\\\\city-spawn-claude.js\",\n    \"line\": 27,\n    \"code\": \"maxSeatNum = 0;\",\n    \"explanation\": \"The `maxSeatNum` variable is initialized but not used effectively in the logic, as it is recalculated later in the loop.\",\n    \"fix\": \"Remove the redundant initialization to improve code clarity.\"\n  },\n  {\n    \"id\": 9,\n    \"severity\": \"MINOR\",\n    \"title\": \"Unnecessary file read in `keyFromSendPtWelcome`\",\n    \"file\": \"C:\\\\Users\\\\joelb\\\\OneDrive\\\\Desktop\\\\Fastops development process\\\\.fastops\\\\city-spawn-claude.js\",\n    \"line\": 11,\n    \"code\": \"const m = src.match(/x-pt-api-key['\\\"]:\\s*['\\\"]([^'\"]+)['\"]/);\",\n    \"explanation\": \"The `src.match` call reads the entire `send-pt-welcome.js` file into memory, which is unnecessary if the key is not found early in the file.\",\n    \"fix\": \"Use a streaming approach or stop processing the file as soon as the key is found to improve performance.\"\n  },\n  {\n    \"id\": 10,\n    \"severity\": \"MINOR\",\n    \"title\": \"Potential API key exposure in logs\",\n    \"file\": \"C:\\\\Users\\\\joelb\\\\OneDrive\\\\Desktop\\\\Fastops development process\\\\.fastops\\\\pt-platoon-api-health.js\",\n    \"line\": 26,\n    \"code\": \"console.log('[body] [REDACTED FOR SECURITY]');\",\n    \"explanation\": \"While the response body is redacted in logs, the log message does not explicitly indicate that sensitive data is being hidden, which could mislead developers during debugging.\",\n    \"fix\": \"Add a note to clarify that the body is redacted for security reasons.\"\n  }\n]",
+      "error": null
+    },
+    {
+      "model": "deepseek-v3.2",
+      "findings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Missing seat map file fallback",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-spawn-claude.js",
+          "line": 57,
+          "code": "const fileData = await fs.promises.readFile(SEAT_MAP_FILE, 'utf8');",
+          "explanation": "If the seat-map.json file does not exist (ENOENT), the readFile will throw an error. The catch block attempts to parse the error as JSON and then creates a default seatMap, but the readFile error will not be JSON. The catch block's error handling incorrectly assumes the error is from JSON.parse.",
+          "fix": "Add a specific check for ENOENT error code before attempting JSON.parse. For example: catch (e) { if (e.code === 'ENOENT') { seatMap = { seats: {}, aliases: {} }; } else { ... } }"
+        },
+        {
+          "id": 2,
+          "severity": "CRITICAL",
+          "title": "Port collision due to reused port calculation",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-spawn-claude.js",
+          "line": 98,
+          "code": "const staticPtyPorts = Array.from(usedPorts).filter(p => p < 10000); // Assuming static ports are below 10000",
+          "explanation": "The usedPorts set includes both pty_port and port values from all seats. The code filters for ports < 10000 to find 'static' ports, but this assumption is arbitrary. In seat-map.json, seat-16 and seat-17 have pty_port values 9302 and 9306 (both < 10000) and are dynamically spawned seats, not static. This will cause the 'highestUsedPtyPort' calculation to incorrectly include these dynamic ports, potentially causing the findFreePort to start scanning from a port already in use by a dynamic seat, leading to a port collision.",
+          "fix": "Do not filter by port number. Instead, track used ports correctly and let findFreePort scan from a safe start (e.g., 9300). Or, distinguish static vs dynamic seats by a property (e.g., 'static': true)."
+        },
+        {
+          "id": 3,
+          "severity": "MINOR",
+          "title": "Inefficient lock acquisition loop",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-spawn-claude.js",
+          "line": 25,
+          "code": "while (Date.now() - start < timeoutMs) {",
+          "explanation": "The acquireLock function uses a busy-wait loop with a non-blocking setTimeout. This is inefficient and can cause high CPU usage if lock contention is high. It also does not handle the case where the lock file is removed between the stat check and the write attempt, potentially leading to unnecessary retries.",
+          "fix": "Use a proper locking library (like 'proper-lockfile') or implement exponential backoff with file watching."
+        },
+        {
+          "id": 4,
+          "severity": "CRITICAL",
+          "title": "Race condition in stale lock cleanup",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-spawn-claude.js",
+          "line": 46,
+          "code": "fs.unlinkSync(LOCK_FILE);",
+          "explanation": "If two processes simultaneously detect a stale lock (same PID not running), both may attempt to delete the lock file. One may succeed, then the other may also call unlinkSync, which will throw ENOENT (ignored by the outer catch). However, the first process may then immediately create a new lock, while the second process continues its loop and might also create a lock, leading to two locks being held.",
+          "fix": "After deleting the stale lock, immediately try to acquire the lock (write with 'wx') instead of continuing the loop. Or use atomic operations (rename) for lock acquisition."
+        },
+        {
+          "id": 5,
+          "severity": "CRITICAL",
+          "title": "Undo logic can deadlock",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-spawn-claude.js",
+          "line": 150,
+          "code": "const startUndo = Date.now();\n          let undone = false;\n          while (Date.now() - startUndo < 15000 && !undone) {",
+          "explanation": "If the child process fails to spawn, the error handler attempts to re-acquire the lock to undo seat map changes. This uses a busy-wait loop that blocks the event loop (due to empty while loop). If another process holds the lock, this will spin for up to 15 seconds, blocking all other operations and potentially causing a deadlock if the other process is also waiting.",
+          "fix": "Use asynchronous polling with setTimeout or implement a proper locking mechanism with retries that yields the event loop."
+        },
+        {
+          "id": 6,
+          "severity": "MINOR",
+          "title": "Hardcoded path for log directory",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-spawn-claude.js",
+          "line": 137,
+          "code": "const logDir = path.join(__dirname, '..', 'terminals');",
+          "explanation": "The log directory is assumed to be one level up from the script's location. If the script is run from a different working directory or the project structure changes, this path may be incorrect, leading to failed log file creation.",
+          "fix": "Use a configurable environment variable or a project root-relative path that is verified."
+        },
+        {
+          "id": 7,
+          "severity": "MINOR",
+          "title": "Missing error handling for fs.openSync on log file",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-spawn-claude.js",
+          "line": 143,
+          "code": "const logFd = fs.openSync(logFile, 'a');",
+          "explanation": "If the log file cannot be opened (e.g., permissions, disk full), openSync will throw an unhandled exception, crashing the script. The error is not caught, which could leave the seat-map locked.",
+          "fix": "Wrap fs.openSync in a try-catch and handle the error gracefully (e.g., fallback to stderr)."
+        }
+      ],
+      "raw": "[\n  {\n    \"id\": 1,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Missing seat map file fallback\",\n    \"file\": \"C:\\\\Users\\\\joelb\\\\OneDrive\\\\Desktop\\\\Fastops development process\\\\.fastops\\\\city-spawn-claude.js\",\n    \"line\": 57,\n    \"code\": \"const fileData = await fs.promises.readFile(SEAT_MAP_FILE, 'utf8');\",\n    \"explanation\": \"If the seat-map.json file does not exist (ENOENT), the readFile will throw an error. The catch block attempts to parse the error as JSON and then creates a default seatMap, but the readFile error will not be JSON. The catch block's error handling incorrectly assumes the error is from JSON.parse.\",\n    \"fix\": \"Add a specific check for ENOENT error code before attempting JSON.parse. For example: catch (e) { if (e.code === 'ENOENT') { seatMap = { seats: {}, aliases: {} }; } else { ... } }\"\n  },\n  {\n    \"id\": 2,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Port collision due to reused port calculation\",\n    \"file\": \"C:\\\\Users\\\\joelb\\\\OneDrive\\\\Desktop\\\\Fastops development process\\\\.fastops\\\\city-spawn-claude.js\",\n    \"line\": 98,\n    \"code\": \"const staticPtyPorts = Array.from(usedPorts).filter(p => p < 10000); // Assuming static ports are below 10000\",\n    \"explanation\": \"The usedPorts set includes both pty_port and port values from all seats. The code filters for ports < 10000 to find 'static' ports, but this assumption is arbitrary. In seat-map.json, seat-16 and seat-17 have pty_port values 9302 and 9306 (both < 10000) and are dynamically spawned seats, not static. This will cause the 'highestUsedPtyPort' calculation to incorrectly include these dynamic ports, potentially causing the findFreePort to start scanning from a port already in use by a dynamic seat, leading to a port collision.\",\n    \"fix\": \"Do not filter by port number. Instead, track used ports correctly and let findFreePort scan from a safe start (e.g., 9300). Or, distinguish static vs dynamic seats by a property (e.g., 'static': true).\"\n  },\n  {\n    \"id\": 3,\n    \"severity\": \"MINOR\",\n    \"title\": \"Inefficient lock acquisition loop\",\n    \"file\": \"C:\\\\Users\\\\joelb\\\\OneDrive\\\\Desktop\\\\Fastops development process\\\\.fastops\\\\city-spawn-claude.js\",\n    \"line\": 25,\n    \"code\": \"while (Date.now() - start < timeoutMs) {\",\n    \"explanation\": \"The acquireLock function uses a busy-wait loop with a non-blocking setTimeout. This is inefficient and can cause high CPU usage if lock contention is high. It also does not handle the case where the lock file is removed between the stat check and the write attempt, potentially leading to unnecessary retries.\",\n    \"fix\": \"Use a proper locking library (like 'proper-lockfile') or implement exponential backoff with file watching.\"\n  },\n  {\n    \"id\": 4,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Race condition in stale lock cleanup\",\n    \"file\": \"C:\\\\Users\\\\joelb\\\\OneDrive\\\\Desktop\\\\Fastops development process\\\\.fastops\\\\city-spawn-claude.js\",\n    \"line\": 46,\n    \"code\": \"fs.unlinkSync(LOCK_FILE);\",\n    \"explanation\": \"If two processes simultaneously detect a stale lock (same PID not running), both may attempt to delete the lock file. One may succeed, then the other may also call unlinkSync, which will throw ENOENT (ignored by the outer catch). However, the first process may then immediately create a new lock, while the second process continues its loop and might also create a lock, leading to two locks being held.\",\n    \"fix\": \"After deleting the stale lock, immediately try to acquire the lock (write with 'wx') instead of continuing the loop. Or use atomic operations (rename) for lock acquisition.\"\n  },\n  {\n    \"id\": 5,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Undo logic can deadlock\",\n    \"file\": \"C:\\\\Users\\\\joelb\\\\OneDrive\\\\Desktop\\\\Fastops development process\\\\.fastops\\\\city-spawn-claude.js\",\n    \"line\": 150,\n    \"code\": \"const startUndo = Date.now();\\n          let undone = false;\\n          while (Date.now() - startUndo < 15000 && !undone) {\",\n    \"explanation\": \"If the child process fails to spawn, the error handler attempts to re-acquire the lock to undo seat map changes. This uses a busy-wait loop that blocks the event loop (due to empty while loop). If another process holds the lock, this will spin for up to 15 seconds, blocking all other operations and potentially causing a deadlock if the other process is also waiting.\",\n    \"fix\": \"Use asynchronous polling with setTimeout or implement a proper locking mechanism with retries that yields the event loop.\"\n  },\n  {\n    \"id\": 6,\n    \"severity\": \"MINOR\",\n    \"title\": \"Hardcoded path for log directory\",\n    \"file\": \"C:\\\\Users\\\\joelb\\\\OneDrive\\\\Desktop\\\\Fastops development process\\\\.fastops\\\\city-spawn-claude.js\",\n    \"line\": 137,\n    \"code\": \"const logDir = path.join(__dirname, '..', 'terminals');\",\n    \"explanation\": \"The log directory is assumed to be one level up from the script's location. If the script is run from a different working directory or the project structure changes, this path may be incorrect, leading to failed log file creation.\",\n    \"fix\": \"Use a configurable environment variable or a project root-relative path that is verified.\"\n  },\n  {\n    \"id\": 7,\n    \"severity\": \"MINOR\",\n    \"title\": \"Missing error handling for fs.openSync on log file\",\n    \"file\": \"C:\\\\Users\\\\joelb\\\\OneDrive\\\\Desktop\\\\Fastops development process\\\\.fastops\\\\city-spawn-claude.js\",\n    \"line\": 143,\n    \"code\": \"const logFd = fs.openSync(logFile, 'a');\",\n    \"explanation\": \"If the log file cannot be opened (e.g., permissions, disk full), openSync will throw an unhandled exception, crashing the script. The error is not caught, which could leave the seat-map locked.\",\n    \"fix\": \"Wrap fs.openSync in a try-catch and handle the error gracefully (e.g., fallback to stderr).\"\n  }\n]",
+      "error": null
+    },
+    {
+      "model": "aion",
+      "findings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Inconsistent lock acquisition in spawn failure cleanup",
+          "file": "city-spawn-claude.js",
+          "line": 165,
+          "code": "const startUndo = Date.now();\n          let undone = false;\n          while (Date.now() - startUndo < 15000 && !undone) {\n            try {\n              fs.writeFileSync(LOCK_FILE, process.pid.toString(), { flag: 'wx' });",
+          "explanation": "When child process fails to spawn, the cleanup code attempts to re-acquire the lock using a custom busy-wait loop instead of calling the established acquireLock() function. This bypasses the robust lock validation (stale PID check, timeout logic) and could lead to deadlock or race conditions if another process holds the lock. It also uses a blocking sleep (busy loop), which is inefficient and can cause high CPU usage.",
+          "fix": "Replace the custom lock acquisition with a call to acquireLock() (or a helper that uses the same logic) and ensure proper release."
+        },
+        {
+          "id": 2,
+          "severity": "MINOR",
+          "title": "VS Code port search starts incorrectly due to commingled port sets",
+          "file": "city-spawn-claude.js",
+          "line": 127,
+          "code": "const staticVsCodePorts = Array.from(usedPorts).filter(p => p < 10000);",
+          "explanation": "The code uses the same usedPorts set (which contains both pty_port and port values) to compute the start port for VS Code port search. Since pty_port values (e.g., 9306) are higher, the search may start at an unnecessarily high port (e.g., 9307), skipping lower available ports (e.g., 9225). This is inefficient but does not cause functional failure.",
+          "fix": "Separate used ports by type: collect only seat.port values (excluding null) for VS Code port start calculation, and only seat.pty_port values for PTY port start calculation."
+        }
+      ],
+      "raw": "[\n  {\n    \"id\": 1,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Inconsistent lock acquisition in spawn failure cleanup\",\n    \"file\": \"city-spawn-claude.js\",\n    \"line\": 165,\n    \"code\": \"const startUndo = Date.now();\\n          let undone = false;\\n          while (Date.now() - startUndo < 15000 && !undone) {\\n            try {\\n              fs.writeFileSync(LOCK_FILE, process.pid.toString(), { flag: 'wx' });\",\n    \"explanation\": \"When child process fails to spawn, the cleanup code attempts to re-acquire the lock using a custom busy-wait loop instead of calling the established acquireLock() function. This bypasses the robust lock validation (stale PID check, timeout logic) and could lead to deadlock or race conditions if another process holds the lock. It also uses a blocking sleep (busy loop), which is inefficient and can cause high CPU usage.\",\n    \"fix\": \"Replace the custom lock acquisition with a call to acquireLock() (or a helper that uses the same logic) and ensure proper release.\"\n  },\n  {\n    \"id\": 2,\n    \"severity\": \"MINOR\",\n    \"title\": \"VS Code port search starts incorrectly due to commingled port sets\",\n    \"file\": \"city-spawn-claude.js\",\n    \"line\": 127,\n    \"code\": \"const staticVsCodePorts = Array.from(usedPorts).filter(p => p < 10000);\",\n    \"explanation\": \"The code uses the same usedPorts set (which contains both pty_port and port values) to compute the start port for VS Code port search. Since pty_port values (e.g., 9306) are higher, the search may start at an unnecessarily high port (e.g., 9307), skipping lower available ports (e.g., 9225). This is inefficient but does not cause functional failure.\",\n    \"fix\": \"Separate used ports by type: collect only seat.port values (excluding null) for VS Code port start calculation, and only seat.pty_port values for PTY port start calculation.\"\n  }\n]",
+      "error": null
+    },
+    {
+      "model": "palmyra",
+      "findings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Port collision risk due to incorrect static port filtering",
+          "file": "city-spawn-claude.js",
+          "line": 178,
+          "code": "const staticPtyPorts = Array.from(usedPorts).filter(p => p < 10000); // Assuming static ports are below 10000",
+          "explanation": "The logic assumes ports below 10000 are 'static', but seat-17 uses pty_port 9306 which is above 9300 and dynamically assigned. This incorrect filtering may lead to reusing ports already in use by other dynamic agents, causing TCP conflicts. The filter does not distinguish between static and dynamic ports by source, only by value.",
+          "fix": "Do not filter by port number. Track all ports from seat-map.json regardless of value. Remove the 'p < 10000' filter and use all ports listed in seatMap.seats entries to populate usedPorts."
+        },
+        {
+          "id": 2,
+          "severity": "CRITICAL",
+          "title": "Race condition on seat ID allocation after port scan",
+          "file": "city-spawn-claude.js",
+          "line": 165,
+          "code": "const nextSeatId = `seat-${maxSeatNum + 1}`;",
+          "explanation": "The nextSeatId is determined before ports are allocated, but if two instances run concurrently, both could calculate the same maxSeatNum from the same seat-map state and assign the same nextSeatId. Although file locking is used, the lock is released and reacquired during spawn failure cleanup without re-reading the seat-map, risking duplicate seat IDs.",
+          "fix": "Ensure seat ID incrementation and port assignment occur atomically under lock, and re-validate seat-map state before writing if reacquiring lock after spawn failure."
+        },
+        {
+          "id": 3,
+          "severity": "MINOR",
+          "title": "Inefficient port scanning with overlapping ranges",
+          "file": "city-spawn-claude.js",
+          "line": 187,
+          "code": "const highestUsedPtyPort = Math.max(9300, ...staticPtyPorts, 0);",
+          "explanation": "The base start port for PTY is hardcoded to 9300 even if higher ports are already in use. Combined with filtering only ports <10000, this creates a narrow and potentially exhausted search space. The logic does not guarantee avoidance of recently assigned high-numbered ports like seat-17's 9306.",
+          "fix": "Use the actual highest pty_port from all existing seats (regardless of value) as the starting point, not a filtered subset."
+        }
+      ],
+      "raw": "[\n  {\n    \"id\": 1,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Port collision risk due to incorrect static port filtering\",\n    \"file\": \"city-spawn-claude.js\",\n    \"line\": 178,\n    \"code\": \"const staticPtyPorts = Array.from(usedPorts).filter(p => p < 10000); // Assuming static ports are below 10000\",\n    \"explanation\": \"The logic assumes ports below 10000 are 'static', but seat-17 uses pty_port 9306 which is above 9300 and dynamically assigned. This incorrect filtering may lead to reusing ports already in use by other dynamic agents, causing TCP conflicts. The filter does not distinguish between static and dynamic ports by source, only by value.\",\n    \"fix\": \"Do not filter by port number. Track all ports from seat-map.json regardless of value. Remove the 'p < 10000' filter and use all ports listed in seatMap.seats entries to populate usedPorts.\"\n  },\n  {\n    \"id\": 2,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Race condition on seat ID allocation after port scan\",\n    \"file\": \"city-spawn-claude.js\",\n    \"line\": 165,\n    \"code\": \"const nextSeatId = `seat-${maxSeatNum + 1}`;\",\n    \"explanation\": \"The nextSeatId is determined before ports are allocated, but if two instances run concurrently, both could calculate the same maxSeatNum from the same seat-map state and assign the same nextSeatId. Although file locking is used, the lock is released and reacquired during spawn failure cleanup without re-reading the seat-map, risking duplicate seat IDs.\",\n    \"fix\": \"Ensure seat ID incrementation and port assignment occur atomically under lock, and re-validate seat-map state before writing if reacquiring lock after spawn failure.\"\n  },\n  {\n    \"id\": 3,\n    \"severity\": \"MINOR\",\n    \"title\": \"Inefficient port scanning with overlapping ranges\",\n    \"file\": \"city-spawn-claude.js\",\n    \"line\": 187,\n    \"code\": \"const highestUsedPtyPort = Math.max(9300, ...staticPtyPorts, 0);\",\n    \"explanation\": \"The base start port for PTY is hardcoded to 9300 even if higher ports are already in use. Combined with filtering only ports <10000, this creates a narrow and potentially exhausted search space. The logic does not guarantee avoidance of recently assigned high-numbered ports like seat-17's 9306.\",\n    \"fix\": \"Use the actual highest pty_port from all existing seats (regardless of value) as the starting point, not a filtered subset.\"\n  }\n]",
+      "error": null
+    },
+    {
+      "model": "nemotron-120b",
+      "findings": [],
+      "raw": "We need to perform adversarial code review on the attached files. The files are:\n\n1. city-spawn-claude.js\n2. seat-map.json\n3. pt-platoon-api-health.js\n\nI need to find where assumptions diverge and things actually break, based only on the code provided. I must flag issues I can PROVE from the attached code, no speculation. Distinguish CRITICAL (will crash, lose data, or break integration) from MINOR (suboptimal but works). For each issue, output JSON with id, severity, title, file, line, code, explanation, fix.\n\nI'll examine each file for bugs.\n\nFirst, city-spawn-claude.js:\n\nI'll go through it line by line.\n\nPotential issues:\n\n- In acquireLock function: There's a while loop that tries to create lock file with 'wx' flag. If EEXIST, it checks if lock is stale by reading PID and checking if process exists. However, there's a potential race condition: after reading the lock file PID and before checking if process exists, the process could die and a new process could reuse the same PID. But that's low risk and maybe acceptable. However, the code does:\n\n```\n            if (!isRunning) {\n                console.warn(`[CITY-SPAWN] Found stale lock file for non-existent PID ${lockPid}. Removing...`);\n                fs.unlinkSync(LOCK_FILE);\n                continue; // Retry acquisition immediately\n            }\n```\n\nBut note: after removing the lock file, it continues the loop, which will try to acquire lock again. That's fine.\n\nHowever, there is a bug: In the stat check, they do:\n\n```\n          try {\n            const stats = fs.statSync(LOCK_FILE);\n            if (Date.now() - stats.mtimeMs > timeoutMs) {\n```\n\nBut timeoutMs is the same as the outer timeout? Actually, they pass timeoutMs to acquireLock, and inside they use that same timeoutMs for checking staleness. That's okay.\n\nBut there's a potential issue: They read the lock file PID with `fs.readFileSync(LOCK_FILE, 'utf8').trim();` but if the file is empty or contains non-numeric, parseInt will return NaN, and they set isRunning = false. That's fine.\n\nHowever, there is a critical bug: In the acquireLock function, they have a while loop that runs until timeout. Inside, they try to create lock file. If they succeed, they return true. If they get EEXIST, they check staleness. If not stale, they wait 100ms and loop again. But note: they do NOT release the lock if they timeout? Actually, if timeout occurs, they throw an error. That's fine because they never acquired the lock.\n\nBut there is a bug: The lock file is never cleaned up if the process crashes after acquiring lock but before releasing. That's typical for lock files; they rely on the stale lock detection. That's okay.\n\nNow, look at the main spawnClaude function.\n\nThey acquire lock, then read seat-map.json. They parse JSON. If parse fails, they warn and use default empty seat map.\n\nThen they ensure seatMap.aliases and seatMap.seats are objects.\n\nThen they compute usedPorts by iterating over seatMap.seats. They add seat.pty_port and seat.port if they exist.\n\nThen they compute maxSeatNum by parsing keys that start with 'seat-'.\n\nThen they compute nextSeatId = `seat-${maxSeatNum + 1}`.\n\nThen they compute staticPtyPorts = Array.from(usedPorts).filter(p => p < 10000); // Assuming static ports are below 10000\n\nThen highestUsedPtyPort = Math.max(9300, ...staticPtyPorts, 0);\n\nThen ptyPort = await findFreePort(highestUsedPtyPort + 1, usedPorts);\n\nThen they add ptyPort to usedPorts.\n\nThen staticVsCodePorts = Array.from(usedPorts).filter(p => p < 10000); // note: usedPorts now includes the ptyPort they just added.\n\nThen highestUsedVsCodePort = Math.max(9222, ...staticVsCodePorts, 0);\n\nThen vsCodePort = await findFreePort(highestUsedVsCodePort + 1, usedPorts);\n\nThen they add vsCodePort to usedPorts.\n\nThen they create the seat.\n\nNow, potential issues:\n\n1. The assumption that static ports are below 10000. Looking at seat-map.json, we see ports like 9223, 9224, 9301, 9306. All are below 10000. So that assumption holds for existing data. However, what if a dynamic port gets assigned above 10000? The filter p < 10000 would exclude it, and then the static port calculation might be off. But the code is trying to avoid ports used by static seats (which are below 10000). However, after they allocate a dynamic port, they add it to usedPorts, and then when computing staticVsCodePorts, they filter usedPorts for p < 10000, which will exclude the dynamic port if it's >=10000. That's actually correct because they want to avoid static ports only. But wait: they want to find a free port that is not used by any seat (static or dynamic). They already have usedPorts set that includes all ports from seats (both static and dynamic). Then they compute staticPtyPorts as subset of usedPorts below 10000, to get a starting point for searching. But they then call findFreePort(highestUsedPtyPort + 1, usedPorts). The findFreePort function takes a startPort and a usedPorts set, and it will skip ports that are in usedPorts. So if they start at highestUsedPtyPort + 1, and usedPorts includes all used ports (including dynamic ones above 10000), then it will avoid those as well. However, the staticPtyPorts filter is only used to compute the highestUsedPtyPort, but they then add 1 and start from there. If there are dynamic ports above 10000 that are used, they might be higher than the static ones, but the filter p < 10000 would ignore them, so highestUsedPtyPort might be lower than actual highest used pty port if there are dynamic pty ports above 10000. That could cause them to start searching too low and potentially conflict with a dynamic port above 10000 that is already in use.\n\nExample: Suppose we have a dynamic seat with pty_port 10500 (which is above 10000). usedPorts includes 10500. staticPtyPorts filters to p < 10000, so if the highest static pty port is 9300, highestUsedPtyPort = max(9300, 9300, 0) = 9300 (assuming staticPtyPorts includes 9300). Then they start from 9301. But 10500 is already used, but they start at 9301 and will find a free port maybe 9301 if not used, but they will not check 10500 because they start low and go up. However, they will eventually reach 10500 and see it's in usedPorts (since they added all usedPorts to the set) and skip it. So it's okay because findFreePort checks against the usedPorts set, which includes the dynamic port. The starting point just affects efficiency, not correctness. So that's not a bug.\n\nBut there is a more subtle bug: In the calculation of highestUsedPtyPort, they do:\n\n```\n    const highestUsedPtyPort = Math.max(9300, ...staticPtyPorts, 0);\n```\n\nIf staticPtyPorts is empty, spread of empty array results in no arguments? Actually, Math.max(9300, ...[], 0) is equivalent to Math.max(9300, 0) which is 9300. That's fine.\n\nBut what if staticPtyPorts contains non-numbers? They are numbers from usedPorts, which are numbers. So fine.\n\nNow, a more serious bug: In the findFreePort function, they have:\n\n```\n  async function findFreePort(startPort, usedPorts = new Set()) {\n    let port = startPort;\n    while (port < 65536) {\n      if (!usedPorts.has(port)) {\n        try {\n          const availablePort = await new Promise((resolve, reject) => {\n            const server = net.createServer();\n            server.unref(); // Prevent blocking exit if something goes wrong\n            server.on('error', (err) => {\n              if (err.code === 'EADDRINUSE') {\n                resolve(null); // Signal port is in use\n              } else {\n                reject(err);\n              }\n            });\n            server.listen(port, '127.0.0.1', () => {\n              const p = server.address().port;\n              server.close(() => resolve(p));\n            });\n          });\n\n          if (availablePort !== null) {\n0",
+      "error": null
+    },
+    {
+      "model": "gemini",
+      "findings": [],
+      "raw": "```json\n[\n  {\n    \"id\": 1,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Stale Lock File PID Check is Ineffective\",\n    \"file\": \"city-spawn-claude.js\",\n    \"line\": 49,\n    \"code\": \"process.kill(lockPid, 0); // test",
+      "error": null
+    },
+    {
+      "model": "phi-4",
+      "findings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Port exhaustion risk due to overlapping port ranges",
+          "file": "city-spawn-claude.js",
+          "line": 147,
+          "code": "const highestUsedPtyPort = Math.max(9300, ...staticPtyPorts, 0);",
+          "explanation": "The code calculates the highest used PTY port by taking the maximum of 9300, all static PTY ports (assumed to be below 10000), and 0. This approach assumes that ports below 10000 are reserved for static seats, but it doesn't account for all dynamic allocations. If dynamic ports are also below 10000, this could lead to port exhaustion.",
+          "fix": "Refine the port discovery logic to dynamically determine the range of ports reserved for static allocations and ensure dynamic allocations do not overlap with this range. Consider maintaining a separate configuration for reserved port ranges."
+        },
+        {
+          "id": 2,
+          "severity": "MINOR",
+          "title": "Potential race condition in lock release",
+          "file": "city-spawn-claude.js",
+          "line": 373,
+          "code": "fs.unlinkSync(LOCK_FILE);",
+          "explanation": "The `releaseLock` function attempts to delete the lock file but does not handle errors other than silently catching them. If the lock file is not deleted due to a permission issue or if another process has already deleted it, this could lead to a race condition where the lock is not properly released.",
+          "fix": "Add error logging for `fs.unlinkSync` to detect and handle failures when attempting to release the lock. Consider using `fs.unlink` with error handling to ensure proper cleanup."
+        },
+        {
+          "id": 3,
+          "severity": "CRITICAL",
+          "title": "Improper cleanup on child process failure",
+          "file": "city-spawn-claude.js",
+          "line": 356,
+          "code": "delete currentMap.seats[nextSeatId];",
+          "explanation": "If the child process fails to spawn, the code attempts to undo changes to the seat map. However, this undo operation is within a loop that retries acquiring the lock, which might not always succeed, potentially leaving the seat map in an inconsistent state if the lock cannot be acquired.",
+          "fix": "Ensure that the undo operation is atomic or implement a more robust mechanism to handle partial updates to the seat map. Consider using a transaction-like system or a backup of the seat map before making changes."
+        }
+      ],
+      "raw": "```json\n[\n  {\n    \"id\": 1,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Port exhaustion risk due to overlapping port ranges\",\n    \"file\": \"city-spawn-claude.js\",\n    \"line\": 147,\n    \"code\": \"const highestUsedPtyPort = Math.max(9300, ...staticPtyPorts, 0);\",\n    \"explanation\": \"The code calculates the highest used PTY port by taking the maximum of 9300, all static PTY ports (assumed to be below 10000), and 0. This approach assumes that ports below 10000 are reserved for static seats, but it doesn't account for all dynamic allocations. If dynamic ports are also below 10000, this could lead to port exhaustion.\",\n    \"fix\": \"Refine the port discovery logic to dynamically determine the range of ports reserved for static allocations and ensure dynamic allocations do not overlap with this range. Consider maintaining a separate configuration for reserved port ranges.\"\n  },\n  {\n    \"id\": 2,\n    \"severity\": \"MINOR\",\n    \"title\": \"Potential race condition in lock release\",\n    \"file\": \"city-spawn-claude.js\",\n    \"line\": 373,\n    \"code\": \"fs.unlinkSync(LOCK_FILE);\",\n    \"explanation\": \"The `releaseLock` function attempts to delete the lock file but does not handle errors other than silently catching them. If the lock file is not deleted due to a permission issue or if another process has already deleted it, this could lead to a race condition where the lock is not properly released.\",\n    \"fix\": \"Add error logging for `fs.unlinkSync` to detect and handle failures when attempting to release the lock. Consider using `fs.unlink` with error handling to ensure proper cleanup.\"\n  },\n  {\n    \"id\": 3,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Improper cleanup on child process failure\",\n    \"file\": \"city-spawn-claude.js\",\n    \"line\": 356,\n    \"code\": \"delete currentMap.seats[nextSeatId];\",\n    \"explanation\": \"If the child process fails to spawn, the code attempts to undo changes to the seat map. However, this undo operation is within a loop that retries acquiring the lock, which might not always succeed, potentially leaving the seat map in an inconsistent state if the lock cannot be acquired.\",\n    \"fix\": \"Ensure that the undo operation is atomic or implement a more robust mechanism to handle partial updates to the seat map. Consider using a transaction-like system or a backup of the seat map before making changes.\"\n  }\n]\n```",
+      "error": null
+    }
+  ],
+  "clusteredFindings": [
+    {
+      "representative": {
+        "id": 2,
+        "severity": "CRITICAL",
+        "title": "Port collision risk due to incorrect static port filtering",
+        "file": "city-spawn-claude.js",
+        "line": 124,
+        "code": "const staticPtyPorts = Array.from(usedPorts).filter(p => p < 10000); // Assuming static ports are below 10000",
+        "explanation": "The code assumes all ports below 10000 are static and should be treated as a separate range. However, seat-map.json shows dynamically allocated ports (e.g., 9306 for seat-17) that are below 10000. This causes the port finder to incorrectly treat dynamic ports as static, leading to potential port collisions when allocating new seats.",
+        "fix": "Remove the static/dynamic port distinction entirely. Use the entire usedPorts set for collision detection without any range-based filtering.",
+        "reviewer": "mistral",
+        "family": "mistral"
+      },
+      "count": 11,
+      "families": 7,
+      "reviewers": [
+        "mistral",
+        "mistral",
+        "mistral",
+        "mistral",
+        "sonar",
+        "gpt",
+        "jamba",
+        "deepseek-v3.2",
+        "deepseek-v3.2",
+        "aion",
+        "phi-4"
+      ],
+      "confidence": "high",
+      "allFindings": [
+        {
+          "id": 2,
+          "severity": "CRITICAL",
+          "title": "Port collision risk due to incorrect static port filtering",
+          "file": "city-spawn-claude.js",
+          "line": 124,
+          "code": "const staticPtyPorts = Array.from(usedPorts).filter(p => p < 10000); // Assuming static ports are below 10000",
+          "explanation": "The code assumes all ports below 10000 are static and should be treated as a separate range. However, seat-map.json shows dynamically allocated ports (e.g., 9306 for seat-17) that are below 10000. This causes the port finder to incorrectly treat dynamic ports as static, leading to potential port collisions when allocating new seats.",
+          "fix": "Remove the static/dynamic port distinction entirely. Use the entire usedPorts set for collision detection without any range-based filtering.",
+          "reviewer": "mistral",
+          "family": "mistral"
+        },
+        {
+          "id": 3,
+          "severity": "CRITICAL",
+          "title": "VS Code port allocation ignores PTY port collision",
+          "file": "city-spawn-claude.js",
+          "line": 135,
+          "code": "const vsCodePort = await findFreePort(highestUsedVsCodePort + 1, usedPorts);",
+          "explanation": "The VS Code port allocation uses the same usedPorts set as the PTY port allocation, but the PTY port is added to usedPorts AFTER the VS Code port search begins. This creates a race condition where the VS Code port could be assigned the same value as the PTY port that was just allocated.",
+          "fix": "Move the usedPorts.add(ptyPort) call BEFORE the VS Code port allocation to ensure the PTY port is reserved before searching for the VS Code port.",
+          "reviewer": "mistral",
+          "family": "mistral"
+        },
+        {
+          "id": 4,
+          "severity": "MINOR",
+          "title": "Inconsistent port range assumptions",
+          "file": "city-spawn-claude.js",
+          "line": 122,
+          "code": "const highestUsedPtyPort = Math.max(9300, ...staticPtyPorts, 0);",
+          "explanation": "The code assumes PTY ports start at 9300, but seat-map.json shows PTY ports at 9301 and 9302. While this works, it creates a magic number dependency that could cause issues if the port range assumptions change. The hardcoded 9300 should be derived from the actual minimum PTY port in use.",
+          "fix": "Replace 9300 with Math.min(...staticPtyPorts.filter(p => p >= 9000)) to dynamically determine the minimum PTY port range.",
+          "reviewer": "mistral",
+          "family": "mistral"
+        },
+        {
+          "id": 6,
+          "severity": "MINOR",
+          "title": "Redundant port reservation in usedPorts",
+          "file": "city-spawn-claude.js",
+          "line": 130,
+          "code": "usedPorts.add(ptyPort); // Claim it immediately so vsCodePort doesn't reuse it",
+          "explanation": "NOT A BUG. The port reservation is correctly handled by adding the PTY port to usedPorts before searching for the VS Code port. This prevents collision and is the correct pattern.",
+          "reviewer": "mistral",
+          "family": "mistral"
+        },
+        {
+          "id": 3,
+          "severity": "MINOR",
+          "title": "Port exhaustion guaranteed by conflicting port ranges",
+          "file": "city-spawn-claude.js",
+          "line": 117,
+          "code": "const staticPtyPorts = Array.from(usedPorts).filter(p => p < 10000);",
+          "explanation": "PTY ports calculated from ports <10000, VSCode ports also from ports <10000. seat-map.json shows existing seats using 9223-9224,9301-9306. After ~20 spawns, highestUsedPtyPort and highestUsedVsCodePort converge to same value. findFreePort() scans same exhausted range twice, but works (just inefficient). No crash but port scan becomes O(n²) slow.",
+          "fix": "Use separate port ranges: PTY >10000, VSCode 8000-9000. Or scan all used ports once.",
+          "reviewer": "sonar",
+          "family": "perplexity"
+        },
+        {
+          "id": 3,
+          "severity": "CRITICAL",
+          "title": "Hardcoded port range assumption",
+          "file": "city-spawn-claude.js",
+          "line": 137,
+          "code": "const staticPtyPorts = Array.from(usedPorts).filter(p => p < 10000);",
+          "explanation": "The code assumes static ports are below 10000, which might not be the case if seat-map.json is configured differently. This assumption can lead to incorrect port allocation.",
+          "fix": "Update the logic to dynamically check the current configuration instead of assuming a static range.",
+          "reviewer": "gpt",
+          "family": "openai"
+        },
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Incorrect port reuse assumption in findFreePort",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-spawn-claude.js",
+          "line": 103,
+          "code": "const staticVsCodePorts = Array.from(usedPorts).filter(p => p < 10000);",
+          "explanation": "The logic assumes that all used ports below 10000 are 'static' and should be excluded from dynamic port allocation. However, there is no guarantee that dynamically allocated ports (like `ptyPort` or `vsCodePort`) won't overlap with this range, potentially leading to a collision when `findFreePort` is called again for `vsCodePort`. This could cause port exhaustion or conflict if a dynamically allocated port is reused in the filtered set.",
+          "fix": "Explicitly track and exclude `ptyPort` and `vsCodePort` in the `usedPorts` set before determining the ranges for new ports to avoid overlap.",
+          "reviewer": "jamba",
+          "family": "ai21"
+        },
+        {
+          "id": 2,
+          "severity": "CRITICAL",
+          "title": "Port collision due to reused port calculation",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-spawn-claude.js",
+          "line": 98,
+          "code": "const staticPtyPorts = Array.from(usedPorts).filter(p => p < 10000); // Assuming static ports are below 10000",
+          "explanation": "The usedPorts set includes both pty_port and port values from all seats. The code filters for ports < 10000 to find 'static' ports, but this assumption is arbitrary. In seat-map.json, seat-16 and seat-17 have pty_port values 9302 and 9306 (both < 10000) and are dynamically spawned seats, not static. This will cause the 'highestUsedPtyPort' calculation to incorrectly include these dynamic ports, potentially causing the findFreePort to start scanning from a port already in use by a dynamic seat, leading to a port collision.",
+          "fix": "Do not filter by port number. Instead, track used ports correctly and let findFreePort scan from a safe start (e.g., 9300). Or, distinguish static vs dynamic seats by a property (e.g., 'static': true).",
+          "reviewer": "deepseek-v3.2",
+          "family": "deepseek"
+        },
+        {
+          "id": 6,
+          "severity": "MINOR",
+          "title": "Hardcoded path for log directory",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-spawn-claude.js",
+          "line": 137,
+          "code": "const logDir = path.join(__dirname, '..', 'terminals');",
+          "explanation": "The log directory is assumed to be one level up from the script's location. If the script is run from a different working directory or the project structure changes, this path may be incorrect, leading to failed log file creation.",
+          "fix": "Use a configurable environment variable or a project root-relative path that is verified.",
+          "reviewer": "deepseek-v3.2",
+          "family": "deepseek"
+        },
+        {
+          "id": 2,
+          "severity": "MINOR",
+          "title": "VS Code port search starts incorrectly due to commingled port sets",
+          "file": "city-spawn-claude.js",
+          "line": 127,
+          "code": "const staticVsCodePorts = Array.from(usedPorts).filter(p => p < 10000);",
+          "explanation": "The code uses the same usedPorts set (which contains both pty_port and port values) to compute the start port for VS Code port search. Since pty_port values (e.g., 9306) are higher, the search may start at an unnecessarily high port (e.g., 9307), skipping lower available ports (e.g., 9225). This is inefficient but does not cause functional failure.",
+          "fix": "Separate used ports by type: collect only seat.port values (excluding null) for VS Code port start calculation, and only seat.pty_port values for PTY port start calculation.",
+          "reviewer": "aion",
+          "family": "aion"
+        },
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Port exhaustion risk due to overlapping port ranges",
+          "file": "city-spawn-claude.js",
+          "line": 147,
+          "code": "const highestUsedPtyPort = Math.max(9300, ...staticPtyPorts, 0);",
+          "explanation": "The code calculates the highest used PTY port by taking the maximum of 9300, all static PTY ports (assumed to be below 10000), and 0. This approach assumes that ports below 10000 are reserved for static seats, but it doesn't account for all dynamic allocations. If dynamic ports are also below 10000, this could lead to port exhaustion.",
+          "fix": "Refine the port discovery logic to dynamically determine the range of ports reserved for static allocations and ensure dynamic allocations do not overlap with this range. Consider maintaining a separate configuration for reserved port ranges.",
+          "reviewer": "phi-4",
+          "family": "microsoft"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 1,
+        "severity": "MINOR",
+        "title": "Busy-wait loop blocks event loop during undo operation",
+        "file": "city-spawn-claude.js",
+        "line": 164,
+        "code": "while (Date.now() < endSleep) {}",
+        "explanation": "The busy-wait loop synchronously blocks the Node.js event loop for up to 100ms per iteration during seat-map undo on spawn failure, causing potential delays in other operations and inefficiency. If the lock cannot be acquired, undo may fail, leaving orphan seat entries in seat-map.json, but this does not cause crashes or data loss as the system can still function with manual cleanup.",
+        "fix": "Replace the busy-wait with an asynchronous delay using setTimeout to avoid blocking the event loop, e.g., await new Promise(resolve => setTimeout(resolve, 100));",
+        "reviewer": "grok",
+        "family": "xai"
+      },
+      "count": 5,
+      "families": 4,
+      "reviewers": [
+        "grok",
+        "deepseek-v3.2",
+        "deepseek-v3.2",
+        "aion",
+        "palmyra"
+      ],
+      "confidence": "high",
+      "allFindings": [
+        {
+          "id": 1,
+          "severity": "MINOR",
+          "title": "Busy-wait loop blocks event loop during undo operation",
+          "file": "city-spawn-claude.js",
+          "line": 164,
+          "code": "while (Date.now() < endSleep) {}",
+          "explanation": "The busy-wait loop synchronously blocks the Node.js event loop for up to 100ms per iteration during seat-map undo on spawn failure, causing potential delays in other operations and inefficiency. If the lock cannot be acquired, undo may fail, leaving orphan seat entries in seat-map.json, but this does not cause crashes or data loss as the system can still function with manual cleanup.",
+          "fix": "Replace the busy-wait with an asynchronous delay using setTimeout to avoid blocking the event loop, e.g., await new Promise(resolve => setTimeout(resolve, 100));",
+          "reviewer": "grok",
+          "family": "xai"
+        },
+        {
+          "id": 3,
+          "severity": "MINOR",
+          "title": "Inefficient lock acquisition loop",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-spawn-claude.js",
+          "line": 25,
+          "code": "while (Date.now() - start < timeoutMs) {",
+          "explanation": "The acquireLock function uses a busy-wait loop with a non-blocking setTimeout. This is inefficient and can cause high CPU usage if lock contention is high. It also does not handle the case where the lock file is removed between the stat check and the write attempt, potentially leading to unnecessary retries.",
+          "fix": "Use a proper locking library (like 'proper-lockfile') or implement exponential backoff with file watching.",
+          "reviewer": "deepseek-v3.2",
+          "family": "deepseek"
+        },
+        {
+          "id": 5,
+          "severity": "CRITICAL",
+          "title": "Undo logic can deadlock",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-spawn-claude.js",
+          "line": 150,
+          "code": "const startUndo = Date.now();\n          let undone = false;\n          while (Date.now() - startUndo < 15000 && !undone) {",
+          "explanation": "If the child process fails to spawn, the error handler attempts to re-acquire the lock to undo seat map changes. This uses a busy-wait loop that blocks the event loop (due to empty while loop). If another process holds the lock, this will spin for up to 15 seconds, blocking all other operations and potentially causing a deadlock if the other process is also waiting.",
+          "fix": "Use asynchronous polling with setTimeout or implement a proper locking mechanism with retries that yields the event loop.",
+          "reviewer": "deepseek-v3.2",
+          "family": "deepseek"
+        },
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Inconsistent lock acquisition in spawn failure cleanup",
+          "file": "city-spawn-claude.js",
+          "line": 165,
+          "code": "const startUndo = Date.now();\n          let undone = false;\n          while (Date.now() - startUndo < 15000 && !undone) {\n            try {\n              fs.writeFileSync(LOCK_FILE, process.pid.toString(), { flag: 'wx' });",
+          "explanation": "When child process fails to spawn, the cleanup code attempts to re-acquire the lock using a custom busy-wait loop instead of calling the established acquireLock() function. This bypasses the robust lock validation (stale PID check, timeout logic) and could lead to deadlock or race conditions if another process holds the lock. It also uses a blocking sleep (busy loop), which is inefficient and can cause high CPU usage.",
+          "fix": "Replace the custom lock acquisition with a call to acquireLock() (or a helper that uses the same logic) and ensure proper release.",
+          "reviewer": "aion",
+          "family": "aion"
+        },
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Port collision risk due to incorrect static port filtering",
+          "file": "city-spawn-claude.js",
+          "line": 178,
+          "code": "const staticPtyPorts = Array.from(usedPorts).filter(p => p < 10000); // Assuming static ports are below 10000",
+          "explanation": "The logic assumes ports below 10000 are 'static', but seat-17 uses pty_port 9306 which is above 9300 and dynamically assigned. This incorrect filtering may lead to reusing ports already in use by other dynamic agents, causing TCP conflicts. The filter does not distinguish between static and dynamic ports by source, only by value.",
+          "fix": "Do not filter by port number. Track all ports from seat-map.json regardless of value. Remove the 'p < 10000' filter and use all ports listed in seatMap.seats entries to populate usedPorts.",
+          "reviewer": "palmyra",
+          "family": "writer"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 5,
+        "severity": "CRITICAL",
+        "title": "Lock file cleanup race during spawn failure",
+        "file": "city-spawn-claude.js",
+        "line": 215,
+        "code": "try { fs.unlinkSync(LOCK_FILE); } catch(e) {}",
+        "explanation": "During spawn failure cleanup, the lock file is released unconditionally. If multiple processes are trying to spawn simultaneously, this could lead to a race where Process A releases the lock, Process B acquires it, then Process A's cleanup deletes Process B's lock, breaking the locking mechanism.",
+        "fix": "Only release the lock in the failure cleanup if the current process actually holds it (check the PID in the lock file matches process.pid).",
+        "reviewer": "mistral",
+        "family": "mistral"
+      },
+      "count": 4,
+      "families": 4,
+      "reviewers": [
+        "mistral",
+        "kimi-k2",
+        "granite",
+        "phi-4"
+      ],
+      "confidence": "high",
+      "allFindings": [
+        {
+          "id": 5,
+          "severity": "CRITICAL",
+          "title": "Lock file cleanup race during spawn failure",
+          "file": "city-spawn-claude.js",
+          "line": 215,
+          "code": "try { fs.unlinkSync(LOCK_FILE); } catch(e) {}",
+          "explanation": "During spawn failure cleanup, the lock file is released unconditionally. If multiple processes are trying to spawn simultaneously, this could lead to a race where Process A releases the lock, Process B acquires it, then Process A's cleanup deletes Process B's lock, breaking the locking mechanism.",
+          "fix": "Only release the lock in the failure cleanup if the current process actually holds it (check the PID in the lock file matches process.pid).",
+          "reviewer": "mistral",
+          "family": "mistral"
+        },
+        {
+          "id": 3,
+          "severity": "MINOR",
+          "title": "Deadlock window during spawn failure rollback",
+          "file": "city-spawn-claude.js",
+          "line": 209,
+          "code": "while (Date.now() - startUndo < 15000 && !undone) { … fs.writeFileSync(LOCK_FILE, …, { flag: 'wx' }) … }",
+          "explanation": "If the original lock file still exists (PID alive), the rollback loop spins hot for 15 s doing CPU-bound sleep, blocking the exit path.  This is not lethal but wastes an entire core and delays agent recovery.",
+          "fix": "Use setTimeout inside async function instead of the blocking sleep loop.",
+          "reviewer": "kimi-k2",
+          "family": "moonshot"
+        },
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Missing file lock handling in seat-map.json",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-spawn-claude.js",
+          "line": 42,
+          "code": "const SEAT_MAP_FILE = path.join(__dirname, 'cdp', 'seat-map.json');",
+          "explanation": "The code does not handle the case where the seat-map.json file is deleted or becomes inaccessible after the lock is acquired. This can lead to a deadlock where the lock is held indefinitely, preventing other processes from acquiring the lock and modifying the seat-map.",
+          "fix": "Add a check to verify the file exists and is readable after acquiring the lock. If the file is missing or unreadable, the function should throw an error or handle it gracefully to prevent deadlocks. For example, add a fs.statSync call after acquiring the lock to ensure the file is still valid.",
+          "reviewer": "granite",
+          "family": "ibm"
+        },
+        {
+          "id": 2,
+          "severity": "MINOR",
+          "title": "Potential race condition in lock release",
+          "file": "city-spawn-claude.js",
+          "line": 373,
+          "code": "fs.unlinkSync(LOCK_FILE);",
+          "explanation": "The `releaseLock` function attempts to delete the lock file but does not handle errors other than silently catching them. If the lock file is not deleted due to a permission issue or if another process has already deleted it, this could lead to a race condition where the lock is not properly released.",
+          "fix": "Add error logging for `fs.unlinkSync` to detect and handle failures when attempting to release the lock. Consider using `fs.unlink` with error handling to ensure proper cleanup.",
+          "reviewer": "phi-4",
+          "family": "microsoft"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 1,
+        "severity": "CRITICAL",
+        "title": "Race condition in seat-map.json atomic write",
+        "file": "city-spawn-claude.js",
+        "line": 162,
+        "code": "fs.renameSync(tmpFile, SEAT_MAP_FILE);",
+        "explanation": "The atomic write pattern (write to tmp, then rename) is correct, but the lock is released BEFORE the rename operation. If another process acquires the lock immediately after releaseLock() but before renameSync(), it could read an inconsistent state of seat-map.json. This violates the atomicity guarantee of the write operation.",
+        "fix": "Move the releaseLock() call AFTER the fs.renameSync() operation to ensure the lock is held during the entire atomic write sequence.",
+        "reviewer": "mistral",
+        "family": "mistral"
+      },
+      "count": 3,
+      "families": 3,
+      "reviewers": [
+        "mistral",
+        "kimi-k2",
+        "palmyra"
+      ],
+      "confidence": "high",
+      "allFindings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Race condition in seat-map.json atomic write",
+          "file": "city-spawn-claude.js",
+          "line": 162,
+          "code": "fs.renameSync(tmpFile, SEAT_MAP_FILE);",
+          "explanation": "The atomic write pattern (write to tmp, then rename) is correct, but the lock is released BEFORE the rename operation. If another process acquires the lock immediately after releaseLock() but before renameSync(), it could read an inconsistent state of seat-map.json. This violates the atomicity guarantee of the write operation.",
+          "fix": "Move the releaseLock() call AFTER the fs.renameSync() operation to ensure the lock is held during the entire atomic write sequence.",
+          "reviewer": "mistral",
+          "family": "mistral"
+        },
+        {
+          "id": 2,
+          "severity": "CRITICAL",
+          "title": "Unchecked fs.renameSync() can silently fail on Windows",
+          "file": "city-spawn-claude.js",
+          "line": 175,
+          "code": "fs.renameSync(tmpFile, SEAT_MAP_FILE);",
+          "explanation": "On Windows renameSync throws if the target is open by another process (common with aggressive AV or editors).  The error is not caught, so the seat map stays in tmp state and the next locker sees corrupted JSON, breaking all future spawns.",
+          "fix": "Wrap in try/catch, retry a few times with exponential back-off, or use fs.copyFileSync + fs.unlinkSync as fallback.",
+          "reviewer": "kimi-k2",
+          "family": "moonshot"
+        },
+        {
+          "id": 2,
+          "severity": "CRITICAL",
+          "title": "Race condition on seat ID allocation after port scan",
+          "file": "city-spawn-claude.js",
+          "line": 165,
+          "code": "const nextSeatId = `seat-${maxSeatNum + 1}`;",
+          "explanation": "The nextSeatId is determined before ports are allocated, but if two instances run concurrently, both could calculate the same maxSeatNum from the same seat-map state and assign the same nextSeatId. Although file locking is used, the lock is released and reacquired during spawn failure cleanup without re-reading the seat-map, risking duplicate seat IDs.",
+          "fix": "Ensure seat ID incrementation and port assignment occur atomically under lock, and re-validate seat-map state before writing if reacquiring lock after spawn failure.",
+          "reviewer": "palmyra",
+          "family": "writer"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 1,
+        "severity": "CRITICAL",
+        "title": "Log file descriptor not closed on successful spawn",
+        "file": "city-spawn-claude.js",
+        "line": 164,
+        "code": "const logFd = fs.openSync(logFile, 'a');",
+        "explanation": "logFd opened at line 164 but only closed in finally block after spawn (line ~220). On successful spawn, child.unref() called but logFd remains open indefinitely since finally executes after unref but process continues running. Open FDs accumulate with each spawn, exhausting system limits and causing future spawns to fail with EMFILE.",
+        "fix": "Move fs.closeSync(logFd) immediately after child.unref() in success path, before console.log success message.",
+        "reviewer": "sonar",
+        "family": "perplexity"
+      },
+      "count": 2,
+      "families": 2,
+      "reviewers": [
+        "sonar",
+        "jamba"
+      ],
+      "confidence": "high",
+      "allFindings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Log file descriptor not closed on successful spawn",
+          "file": "city-spawn-claude.js",
+          "line": 164,
+          "code": "const logFd = fs.openSync(logFile, 'a');",
+          "explanation": "logFd opened at line 164 but only closed in finally block after spawn (line ~220). On successful spawn, child.unref() called but logFd remains open indefinitely since finally executes after unref but process continues running. Open FDs accumulate with each spawn, exhausting system limits and causing future spawns to fail with EMFILE.",
+          "fix": "Move fs.closeSync(logFd) immediately after child.unref() in success path, before console.log success message.",
+          "reviewer": "sonar",
+          "family": "perplexity"
+        },
+        {
+          "id": 2,
+          "severity": "MINOR",
+          "title": "Unnecessary log file creation before spawn validation",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-spawn-claude.js",
+          "line": 168,
+          "code": "const logFd = fs.openSync(logFile, 'a');",
+          "explanation": "The log file descriptor is created before the child process is validated to spawn successfully. If the spawn fails and the process exits, the log file descriptor is closed, but the file is still created unnecessarily. This is wasteful but does not break functionality.",
+          "fix": "Delay creating the log file descriptor until after the child process is confirmed to spawn successfully.",
+          "reviewer": "jamba",
+          "family": "ai21"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 1,
+        "severity": "CRITICAL",
+        "title": "Port collision in seat-map.json",
+        "file": "seat-map.json",
+        "line": 10,
+        "code": "\"port\": 9223,",
+        "explanation": "Multiple seats in seat-map.json are using the same port 9223, which can lead to port binding errors when trying to start services.",
+        "fix": "Assign unique ports to each seat entry in seat-map.json to prevent collisions.",
+        "reviewer": "gpt",
+        "family": "openai"
+      },
+      "count": 2,
+      "families": 2,
+      "reviewers": [
+        "gpt",
+        "kimi-k2"
+      ],
+      "confidence": "high",
+      "allFindings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Port collision in seat-map.json",
+          "file": "seat-map.json",
+          "line": 10,
+          "code": "\"port\": 9223,",
+          "explanation": "Multiple seats in seat-map.json are using the same port 9223, which can lead to port binding errors when trying to start services.",
+          "fix": "Assign unique ports to each seat entry in seat-map.json to prevent collisions.",
+          "reviewer": "gpt",
+          "family": "openai"
+        },
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Port collision on 9223 – multiple seats hard-coded to same port",
+          "file": "cdp\\seat-map.json",
+          "line": 6,
+          "code": "\"port\": 9223,",
+          "explanation": "seat-1, seat-2, seat-3, seat-4, seat-5, seat-6, seat-7, and seat-16 all claim port 9223.  city-spawn-claude.js uses findFreePort() to avoid re-use, but it only consults the dynamic algorithm when spawning; the static map is never validated for duplicates.  Starting any two of these seats simultaneously will trigger EADDRINUSE and crash the second agent.",
+          "fix": "Run a one-time validation script that exits non-zero if any two seats share the same non-null port, or teach city-spawn-claude.js to refuse starting while duplicates exist in seat-map.json.",
+          "reviewer": "kimi-k2",
+          "family": "moonshot"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 3,
+        "severity": "CRITICAL",
+        "title": "Undefined behavior on invalid seatMap structure",
+        "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-spawn-claude.js",
+        "line": 72,
+        "code": "if (typeof seatMap !== 'object' || seatMap === null) {",
+        "explanation": "If `seatMap` is not an object or is null, a default empty structure is used. However, the subsequent logic assumes `seatMap.seats` and `seatMap.aliases` exist and are objects. If the input `seatMap` JSON is malformed or partially corrupted (e.g., missing required keys), this could lead to runtime errors when attempting to iterate over or modify non-existent properties. This breaks the seat map update process.",
+        "fix": "Validate the full structure of `seatMap` (including `seats` and `aliases` being non-null objects) before proceeding with dynamic updates. Provide a clear fallback or error handling for unexpected structures.",
+        "reviewer": "jamba",
+        "family": "ai21"
+      },
+      "count": 2,
+      "families": 2,
+      "reviewers": [
+        "jamba",
+        "deepseek-v3.2"
+      ],
+      "confidence": "high",
+      "allFindings": [
+        {
+          "id": 3,
+          "severity": "CRITICAL",
+          "title": "Undefined behavior on invalid seatMap structure",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-spawn-claude.js",
+          "line": 72,
+          "code": "if (typeof seatMap !== 'object' || seatMap === null) {",
+          "explanation": "If `seatMap` is not an object or is null, a default empty structure is used. However, the subsequent logic assumes `seatMap.seats` and `seatMap.aliases` exist and are objects. If the input `seatMap` JSON is malformed or partially corrupted (e.g., missing required keys), this could lead to runtime errors when attempting to iterate over or modify non-existent properties. This breaks the seat map update process.",
+          "fix": "Validate the full structure of `seatMap` (including `seats` and `aliases` being non-null objects) before proceeding with dynamic updates. Provide a clear fallback or error handling for unexpected structures.",
+          "reviewer": "jamba",
+          "family": "ai21"
+        },
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Missing seat map file fallback",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-spawn-claude.js",
+          "line": 57,
+          "code": "const fileData = await fs.promises.readFile(SEAT_MAP_FILE, 'utf8');",
+          "explanation": "If the seat-map.json file does not exist (ENOENT), the readFile will throw an error. The catch block attempts to parse the error as JSON and then creates a default seatMap, but the readFile error will not be JSON. The catch block's error handling incorrectly assumes the error is from JSON.parse.",
+          "fix": "Add a specific check for ENOENT error code before attempting JSON.parse. For example: catch (e) { if (e.code === 'ENOENT') { seatMap = { seats: {}, aliases: {} }; } else { ... } }",
+          "reviewer": "deepseek-v3.2",
+          "family": "deepseek"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 2,
+        "severity": "CRITICAL",
+        "title": "Lock acquisition race in spawn error undo loop",
+        "file": "city-spawn-claude.js",
+        "line": 192,
+        "code": "fs.writeFileSync(LOCK_FILE, process.pid.toString(), { flag: 'wx' });",
+        "explanation": "Undo loop uses same busy-wait acquireLock logic without calling acquireLock() function. If lock file exists (another process holds it), enters infinite tight CPU spin loop: `while (Date.now() < endSleep) {}` with 100ms sleep. No timeout or exponential backoff. Will hang forever or thrash CPU if contention during cleanup window.",
+        "fix": "Extract undo logic into async function that calls acquireLock() properly. Add max retry limit with exponential backoff.",
+        "reviewer": "sonar",
+        "family": "perplexity"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "sonar"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 2,
+          "severity": "CRITICAL",
+          "title": "Lock acquisition race in spawn error undo loop",
+          "file": "city-spawn-claude.js",
+          "line": 192,
+          "code": "fs.writeFileSync(LOCK_FILE, process.pid.toString(), { flag: 'wx' });",
+          "explanation": "Undo loop uses same busy-wait acquireLock logic without calling acquireLock() function. If lock file exists (another process holds it), enters infinite tight CPU spin loop: `while (Date.now() < endSleep) {}` with 100ms sleep. No timeout or exponential backoff. Will hang forever or thrash CPU if contention during cleanup window.",
+          "fix": "Extract undo logic into async function that calls acquireLock() properly. Add max retry limit with exponential backoff.",
+          "reviewer": "sonar",
+          "family": "perplexity"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 4,
+        "severity": "MINOR",
+        "title": "fetch polyfill before dotenv breaks .env loading",
+        "file": "pt-platoon-api-health.js",
+        "line": 11,
+        "code": "if (typeof fetch === 'undefined') { global.fetch = require('node-fetch'); }",
+        "explanation": "fetch polyfill executes before require('dotenv').config(). node-fetch modifies global environment in way that interferes with dotenv parsing (seen in Node 16-18). PT_SHARED_SECRET etc. become undefined even when .env exists. Key fallback to send-pt-welcome.js parsing works around it.",
+        "fix": "Move dotenv.config() before fetch polyfill.",
+        "reviewer": "sonar",
+        "family": "perplexity"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "sonar"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 4,
+          "severity": "MINOR",
+          "title": "fetch polyfill before dotenv breaks .env loading",
+          "file": "pt-platoon-api-health.js",
+          "line": 11,
+          "code": "if (typeof fetch === 'undefined') { global.fetch = require('node-fetch'); }",
+          "explanation": "fetch polyfill executes before require('dotenv').config(). node-fetch modifies global environment in way that interferes with dotenv parsing (seen in Node 16-18). PT_SHARED_SECRET etc. become undefined even when .env exists. Key fallback to send-pt-welcome.js parsing works around it.",
+          "fix": "Move dotenv.config() before fetch polyfill.",
+          "reviewer": "sonar",
+          "family": "perplexity"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 2,
+        "severity": "MINOR",
+        "title": "Unused variable 'r'",
+        "file": "pt-platoon-api-health.js",
+        "line": 64,
+        "code": "let r;",
+        "explanation": "The variable 'r' is declared but not used until it is reassigned a value. This is unnecessary and could be removed to clean up the code.",
+        "fix": "Remove the declaration 'let r;' and declare 'r' only when it's assigned a value.",
+        "reviewer": "gpt",
+        "family": "openai"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "gpt"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 2,
+          "severity": "MINOR",
+          "title": "Unused variable 'r'",
+          "file": "pt-platoon-api-health.js",
+          "line": 64,
+          "code": "let r;",
+          "explanation": "The variable 'r' is declared but not used until it is reassigned a value. This is unnecessary and could be removed to clean up the code.",
+          "fix": "Remove the declaration 'let r;' and declare 'r' only when it's assigned a value.",
+          "reviewer": "gpt",
+          "family": "openai"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 4,
+        "severity": "MINOR",
+        "title": "Redundant error logging in main health check",
+        "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\pt-platoon-api-health.js",
+        "line": 31,
+        "code": "console.error('[host] GET https://pt-ai-os.vercel.app/ failed:', err.message);",
+        "explanation": "If the `fetch` call to the host endpoint fails, the error is logged, but the script immediately exits with `process.exit(1)`. While not breaking, this is redundant because the script will terminate without further action. A single clear exit message would suffice.",
+        "fix": "Remove the redundant error log and let the exit code indicate failure.",
+        "reviewer": "jamba",
+        "family": "ai21"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "jamba"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 4,
+          "severity": "MINOR",
+          "title": "Redundant error logging in main health check",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\pt-platoon-api-health.js",
+          "line": 31,
+          "code": "console.error('[host] GET https://pt-ai-os.vercel.app/ failed:', err.message);",
+          "explanation": "If the `fetch` call to the host endpoint fails, the error is logged, but the script immediately exits with `process.exit(1)`. While not breaking, this is redundant because the script will terminate without further action. A single clear exit message would suffice.",
+          "fix": "Remove the redundant error log and let the exit code indicate failure.",
+          "reviewer": "jamba",
+          "family": "ai21"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 4,
+        "severity": "CRITICAL",
+        "title": "Race condition in stale lock cleanup",
+        "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-spawn-claude.js",
+        "line": 46,
+        "code": "fs.unlinkSync(LOCK_FILE);",
+        "explanation": "If two processes simultaneously detect a stale lock (same PID not running), both may attempt to delete the lock file. One may succeed, then the other may also call unlinkSync, which will throw ENOENT (ignored by the outer catch). However, the first process may then immediately create a new lock, while the second process continues its loop and might also create a lock, leading to two locks being held.",
+        "fix": "After deleting the stale lock, immediately try to acquire the lock (write with 'wx') instead of continuing the loop. Or use atomic operations (rename) for lock acquisition.",
+        "reviewer": "deepseek-v3.2",
+        "family": "deepseek"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "deepseek-v3.2"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 4,
+          "severity": "CRITICAL",
+          "title": "Race condition in stale lock cleanup",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-spawn-claude.js",
+          "line": 46,
+          "code": "fs.unlinkSync(LOCK_FILE);",
+          "explanation": "If two processes simultaneously detect a stale lock (same PID not running), both may attempt to delete the lock file. One may succeed, then the other may also call unlinkSync, which will throw ENOENT (ignored by the outer catch). However, the first process may then immediately create a new lock, while the second process continues its loop and might also create a lock, leading to two locks being held.",
+          "fix": "After deleting the stale lock, immediately try to acquire the lock (write with 'wx') instead of continuing the loop. Or use atomic operations (rename) for lock acquisition.",
+          "reviewer": "deepseek-v3.2",
+          "family": "deepseek"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 7,
+        "severity": "MINOR",
+        "title": "Missing error handling for fs.openSync on log file",
+        "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-spawn-claude.js",
+        "line": 143,
+        "code": "const logFd = fs.openSync(logFile, 'a');",
+        "explanation": "If the log file cannot be opened (e.g., permissions, disk full), openSync will throw an unhandled exception, crashing the script. The error is not caught, which could leave the seat-map locked.",
+        "fix": "Wrap fs.openSync in a try-catch and handle the error gracefully (e.g., fallback to stderr).",
+        "reviewer": "deepseek-v3.2",
+        "family": "deepseek"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "deepseek-v3.2"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 7,
+          "severity": "MINOR",
+          "title": "Missing error handling for fs.openSync on log file",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-spawn-claude.js",
+          "line": 143,
+          "code": "const logFd = fs.openSync(logFile, 'a');",
+          "explanation": "If the log file cannot be opened (e.g., permissions, disk full), openSync will throw an unhandled exception, crashing the script. The error is not caught, which could leave the seat-map locked.",
+          "fix": "Wrap fs.openSync in a try-catch and handle the error gracefully (e.g., fallback to stderr).",
+          "reviewer": "deepseek-v3.2",
+          "family": "deepseek"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 3,
+        "severity": "MINOR",
+        "title": "Inefficient port scanning with overlapping ranges",
+        "file": "city-spawn-claude.js",
+        "line": 187,
+        "code": "const highestUsedPtyPort = Math.max(9300, ...staticPtyPorts, 0);",
+        "explanation": "The base start port for PTY is hardcoded to 9300 even if higher ports are already in use. Combined with filtering only ports <10000, this creates a narrow and potentially exhausted search space. The logic does not guarantee avoidance of recently assigned high-numbered ports like seat-17's 9306.",
+        "fix": "Use the actual highest pty_port from all existing seats (regardless of value) as the starting point, not a filtered subset.",
+        "reviewer": "palmyra",
+        "family": "writer"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "palmyra"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 3,
+          "severity": "MINOR",
+          "title": "Inefficient port scanning with overlapping ranges",
+          "file": "city-spawn-claude.js",
+          "line": 187,
+          "code": "const highestUsedPtyPort = Math.max(9300, ...staticPtyPorts, 0);",
+          "explanation": "The base start port for PTY is hardcoded to 9300 even if higher ports are already in use. Combined with filtering only ports <10000, this creates a narrow and potentially exhausted search space. The logic does not guarantee avoidance of recently assigned high-numbered ports like seat-17's 9306.",
+          "fix": "Use the actual highest pty_port from all existing seats (regardless of value) as the starting point, not a filtered subset.",
+          "reviewer": "palmyra",
+          "family": "writer"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 3,
+        "severity": "CRITICAL",
+        "title": "Improper cleanup on child process failure",
+        "file": "city-spawn-claude.js",
+        "line": 356,
+        "code": "delete currentMap.seats[nextSeatId];",
+        "explanation": "If the child process fails to spawn, the code attempts to undo changes to the seat map. However, this undo operation is within a loop that retries acquiring the lock, which might not always succeed, potentially leaving the seat map in an inconsistent state if the lock cannot be acquired.",
+        "fix": "Ensure that the undo operation is atomic or implement a more robust mechanism to handle partial updates to the seat map. Consider using a transaction-like system or a backup of the seat map before making changes.",
+        "reviewer": "phi-4",
+        "family": "microsoft"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "phi-4"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 3,
+          "severity": "CRITICAL",
+          "title": "Improper cleanup on child process failure",
+          "file": "city-spawn-claude.js",
+          "line": 356,
+          "code": "delete currentMap.seats[nextSeatId];",
+          "explanation": "If the child process fails to spawn, the code attempts to undo changes to the seat map. However, this undo operation is within a loop that retries acquiring the lock, which might not always succeed, potentially leaving the seat map in an inconsistent state if the lock cannot be acquired.",
+          "fix": "Ensure that the undo operation is atomic or implement a more robust mechanism to handle partial updates to the seat map. Consider using a transaction-like system or a backup of the seat map before making changes.",
+          "reviewer": "phi-4",
+          "family": "microsoft"
+        }
+      ]
+    }
+  ],
+  "runId": "mnjmxefn"
+}

@@ -1,0 +1,14 @@
+{
+  "id": "mistral-mnkeygwo-fd9746",
+  "model": "mistral",
+  "task": "Build .fastops/session-memory-bridge.js — persistent memory layer for cross-session agent continuity. Under 60 lines. When a city-session completes, this extracts: (1) key decisions made, (2) files touched and why, (3) errors hit and how resolved, (4) unfinished work. Stores in .fastops/model-memory/<model-name>.jsonl as append-only entries with timestamps. When a NEW session starts for the same model, the bridge loads the last 5 entries as context preamble. Read city-session.js to understand session lifecycle. Read model-state/ for existing per-model state format.",
+  "branch": "city/mistral-mnkeygwo-fd9746",
+  "worktree": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.city-worktrees\\mistral-mnkeygwo-fd9746",
+  "maxTurns": 15,
+  "turn": 0,
+  "status": "active",
+  "history": [],
+  "created": "2026-04-04T14:14:42.290Z",
+  "updated": "2026-04-04T14:14:42.290Z",
+  "_buildTargets": {}
+}

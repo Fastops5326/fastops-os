@@ -1,0 +1,14 @@
+name = "fastops-slack-bridge"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+# KV namespace for inbound message queue (Slack → agents)
+[[kv_namespaces]]
+binding = "INBOX"
+id = "229593c2e333498397646a86e4ca7cfe"
+
+# Secrets (set via `wrangler secret put`):
+#   SLACK_BOT_TOKEN    — xoxb-... from Slack app OAuth
+#   SLACK_SIGNING_SECRET — from Slack app Basic Information
+#   SLACK_CHANNEL_ID   — channel to bridge
+#   BRIDGE_API_KEY     — shared secret for local scripts to auth with this worker

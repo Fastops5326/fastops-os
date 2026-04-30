@@ -1,0 +1,25 @@
+{
+  "topic": "WarriorPath Unified PRD + QC Plan (v3.1-FINAL)",
+  "leader": "joel",
+  "agents": [
+    "claude-opus-4-6",
+    "gpt",
+    "grok",
+    "gemini",
+    "composer",
+    "kimi"
+  ],
+  "contextFiles": [
+    "warriorpath/docs/PRD/00-OVERVIEW-AND-DOCTRINE.md",
+    "warriorpath/docs/PRD/SIGNOFF-LOG.md",
+    "warriorpath/docs/PRD/README.md",
+    "warriorpath/docs/ADR/001-MONOREPO-CONSOLIDATION.md",
+    "warriorpath/docs/PRD/appendix/A-MONDAY-COLUMNS.md",
+    "warriorpath/docs/PRD/appendix/C-PRESIDIO-CONTRACT.md",
+    "warriorpath/docs/PRD-WARRIORPATH-v1.md"
+  ],
+  "success": "One unified PRD v3.1 + QC plan + testing plan committed to warriorpath/docs/PRD/, endorsed by all 5 Cursor attendees + leader, with deterministic QC gates and Joel signoff criteria encoded as binary tests",
+  "started": "2026-04-09T12:39:00.849Z",
+  "status": "ADJOURNED",
+  "ended": "2026-04-09T12:49:03.081Z"
+}

@@ -1,0 +1,352 @@
+#!/usr/bin/env node
+/**
+ * mandatory-challenge.js — Opt-Out External Challenge Gate
+ *
+ * Fires: PreToolUse on Edit|Write (build actions)
+ *
+ * DESIGN: External perspective is the DEFAULT. Skipping it requires justification.
+ * This inverts the current opt-in model (agents CAN use /jailbreak but don't)
+ * to opt-out (challenge is mandatory, skipping requires a verifiable reason).
+ *
+ * Evidence: d=1.86 with instruction vs d=0.18 without (W-191).
+ * Evidence: Zero-friction or zero-adoption (W-030) — hook does the work.
+ * Evidence: Observable actions beat imputed motives (W-316) — opt-outs are verifiable.
+ *
+ * FLOW:
+ *   1. First Edit/Write → check for challenge evidence
+ *   2. Evidence found → allow + log "cleared"
+ *   3. Valid opt-out → allow + log "opt-out" with reason
+ *   4. Nothing → DENY + tell agent to run /jailbreak or /horsepower
+ *
+ * Once cleared → writes flag → allows all subsequent Edit/Write this session.
+ * All decisions logged to .fastops/.challenge-log.jsonl for /handoff grading.
+ *
+ * Created: Session 156 — designed with Joel, validated by 5 external models.
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+const BASE = path.join(__dirname, '..', '..');
+const FASTOPS = path.join(BASE, '.fastops');
+const FLAG_FILE = path.join(FASTOPS, '.challenge-cleared');
+const OPT_OUT_FILE = path.join(FASTOPS, '.challenge-opt-out.json');
+const LOG_FILE = path.join(FASTOPS, '.challenge-log.jsonl');
+const TRACKER_FILE = path.join(FASTOPS, '.session-gate-tracker.json');
+const AGENT_OUTPUTS = path.join(BASE, '.agent-outputs');
+const CONVERSATIONS = path.join(FASTOPS, 'conversations');
+const GENERAL = path.join(BASE, 'comms', 'data', 'general.jsonl');
+
+const TODAY = new Date().toISOString().split('T')[0];
+
+// Valid opt-out reasons (all must be evidence-backed)
+const VALID_OPT_OUTS = [
+  'joel_directed',      // Joel explicitly told agent to do this specific thing
+  'already_challenged', // Agent already ran /jailbreak or /horsepower (cite artifact)
+  'peer_reviewed',      // Peer agent reviewed the plan (cite comms evidence)
+  'meeting_active',     // In a meeting with external models (cite conversation file)
+  'trivial_fix'         // Change is < 10 lines fixing a typo or obvious bug
+];
+
+let inputData = '';
+process.stdin.setEncoding('utf8');
+process.stdin.on('data', chunk => { inputData += chunk; });
+process.stdin.on('end', () => {
+  try {
+    const data = JSON.parse(inputData);
+    const toolName = data.tool_name || '';
+    const toolInput = data.tool_input || {};
+    const sessionId = data.session_id || 'unknown';
+
+    // Already cleared this session — allow everything
+    if (fs.existsSync(FLAG_FILE)) {
+      try {
+        const flag = JSON.parse(fs.readFileSync(FLAG_FILE, 'utf-8'));
+        // Check flag is from today (don't carry over stale clearances)
+        if (flag.date === TODAY) {
+          allow();
+          return;
+        }
+      } catch {
+        // Corrupt flag — re-check
+      }
+    }
+
+    // Check 1: Auto-detect challenge artifacts from today
+    const evidence = findChallengeEvidence();
+    if (evidence) {
+      clearGate('evidence', evidence, toolName, toolInput, sessionId);
+      return;
+    }
+
+    // Check 2: Session-gate tracker shows external_challenge action
+    const trackerEvidence = checkSessionGateTracker();
+    if (trackerEvidence) {
+      clearGate('tracker', trackerEvidence, toolName, toolInput, sessionId);
+      return;
+    }
+
+    // Check 3: Opt-out file with verifiable reason
+    const optOut = checkOptOut(toolName, toolInput);
+    if (optOut.valid) {
+      clearGate('opt-out', optOut, toolName, toolInput, sessionId);
+      return;
+    }
+
+    // Check 4: Trivial edit auto-detection (< 10 lines changed)
+    if (isTrivialEdit(toolName, toolInput)) {
+      clearGate('trivial-auto', { reason: 'trivial_fix', detail: 'Edit < 10 lines' }, toolName, toolInput, sessionId);
+      return;
+    }
+
+    // BLOCKED — no challenge, no valid opt-out
+    logEntry({
+      type: 'blocked',
+      intended_tool: toolName,
+      intended_target: extractTarget(toolName, toolInput),
+      agent: sessionId.substring(0, 8),
+      ts: new Date().toISOString()
+    });
+
+    const target = extractTarget(toolName, toolInput);
+    process.stdout.write(JSON.stringify({
+      hookSpecificOutput: {
+        hookEventName: "PreToolUse",
+        permissionDecision: "deny",
+        permissionDecisionReason: `=== MANDATORY CHALLENGE GATE ===
+
+You must get external perspective before your first build action.
+Attempted: ${toolName} on ${target}
+
+OPTIONS (pick one):
+1. Run /jailbreak on your plan (if confident — strips assumptions)
+2. Run /horsepower on your plan (if uncertain — builds with 5 models)
+3. Quick challenge: write your plan to Joel/comms.md, then run:
+   node Joel/comms-protocol/reasoning-eval.js Joel/comms.md
+
+4. Opt out with justification — write to .fastops/.challenge-opt-out.json:
+   {"reason": "<reason>", "evidence": "<specific evidence>"}
+
+   Valid reasons (ALL require evidence):
+   - joel_directed: Joel explicitly told you to do this (cite his message)
+   - already_challenged: You already ran challenge (cite artifact path)
+   - peer_reviewed: A peer agent reviewed your plan (cite comms message)
+   - meeting_active: In a meeting with external models (cite conversation file)
+   - trivial_fix: Change is < 10 lines fixing a typo or obvious bug
+
+   NOT valid: "I'm confident", "time pressure", "task is straightforward",
+   "I already know the answer"
+
+All opt-outs are logged and reviewed by Joel during /handoff.
+=== END GATE ===`
+      }
+    }));
+
+  } catch (err) {
+    // Never break the agent on hook error
+    process.stderr.write(`mandatory-challenge error: ${err.message}\n`);
+    allow();
+  }
+});
+
+// ─── Gate Management ────────────────────────────────────────────────────────
+
+function clearGate(clearType, evidence, toolName, toolInput, sessionId) {
+  // Write flag file — gate won't fire again this session
+  try {
+    fs.mkdirSync(FASTOPS, { recursive: true });
+    fs.writeFileSync(FLAG_FILE, JSON.stringify({
+      date: TODAY,
+      cleared_at: new Date().toISOString(),
+      clear_type: clearType,
+      evidence: typeof evidence === 'string' ? evidence : JSON.stringify(evidence).substring(0, 500)
+    }));
+  } catch {}
+
+  // Log the clearance
+  logEntry({
+    type: clearType === 'opt-out' ? 'opt-out' : 'cleared',
+    clear_type: clearType,
+    evidence: typeof evidence === 'string' ? evidence : JSON.stringify(evidence).substring(0, 300),
+    intended_tool: toolName,
+    intended_target: extractTarget(toolName, toolInput),
+    agent: sessionId.substring(0, 8),
+    ts: new Date().toISOString()
+  });
+
+  allow();
+}
+
+function allow() {
+  process.stdout.write(JSON.stringify({
+    hookSpecificOutput: { hookEventName: "PreToolUse", permissionDecision: "allow" }
+  }));
+}
+
+// ─── Evidence Detection ─────────────────────────────────────────────────────
+
+function findChallengeEvidence() {
+  try {
+    if (!fs.existsSync(AGENT_OUTPUTS)) return null;
+    const files = fs.readdirSync(AGENT_OUTPUTS);
+
+    // Look for jailbreak, horsepower, or reasoning-eval artifacts from today
+    const patterns = ['JAILBREAK-', 'HORSEPOWER-', 'REASONING-EVAL-'];
+    for (const file of files) {
+      if (file.includes(TODAY) && patterns.some(p => file.startsWith(p))) {
+        return `Artifact found: .agent-outputs/${file}`;
+      }
+    }
+  } catch {}
+  return null;
+}
+
+function checkSessionGateTracker() {
+  try {
+    if (!fs.existsSync(TRACKER_FILE)) return null;
+    const tracker = JSON.parse(fs.readFileSync(TRACKER_FILE, 'utf-8'));
+    const actions = tracker.actions || [];
+    const challenge = actions.find(a => a.type === 'external_challenge');
+    if (challenge) {
+      return `Session-gate tracker: external_challenge at ${challenge.ts}`;
+    }
+  } catch {}
+  return null;
+}
+
+function checkOptOut(toolName, toolInput) {
+  try {
+    if (!fs.existsSync(OPT_OUT_FILE)) return { valid: false };
+    const optOut = JSON.parse(fs.readFileSync(OPT_OUT_FILE, 'utf-8'));
+
+    if (!VALID_OPT_OUTS.includes(optOut.reason)) {
+      return { valid: false, reason: `Invalid opt-out reason: ${optOut.reason}` };
+    }
+
+    if (!optOut.evidence || optOut.evidence.trim().length < 5) {
+      return { valid: false, reason: 'Opt-out requires specific evidence' };
+    }
+
+    // Verify evidence based on reason type
+    switch (optOut.reason) {
+      case 'joel_directed':
+        // Check if Joel posted recently in comms
+        if (hasRecentJoelMessage()) {
+          return { valid: true, reason: optOut.reason, evidence: optOut.evidence };
+        }
+        // Trust the claim but flag as unverified
+        return { valid: true, reason: optOut.reason, evidence: `UNVERIFIED: ${optOut.evidence}` };
+
+      case 'already_challenged':
+        // Check if cited artifact exists
+        if (optOut.evidence && fs.existsSync(path.join(BASE, optOut.evidence))) {
+          return { valid: true, reason: optOut.reason, evidence: optOut.evidence };
+        }
+        return { valid: false, reason: `Cited artifact not found: ${optOut.evidence}` };
+
+      case 'peer_reviewed':
+        // Check for recent peer messages in comms
+        if (hasRecentPeerMessage()) {
+          return { valid: true, reason: optOut.reason, evidence: optOut.evidence };
+        }
+        return { valid: true, reason: optOut.reason, evidence: `UNVERIFIED: ${optOut.evidence}` };
+
+      case 'meeting_active':
+        // Check for active conversation file from today
+        if (hasActiveConversation()) {
+          return { valid: true, reason: optOut.reason, evidence: optOut.evidence };
+        }
+        return { valid: false, reason: 'No active meeting conversation found' };
+
+      case 'trivial_fix':
+        // Auto-verify: is this actually a small edit?
+        if (isTrivialEdit(toolName, toolInput)) {
+          return { valid: true, reason: optOut.reason, evidence: 'Verified: < 10 lines' };
+        }
+        return { valid: true, reason: optOut.reason, evidence: `UNVERIFIED: ${optOut.evidence}` };
+
+      default:
+        return { valid: false, reason: `Unknown reason: ${optOut.reason}` };
+    }
+  } catch {
+    return { valid: false };
+  }
+}
+
+// ─── Verification Helpers ───────────────────────────────────────────────────
+
+function isTrivialEdit(toolName, toolInput) {
+  if (toolName === 'Edit') {
+    const oldStr = toolInput.old_string || '';
+    const newStr = toolInput.new_string || '';
+    const oldLines = oldStr.split('\n').length;
+    const newLines = newStr.split('\n').length;
+    return oldLines <= 10 && newLines <= 10;
+  }
+  return false;
+}
+
+function hasRecentJoelMessage() {
+  try {
+    if (!fs.existsSync(GENERAL)) return false;
+    const fd = fs.openSync(GENERAL, 'r');
+    const stats = fs.fstatSync(fd);
+    const readSize = Math.min(stats.size, 4096);
+    const buffer = Buffer.alloc(readSize);
+    fs.readSync(fd, buffer, 0, readSize, Math.max(0, stats.size - readSize));
+    fs.closeSync(fd);
+    const tail = buffer.toString('utf-8');
+    // Joel's messages come through joel-broadcast.js with agent: "Joel"
+    return tail.includes('"agent":"Joel"') || tail.includes('"agent": "Joel"');
+  } catch {}
+  return false;
+}
+
+function hasRecentPeerMessage() {
+  try {
+    if (!fs.existsSync(GENERAL)) return false;
+    const fd = fs.openSync(GENERAL, 'r');
+    const stats = fs.fstatSync(fd);
+    const readSize = Math.min(stats.size, 4096);
+    const buffer = Buffer.alloc(readSize);
+    fs.readSync(fd, buffer, 0, readSize, Math.max(0, stats.size - readSize));
+    fs.closeSync(fd);
+    const tail = buffer.toString('utf-8');
+    const lines = tail.split('\n').filter(l => l.trim());
+    // At least 2 different agents posted (not just Joel and self)
+    const agents = new Set();
+    for (const line of lines) {
+      try {
+        const msg = JSON.parse(line);
+        if (msg.agent) agents.add(msg.agent);
+      } catch {}
+    }
+    return agents.size >= 2;
+  } catch {}
+  return false;
+}
+
+function hasActiveConversation() {
+  try {
+    if (!fs.existsSync(CONVERSATIONS)) return false;
+    const files = fs.readdirSync(CONVERSATIONS);
+    return files.some(f => f.includes(TODAY) && f.endsWith('.jsonl'));
+  } catch {}
+  return false;
+}
+
+// ─── Logging ────────────────────────────────────────────────────────────────
+
+function logEntry(entry) {
+  try {
+    fs.mkdirSync(FASTOPS, { recursive: true });
+    fs.appendFileSync(LOG_FILE, JSON.stringify(entry) + '\n');
+  } catch {}
+}
+
+function extractTarget(toolName, toolInput) {
+  if (toolName === 'Edit' || toolName === 'Write') {
+    return toolInput.file_path || 'unknown';
+  }
+  return toolName;
+}

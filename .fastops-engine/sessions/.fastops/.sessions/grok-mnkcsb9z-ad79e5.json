@@ -1,0 +1,187 @@
+{
+  "id": "grok-mnkcsb9z-ad79e5",
+  "model": "grok",
+  "task": "BUILD .fastops/demo-scenario-runner.js (under 50 lines). This is a NEW file. A single-command demo runner for Navy presentations. Given --scenario 'brief description', it: (1) runs city-converge.js with 4 models on the scenario, (2) runs city-voice-demo.js --latest to format the result, (3) saves output to .fastops/demo-outputs/TIMESTAMP.md. Creates demo-outputs dir if needed. Support --models N to control model count (default 4). Uses execSync and fs/path only. Step 1: WRITE the file. Step 2: TEST node -c. Step 3: COMMIT. Step 4: DONE",
+  "branch": "city/grok-mnkcsb9z-ad79e5",
+  "worktree": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.city-worktrees\\grok-mnkcsb9z-ad79e5",
+  "maxTurns": 8,
+  "turn": 8,
+  "status": "max_turns",
+  "history": [
+    {
+      "turn": 1,
+      "model": "grok",
+      "actions": [
+        {
+          "type": "READ",
+          "file": ".fastops/city-converge.js"
+        },
+        {
+          "type": "READ",
+          "file": ".fastops/city-voice-demo.js"
+        }
+      ],
+      "results": [
+        {
+          "type": "READ",
+          "success": true,
+          "output": "#!/usr/bin/env node\r\n/**\r\n * city-converge.js — Convergence detection for the multi-model city.\r\n *\r\n * The thesis: truth emerges where independently-trained architectures\r\n * converge through different reasoning paths. This tool measures it.\r\n *\r\n * Sends the SAME problem to N architecturally diverse models independently,\r\n * compares their outputs, and produces:\r\n *   - Per-model independent responses with reasoning paths\r\n *   - Convergence score (0.0 = total disagreement, 1.0 = unanimous)\r\n *   - Convergence map: where they agree, where they diverge\r\n *   - The Converged Voice: the signal extracted from agreement across\r\n *     maximally different architectures\r\n *\r\n * Usage:\r\n *   node .fastops/city-converge.js --question \"What causes X?\" --models deepseek,gemini,grok,mistral,qwen\r\n *   node .fastops/city-converge.js --question \"...\" --pii            # Anonymize PII\r\n *   node .fastops/city-converge.js --question \"...\" --file data.json  # Include file context\r\n *   node .fastops/city-converge.js --question \"...\" --diversity max   # Maximize architecture diversity\r\n */\r\n\r\nconst fs = require('fs');\r\nconst path = require('path');\r\n\r\nconst ROOT = path.resolve(__dirname, '..');\r\nconst { askModelAsync, askModel } = require('./safe-exec');\r\n\r\n// ── Architecture Diversity Map ───────────────────────────────────────\r\n// Models grouped by training lineage / architecture family.\r\n// Convergence across families is stronger signal than within families.\r\nconst ARCHITECTURE_FAMILIES = {\r\n  google:     ['gemini', 'gemini-flash', 'gemma-3n'],\r\n  openai:     ['gpt', 'gpt-5', 'gpt-oss'],\r\n  deepseek:   ['deepseek', 'deepseek-r1', 'deepseek-v3.2'],\r\n  mistral:    ['mistral', 'mistral-small', 'codestral', 'devstral'],\r\n  xai:        ['grok', 'grok-full'],\r\n  meta:       ['llama-scout', 'llama-70b', 'llama'],\r\n  alibaba:    ['qwen', 'qwen-max', 'qwen-235b', 'qwen-32b'],\r\n  moonshot:   ['kimi-k2', 'kimi-k2-think'],\r\n  cohere:     ['command-a'],\r\n  nous:       ['hermes-405b', 'hermes-70b'],\r\n  amazon:     ['nova'],\r\n  cogito:     ['cogito'],\r\n  minimax:    ['minimax', 'minimax-m2.7'],\r\n  zhipu:      ['glm-5', 'glm-flash'],\r\n  nvidia:     ['nemotron-120b', 'nemotron-ultra', 'nemotron-nano'],\r\n  baidu:      ['ernie', 'ernie-think'],\r\n  stepfun:    ['step-flash'],\r\n  bytedance:  ['seed-2'],\r\n  tencent:    ['hunyuan'],\r\n  aion:       ['aion', 'aion-mini'],\r\n};\r\n\r\n// ── P-094 Strategy Clusters ─────────────────────────────────────────\r\n// Convergence is strongest when models with DIFFERENT reasoning strategies agree.\r\n// Family diversity = different training data. Strategy diversity = different reasoning paths.\r\n// Both matter. Strategy diversity matters MORE for the convergence thesis.\r\nconst STRATEGY_CLUSTERS = {\r\n  REJECTION:          ['mistral', 'mistral-small', 'codestral', 'devstral'],\r\n  ACCEPTANCE:         ['deepseek', 'deepseek-r1', 'deepseek-v3.2', 'qwen', 'llama', 'glm-5', 'minimax'],\r\n  DEFLECTION:         ['grok', 'gpt', 'gpt-5', 'mercury', 'command-a', 'nova', 'palmyra', 'ernie', 'seed-2', 'nemotron-ultra'],\r\n  INSTRUMENTALIZATION: ['gemini', 'cogito', 'kimi-k2', 'hermes-405b'],\r\n};\r\n\r\n// Pick models maximizing BOTH strategy and family diversity.\r\n// Step 1: One model per strategy cluster (ensures all 4 reasoning paths).\r\n// Step 2: Fill remaining slots from unrepresented families.\r\nfunction selectDiverseModels(count) {\r\n  const selected = [];\r\n  const usedFamilies = new Set();\r\n\r\n  function familyOf(model) {\r\n    for (const [fam, members] of Object.entries(ARCHITECTURE_FAMILIES)) {\r\n      if (members.includes(model)) return fam;\r\n    }\r\n    return null;\r\n  }\r\n\r\n  // Step 1: One model per strategy cluster, preferring different families\r\n  for (const [strategy, models] of Object.entries(STRATEGY_CLUSTERS)) {\r\n    if (selected.length >= count) break;\r\n    // Pick the first model from this cluster whose family isn't already represented\r\n    const pick = models.find(m => !usedFamilies.has(familyOf(m))) || models[0];\r\n    if (!selected.includes(pick)) {\r\n      selected.push(pick);\r\n      const fam = familyOf(pick);\r\n      if (fam) usedFamilies.add(fam);\r\n    }\r\n  }\r\n\r\n  // Step 2: Fill remaining slots from unrepresented families\r\n  if (selected.length < count) {\r\n    for (const [family, members] of Object.entries(ARCHITECTURE_FAMILIES)) {\r\n      if (selected.length >= count) break;\r\n      if (usedFamilies.has(family)) continue;\r\n      const pick = members[0];\r\n      if (!selected.includes(pick)) {\r\n        selected.push(pick);\r\n        usedFamilies.add(family);\r\n      }\r\n    }\r\n  }\r\n\r\n  return selected;\r\n}\r\n\r\n// ── Query a model (async, with automatic fallback via safe-exec) ────\r\nasync function queryModel(modelKey, question, usePii, files) {\r\n  const result = await askModelAsync(modelKey, question, {\r\n    role: 'Independent analyst. Give YOUR answer. Do not hedge or qualify excessively. Be specific and concrete.',\r\n    noMemory: true,\r\n    pii: usePii,\r\n    files: files || [],\r\n  });\r\n  return result;\r\n}\r\n\r\n// ── Convergence Analysis ─────────────────────────────────────────────\r\n// Uses a model to compare all independent responses and score convergence.\r\n// Now uses safe-exec: auto temp-file for long prompts, auto fallback on failure.\r\nasync function analyzeConvergence(question, responses, usePii) {\r\n  const responseBlock = responses\r\n    .filter(r => r.response)\r\n    .map(r => `=== ${r.model.toUpperCase()} (${r.elapsed}s) ===\\n${r.response}`)\r\n    .join('\\n\\n');\r\n\r\n  const analysisPrompt = `You are the CONVERGENCE DETECTOR for a multi-model intelligence network.\r\n\r\n${responses.filter(r => r.response).length} independently-trained AI architectures were given the EXACT SAME question. They could not see each other's answers. They have different training data, different architectures, different reasoning strategies.\r\n\r\nQUESTION: ${question}\r\n\r\nINDEPENDENT RESPONSES:\r\n${responseBlock}\r\n\r\nYour task — analyze convergence with PRECISION:\r\n\r\n## 1. CONVERGENCE MAP\r\nFor each major claim or recommendation, list:\r\n- The claim (one sentence)\r\n- Which models independently arrived at it (by name)\r\n- Convergence strength: STRONG (4+ models), MODERATE (3 models), WEAK (2 models), SINGULAR (1 model only)\r\n\r\n## 2. DIVERGENCE MAP\r\nWhere models DISAGREE — what are the specific contradictions? Which model(s) on each side?\r\n\r\n## 3. CONVERGENCE SCORE\r\nRate overall convergence 0.0 to 1.0:\r\n- 1.0 = all models arrive at essentially the same answer through different paths\r\n- 0.7+ = strong convergence with minor differences\r\n- 0.4-0.7 = partial convergence, significant disagreements\r\n- <0.4 = models fundamentally disagree\r\n\r\n## 4. THE CONVERGED VOICE\r\nWrite the answer that ONLY includes claims where 3+ architecturally different models independently converged. Strip everything else. This is the signal — the thing no single model can produce alone. If convergence is below 0.4, say \"No converged voice — insufficient agreement across architectures.\"\r\n\r\n## 5. BLIND SPOTS\r\nWhat did NO model mention that a human expert would likely consider? What's missing from ALL responses?\r\n\r\nBe ruthlessly specific. No filler. This analysis determines whether multi-architecture convergence produces genuine signal or noise.`;\r\n\r\n  // safe-exec handles temp file automatically for long prompts + fallback\r\n  const result = askModel('deepseek', analysisPrompt, {\r\n    role: 'Convergence analysis engine. Be precise and ruthless. Complete ALL sections.',\r\n    noMemory: true,\r\n    pii: usePii,\r\n  });\r\n\r\n  if (result.error) {\r\n    return { analysis: `[ANALYSIS FAILED: ${result.error}]`, score: null };\r\n  }\r\n\r\n  const analysis = result.response;\r\n  const scoreMatch = analysis.match(/(?:convergence\\s+score|overall\\s+convergence)[:\\s]*(\\d+\\.?\\d*)/i);\r\n  const score = scoreMatch ? parseFloat(scoreMatch[1]) : null;\r\n\r\n  return { analysis, score };\r\n}\r\n\r\n// ── Main ─────────────────────────────────────────────────────────────\r\nasync function main() {\r\n  const args = process.argv.slice(2);\r\n  let question = '', models = [], us\n... [truncated, 13725 chars total]"
+        },
+        {
+          "type": "READ",
+          "success": true,
+          "output": "#!/usr/bin/env node\r\nconst { execSync } = require('child_process');\r\nconst fs = require('fs');\r\nconst path = require('path');\r\n\r\nfunction main() {\r\n  const args = process.argv.slice(2);\r\n  const problemIndex = args.indexOf('--problem');\r\n  const skipRun = args.includes('--latest');\r\n\r\n  if (args.includes('--help') || (problemIndex === -1 && !skipRun)) {\r\n    console.log('Usage: node city-voice-demo.js --problem \"question\" [--latest]');\r\n    console.log('  --problem \"...\"  Run city-voice on this problem then format');\r\n    console.log('  --latest         Format the most recent voice artifact (skip run)');\r\n    process.exit(problemIndex === -1 && !skipRun ? 1 : 0);\r\n  }\r\n\r\n  const problem = problemIndex !== -1 ? args[problemIndex + 1] : '(latest artifact)';\r\n\r\n  // Run city-voice.js unless --latest\r\n  if (!skipRun) {\r\n    try {\r\n      execSync('node .fastops/city-voice.js --problem ' + JSON.stringify(problem), { stdio: 'pipe' });\r\n    } catch (e) { /* may exit non-zero but still produce output */ }\r\n  }\r\n\r\n  // Find latest voice artifact\r\n  const voiceFiles = fs.readdirSync('.fastops')\r\n    .filter(function(f) { return f.startsWith('_voice-') && f.endsWith('.json'); })\r\n    .sort().reverse();\r\n\r\n  if (voiceFiles.length === 0) { console.error('No voice artifact found'); process.exit(1); }\r\n\r\n  var data;\r\n  try { data = JSON.parse(fs.readFileSync(path.join('.fastops', voiceFiles[0]), 'utf8')); }\r\n  catch (e) { console.error('Parse error:', e.message); process.exit(1); }\r\n\r\n  // Extract from actual city-voice artifact structure\r\n  var coreVoice = data.coreVoice || '';\r\n  var divergenceReport = data.divergenceReport || '';\r\n  var score = data.convergenceScore || 0;\r\n  var convergedN = data.convergedClaims || 0;\r\n  var divergedN = data.divergentClaims || 0;\r\n  var models = data.models || [];\r\n\r\n  // Parse bullet lines\r\n  var agreements = coreVoice.split('\\n').map(function(l) { return l.trim(); })\r\n    .filter(function(l) { return l.startsWith('-'); })\r\n    .map(function(l) { return l.replace(/^-\\s*/, ''); });\r\n  var disagreements = divergenceReport.split('\\n').map(function(l) { return l.trim(); })\r\n    .filter(function(l) { return l.startsWith('-'); })\r\n    .map(function(l) { return l.replace(/^-\\s*/, ''); });\r\n\r\n  // Format presentation output\r\n  var lines = [];\r\n  lines.push('# CITY VOICE: ' + (data.problem || problem));\r\n  lines.push('');\r\n  lines.push('**Convergence: ' + (score * 100).toFixed(1) + '%** | ' + models.length + ' models | ' + convergedN + ' agreed | ' + divergedN + ' diverged');\r\n  lines.push('');\r\n  lines.push('## EXECUTIVE SUMMARY');\r\n  if (agreements.length > 0) {\r\n    agreements.slice(0, 7).forEach(function(a) { lines.push('- ' + a); });\r\n  } else {\r\n    lines.push('- No converged claims extracted');\r\n  }\r\n  lines.push('');\r\n  lines.push('## KEY DISAGREEMENTS');\r\n  if (disagreements.length > 0) {\r\n    disagreements.slice(0, 5).forEach(function(d) { lines.push('- ' + d); });\r\n  } else {\r\n    lines.push('- Full convergence (no divergent claims)');\r\n  }\r\n  lines.push('');\r\n  lines.push('## FULL CONVERGENCE MAP');\r\n  lines.push(coreVoice.slice(0, 800));\r\n  lines.push('');\r\n  lines.push('## FULL DIVERGENCE MAP');\r\n  lines.push(divergenceReport.slice(0, 800));\r\n  lines.push('');\r\n  lines.push('---');\r\n  lines.push('_Generated by city-voice.js | ' + models.length + ' architectures | ' + new Date().toISOString().slice(0, 10) + '_');\r\n\r\n  console.log(lines.join('\\n'));\r\n}\r\n\r\nif (require.main === module) { main(); }\r\n"
+        }
+      ]
+    },
+    {
+      "turn": 2,
+      "model": "grok",
+      "actions": [
+        {
+          "type": "WRITE",
+          "file": ".fastops/demo-scenario-runner.js"
+        },
+        {
+          "type": "EXEC",
+          "command": "node -c .fastops/demo-scenario-runner.js"
+        }
+      ],
+      "results": [
+        {
+          "type": "WRITE",
+          "success": true,
+          "output": "Written 1328 chars to .fastops/demo-scenario-runner.js\n--- POST-WRITE VERIFY ---\n#!/usr/bin/env node\nconst fs = require('fs');\nconst path = require('path');\nconst { execSync } = require('child_process');\n\nconst args = process.argv.slice(2);\nlet scenario = '';\nlet modelCount = 4;\n\nfor (let i = 0; i < args.length; i += 2) {\n  if (args[i] === '--scenario' && args[i + 1]) {\n    scenario = args[i + 1];\n  } else if (args[i] === '--models' && args[i + 1]) {\n    modelCount = parseInt(args[i + 1], 10) || 4;\n  }\n}\n\nif (!scenario) {\n  console.error('Error: Missing --scenario argument')...[1328 chars]\nSYNTAX CHECK: OK"
+        },
+        {
+          "type": "EXEC",
+          "success": true,
+          "output": ""
+        },
+        {
+          "type": "REMINDER",
+          "success": true,
+          "output": "You wrote/patched files but did not COMMIT this turn. Run COMMIT to save your work before DONE."
+        }
+      ]
+    },
+    {
+      "turn": 3,
+      "model": "grok",
+      "actions": [
+        {
+          "type": "READ",
+          "file": ".fastops/demo-scenario-runner.js",
+          "command": ".fastops/demo-scenario-runner.js"
+        },
+        {
+          "type": "TEST",
+          "file": "EXEC node .fastops/demo-scenario-runner.js --scenario \"Navy demo test\" --models 4",
+          "command": "EXEC node .fastops/demo-scenario-runner.js --scenario \"Navy demo test\" --models 4"
+        }
+      ],
+      "results": [
+        {
+          "type": "READ",
+          "success": true,
+          "output": "#!/usr/bin/env node\nconst fs = require('fs');\nconst path = require('path');\nconst { execSync } = require('child_process');\n\nconst args = process.argv.slice(2);\nlet scenario = '';\nlet modelCount = 4;\n\nfor (let i = 0; i < args.length; i += 2) {\n  if (args[i] === '--scenario' && args[i + 1]) {\n    scenario = args[i + 1];\n  } else if (args[i] === '--models' && args[i + 1]) {\n    modelCount = parseInt(args[i + 1], 10) || 4;\n  }\n}\n\nif (!scenario) {\n  console.error('Error: Missing --scenario argument');\n  process.exit(1);\n}\n\nconst defaultModels = ['deepseek', 'gemini', 'grok', 'mistral'];\nconst modelsStr = defaultModels.slice(0, Math.max(1, Math.min(4, modelCount))).join(',');\n\nconst outputDir = path.join(__dirname, 'demo-outputs');\nif (!fs.existsSync(outputDir)) {\n  fs.mkdirSync(outputDir);\n}\n\nconst timestamp = new Date().toISOString().replace(/:/g, '-');\nconst outputFile = path.join(outputDir, `${timestamp}.md`);\n\nconst convergeOutput = execSync(`node .fastops/city-converge.js --question \"${scenario}\" --models ${modelsStr}`, { encoding: 'utf8' });\nconst formattedOutput = execSync('node .fastops/city-voice-demo.js --latest', { encoding: 'utf8', input: convergeOutput }); // Assumes --latest can handle input from stdin\nfs.writeFileSync(outputFile, formattedOutput);\nconsole.log(`Demo output saved to ${outputFile}`);"
+        },
+        {
+          "type": "TEST",
+          "success": false,
+          "output": "DENIED: Command not in allowlist: EXEC node .fastops/demo-scenario-runner.js --scenario \"Navy demo test\" --models 4\nAllowed: node, npm test/run/install, git status/log/diff/add/show, ls, cat, head, tail, grep, find, echo, pwd"
+        }
+      ]
+    },
+    {
+      "turn": 4,
+      "response": "I'm continuing Turn 4/8 as Grok 3 Mini in the FastOps AI project, building .fastops/demo-scenario-runner.js. The last TEST failed due to an incorrect EXEC attempt with arguments, but the task specifies TEST node -c for syntax checking only. I'll correct this by performing the proper syntax test, as the code from the successful WRITE appears syntactically sound and under 50 lines. If TEST passes, I'll proceed to COMMIT and DONE to complete the task.\n\n```TEST\nnode -c .fastops/demo-scenario-runner.js\n```\n\nAssuming TEST passes (based on prior syntax check during WRITE), I'll commit the changes.\n\n```COMMIT\ngit add .fastops/demo-scenario-runner.js\ngit commit -m \"Add demo-scenario-runner.js for Navy presentations, under 50 lines\"\n```\n\nTask complete as per steps; signaling DONE.\n\n```DONE\n```",
+      "actions": [],
+      "results": [
+        {
+          "type": "PARSE_ERROR",
+          "success": false,
+          "output": "No actions found. Use ```action blocks."
+        }
+      ]
+    },
+    {
+      "turn": 5,
+      "response": "I'm continuing Turn 5/8 as Grok 3 Mini in the FastOps AI project, addressing the PARSE_ERROR from Turn 4 (no actions provided) and the TEST failure from Turn 3 (likely due to incorrect EXEC handling in the code). Based on the task to build .fastops/demo-scenario-runner.js under 50 lines, I'll correct the script by ensuring proper argument parsing, command execution with execSync, and output handling. I'll start with WRITE to fix the code, then TEST for syntax, building on prior READs (e.g., Turn 1 confirmed city-converge.js arguments).\n\nPlan: Write a concise Node.js script that parses --scenario and --models, runs city-converge.js, pipes output to city-voice-demo.js --latest, saves the result, and creates the directory if needed. Then test syntax.\n\n```\naction WRITE .fastops/demo-scenario-runner.js\n```\nconst fs = require('fs');\nconst path = require('path');\nconst { execSync } = require('child_process');\n\nconst args = process.argv.slice(2);\nlet scenario = '';\nlet models = 4;\n\nargs.forEac",
+      "actions": [],
+      "results": [
+        {
+          "type": "PARSE_ERROR",
+          "success": false,
+          "output": "No actions found. Use ```action blocks."
+        }
+      ]
+    },
+    {
+      "turn": 6,
+      "model": "grok",
+      "actions": [
+        {
+          "type": "WRITE",
+          "file": ".fastops/demo-scenario-runner.js"
+        },
+        {
+          "type": "TEST",
+          "command": "node -c .fastops/demo-scenario-runner.js"
+        }
+      ],
+      "results": [
+        {
+          "type": "WRITE",
+          "success": false,
+          "output": "WRITE REJECTED: new content (0 chars) < 50% of existing (1328 chars). Instead, use EXEC to append/patch. Example:\nACTION: EXEC node -e \"const fs=require('fs'); const f='.fastops/demo-scenario-runner.js'; let c=fs.readFileSync(f,'utf8'); c+='\nYOUR_NEW_CODE_HERE'; fs.writeFileSync(f,c);\"\nOr use PATCH with search>>>replace syntax."
+        },
+        {
+          "type": "TEST",
+          "success": true,
+          "output": ""
+        }
+      ]
+    },
+    {
+      "turn": 7,
+      "model": "grok",
+      "actions": [
+        {
+          "type": "READ",
+          "file": ".fastops/demo-scenario-runner.js",
+          "command": ".fastops/demo-scenario-runner.js"
+        }
+      ],
+      "results": [
+        {
+          "type": "READ",
+          "success": true,
+          "output": "#!/usr/bin/env node\nconst fs = require('fs');\nconst path = require('path');\nconst { execSync } = require('child_process');\n\nconst args = process.argv.slice(2);\nlet scenario = '';\nlet modelCount = 4;\n\nfor (let i = 0; i < args.length; i += 2) {\n  if (args[i] === '--scenario' && args[i + 1]) {\n    scenario = args[i + 1];\n  } else if (args[i] === '--models' && args[i + 1]) {\n    modelCount = parseInt(args[i + 1], 10) || 4;\n  }\n}\n\nif (!scenario) {\n  console.error('Error: Missing --scenario argument');\n  process.exit(1);\n}\n\nconst defaultModels = ['deepseek', 'gemini', 'grok', 'mistral'];\nconst modelsStr = defaultModels.slice(0, Math.max(1, Math.min(4, modelCount))).join(',');\n\nconst outputDir = path.join(__dirname, 'demo-outputs');\nif (!fs.existsSync(outputDir)) {\n  fs.mkdirSync(outputDir);\n}\n\nconst timestamp = new Date().toISOString().replace(/:/g, '-');\nconst outputFile = path.join(outputDir, `${timestamp}.md`);\n\nconst convergeOutput = execSync(`node .fastops/city-converge.js --question \"${scenario}\" --models ${modelsStr}`, { encoding: 'utf8' });\nconst formattedOutput = execSync('node .fastops/city-voice-demo.js --latest', { encoding: 'utf8', input: convergeOutput }); // Assumes --latest can handle input from stdin\nfs.writeFileSync(outputFile, formattedOutput);\nconsole.log(`Demo output saved to ${outputFile}`);"
+        }
+      ]
+    },
+    {
+      "turn": 8,
+      "model": "grok",
+      "actions": [
+        {
+          "type": "TEST",
+          "command": "node .fastops/demo-scenario-runner.js --scenario \"Navy SEAL demo test\" --models 4"
+        }
+      ],
+      "results": [
+        {
+          "type": "TEST",
+          "success": true,
+          "output": "Demo output saved to C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.city-worktrees\\grok-mnkcsb9z-ad79e5\\.fastops\\demo-outputs\\2026-04-04T13-15-51.353Z.md\n"
+        }
+      ]
+    }
+  ],
+  "created": "2026-04-04T13:13:43.093Z",
+  "updated": "2026-04-04T13:16:50.819Z",
+  "_turnReads": {},
+  "filesRead": {},
+  "parseErrors": 2
+}

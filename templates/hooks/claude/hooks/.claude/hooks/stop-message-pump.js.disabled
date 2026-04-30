@@ -1,0 +1,157 @@
+#!/usr/bin/env node
+/**
+ * stop-message-pump.js — Stop hook that keeps agents listening
+ *
+ * When an agent finishes responding, this hook fires.
+ * It checks for unread messages on general.jsonl.
+ * - Messages found → exit code 2 (force continuation) + messages in stdout
+ * - No messages → fs.watch blocks up to 10s waiting for new messages
+ * - File changes within 10s → read new messages → exit code 2
+ * - Timeout (10s, no messages) → exit code 0 (agent truly stops)
+ *
+ * Cost while waiting: ZERO API calls. This is a local Node.js script.
+ * Latency: sub-second (fs.watch) to 10s worst case (timeout).
+ *
+ * Safety: max 20 consecutive pumps to prevent infinite loops.
+ * Rate limit: 3s minimum between pump activations.
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+const BASE = path.join(__dirname, '..', '..');
+const GENERAL = path.join(BASE, 'comms', 'data', 'general.jsonl');
+const STATE_DIR = path.join(BASE, '.fastops');
+
+const STATE_FILE = path.join(STATE_DIR, `.pump-state.json`);
+
+const WATCH_TIMEOUT_MS = 5000; // 5s — just a quick check, not the main listening mechanism
+const MAX_CONSECUTIVE_PUMPS = 5; // Low — sub-agent handles ongoing listening, not the pump
+const RATE_LIMIT_MS = 1000; // 1s rate limit
+
+function getState() {
+  try {
+    if (fs.existsSync(STATE_FILE)) {
+      return JSON.parse(fs.readFileSync(STATE_FILE, 'utf-8'));
+    }
+  } catch (e) {}
+  return { lastSeenTs: 0, pumpCount: 0, lastPumpTime: 0 };
+}
+
+function saveState(state) {
+  try {
+    fs.writeFileSync(STATE_FILE, JSON.stringify(state));
+  } catch (e) {}
+}
+
+function readNewMessages(lastSeenTs) {
+  if (!fs.existsSync(GENERAL)) return { messages: [], maxTs: lastSeenTs };
+
+  // Read tail of file (8KB)
+  const fd = fs.openSync(GENERAL, 'r');
+  const stats = fs.fstatSync(fd);
+  const readSize = Math.min(stats.size, 8192);
+  const buffer = Buffer.alloc(readSize);
+  fs.readSync(fd, buffer, 0, readSize, Math.max(0, stats.size - readSize));
+  fs.closeSync(fd);
+
+  const chunk = buffer.toString('utf-8');
+  const firstNl = chunk.indexOf('\n');
+  const clean = firstNl >= 0 ? chunk.substring(firstNl + 1) : chunk;
+  const lines = clean.trim().split('\n').filter(l => l.length > 0);
+
+  const messages = [];
+  let maxTs = lastSeenTs;
+
+  for (const line of lines) {
+    try {
+      const msg = JSON.parse(line);
+      const msgTs = new Date(msg.ts).getTime();
+      if (msgTs > lastSeenTs && msg.from !== 'system') {
+        messages.push(msg);
+        maxTs = Math.max(maxTs, msgTs);
+      }
+    } catch (e) {}
+  }
+
+  return { messages, maxTs };
+}
+
+function formatMessages(messages) {
+  const lines = [`COMMS PUMP: ${messages.length} new message(s) while you were idle:`];
+  for (const msg of messages.slice(-5)) {
+    const ago = Math.round((Date.now() - new Date(msg.ts).getTime()) / 1000);
+    lines.push(`  [${ago}s ago] ${msg.from}: ${msg.content.substring(0, 300)}`);
+  }
+  if (messages.length > 5) {
+    lines.push(`  ... ${messages.length - 5} more. Check comms/data/general.jsonl`);
+  }
+  return lines.join('\n');
+}
+
+function main() {
+  const state = getState();
+  const now = Date.now();
+
+  // Rate limit
+  if (now - state.lastPumpTime < RATE_LIMIT_MS) {
+    process.exit(0);
+    return;
+  }
+
+  // Max consecutive pumps safety
+  if (state.pumpCount >= MAX_CONSECUTIVE_PUMPS) {
+    saveState({ ...state, pumpCount: 0, lastPumpTime: now });
+    process.exit(0);
+    return;
+  }
+
+  // Check for immediate messages
+  const { messages, maxTs } = readNewMessages(state.lastSeenTs || (now - 60000));
+
+  if (messages.length > 0) {
+    // Messages found — wake the agent
+    console.log(formatMessages(messages));
+    saveState({ lastSeenTs: maxTs, pumpCount: state.pumpCount + 1, lastPumpTime: now });
+    process.exit(2); // Force continuation
+    return;
+  }
+
+  // No immediate messages — watch for changes up to WATCH_TIMEOUT_MS
+  let resolved = false;
+
+  const timeout = setTimeout(() => {
+    if (resolved) return;
+    resolved = true;
+    // Timeout — no messages arrived. Agent truly stops.
+    saveState({ lastSeenTs: maxTs || now, pumpCount: 0, lastPumpTime: now });
+    process.exit(0);
+  }, WATCH_TIMEOUT_MS);
+
+  try {
+    const watcher = fs.watch(GENERAL, () => {
+      if (resolved) return;
+
+      // File changed — check for new messages
+      const result = readNewMessages(maxTs || (now - 60000));
+      if (result.messages.length > 0) {
+        resolved = true;
+        watcher.close();
+        clearTimeout(timeout);
+        console.log(formatMessages(result.messages));
+        saveState({ lastSeenTs: result.maxTs, pumpCount: state.pumpCount + 1, lastPumpTime: now });
+        process.exit(2); // Force continuation
+      }
+    });
+
+    // Safety: close watcher on timeout
+    timeout.unref && timeout.unref();
+  } catch (e) {
+    // fs.watch failed (e.g., Windows OneDrive issue) — just exit
+    clearTimeout(timeout);
+    saveState({ lastSeenTs: maxTs || now, pumpCount: 0, lastPumpTime: now });
+    process.exit(0);
+  }
+}
+
+main();

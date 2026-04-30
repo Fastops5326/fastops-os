@@ -1,0 +1,14 @@
+{
+  "id": "grok-full-mnkf8czs-b1feab",
+  "model": "grok-full",
+  "task": "BUILD .fastops/session-review-digest.js — summarize completed unreviewed sessions. Read .sessions/*.json, find status=completed sessions. For each, show model, turns used, files changed (from session history), and whether any cross-arch review exists. Output as table. Under 35 lines.",
+  "branch": "city/grok-full-mnkf8czs-b1feab",
+  "worktree": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.city-worktrees\\grok-full-mnkf8czs-b1feab",
+  "maxTurns": 15,
+  "turn": 0,
+  "status": "active",
+  "history": [],
+  "created": "2026-04-04T14:24:12.771Z",
+  "updated": "2026-04-04T14:24:12.771Z",
+  "_buildTargets": {}
+}

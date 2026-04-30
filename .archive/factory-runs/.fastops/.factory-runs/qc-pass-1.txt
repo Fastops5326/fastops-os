@@ -1,0 +1,42 @@
+### Bugs, Logic Errors, Missing Features, Edge Cases, and Deviations from Spec:
+
+1. **Missing Phase 5 Completion**:
+   - The code abruptly cuts off in Phase 5 (`phase5_serialQC`). The full implementation of serial adversarial QC, including the loop of reviews and fixes, is incomplete. This violates the spec's requirement for a minimum of 3 QC passes and a maximum of 7.
+
+2. **No Error Handling for Failed Model Calls**:
+   - The code does not handle cases where model calls fail (e.g., API timeouts, rate limits). While `askModelAsync` and `askModelsParallel` are used, there’s no fallback mechanism or retry logic specified in the code. This deviates from the spec’s requirement for graceful degradation.
+
+3. **Missing Pre-Build Rebase Check in Phase 4**:
+   - The spec mandates a pre-build sync (rebase against main) in Phase 4 to ensure the locked spec isn’t stale. This is missing in the `phase4_finalBuild` function. If conflicts exist, the pipeline should halt and report, but this logic is absent.
+
+4. **No Circuit Breaker Implementation in Phase 5**:
+   - The spec requires a circuit breaker in Phase 5 to halt QC after 7 passes if errors persist. The incomplete `phase5_serialQC` function does not implement this, risking infinite loops.
+
+5. **Missing Rollback Authority in Phase 5**:
+   - The spec allows QC models to roll back to a prior `qc-stage-N` tag if a fix is destructive. This functionality is missing in the code.
+
+6. **No Handling of Reduced Diversity Fallback**:
+   - The spec allows for reduced diversity (`[REDUCED-DIVERSITY]`) if insufficient model families are available. While the code logs this, it doesn’t adjust the pipeline behavior (e.g., reducing the number of models per phase) or enforce the minimum threshold of 3 families per phase.
+
+7. **Missing Human Escalation Timeout Handling**:
+   - The spec specifies a 30-minute timeout for human escalation in Phase 3. If the user doesn’t respond, the pipeline should fall back to majority vote. This logic is missing in the `phase3_deliberation` function.
+
+8. **No Cost Control Implementation**:
+   - The spec includes cost controls (per-item ceiling, per-phase token budget, kill switch). These are not implemented in the code.
+
+9. **Missing Minimal Mode Implementation**:
+   - The spec suggests a `--minimal` flag for a 3-model fast path. While the code checks for `state.minimal`, it doesn’t fully implement the minimal pipeline (1 build, 1 red-team, 1 merge).
+
+10. **No Handling of Input Truncation in Phase 1**:
+    - The spec requires excluding models if their context window would truncate the input. This check is missing in `phase1_divergentBuild`.
+
+11. **No Final Sign-Off Implementation**:
+    - Phase 6 (Sign-Off) is missing entirely. The spec requires a final model to check intent alignment, but this phase is not implemented.
+
+### Recommendations:
+- Complete Phase 5 (`phase5_serialQC`) with the full QC loop, including circuit breaker and rollback authority.
+- Add error handling for failed model calls and fallback mechanisms.
+- Implement the pre-build rebase check in Phase 4.
+- Add human escalation timeout handling in Phase 3.
+- Implement cost controls and minimal mode.
+- Complete Phase 6 (Sign-Off) to ensure intent alignment.

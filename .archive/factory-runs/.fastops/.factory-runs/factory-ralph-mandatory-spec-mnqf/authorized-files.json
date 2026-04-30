@@ -1,0 +1,28 @@
+{
+  "runId": "factory-ralph-mandatory-spec-mnqf",
+  "scope": "Close gemini-2-5-pro convergent critique: make spec MANDATORY in exec-verify.js (no agent-authored --expect fallback for new scripts).",
+  "authorizedFiles": [
+    "environment/verification/exec-verify.js",
+    "environment/verification/specs/exec-verify.spec.json",
+    ".fastops/.spec-review-receipts.jsonl"
+  ],
+  "authorized_files": [
+    "environment/verification/exec-verify.js",
+    "environment/verification/specs/exec-verify.spec.json",
+    ".fastops/.spec-review-receipts.jsonl"
+  ],
+  "provenance": {
+    "pipeline": "ralph-loop iter + spec-review peer-QC pool",
+    "structural_change": "exec-verify.js now refuses if no spec exists at environment/verification/specs/<name>.spec.json. --expect CLI flag is still accepted as a no-op when spec provides stdout_regex, but cannot be used as a fallback when no spec exists. Closes the gemini-2-5-pro gap: agents cannot verify a new script by providing a permissive --expect regex.",
+    "sha_chain": {
+      "old_exec_verify_sha": "dfaeaa13cc954c52a0f65e8ff50295f865d8c3aec0dc4d8a19ce77566bda5ac1",
+      "new_exec_verify_sha": "6390c8a5c6896b51ab9aa0669023f7fce398d48b3e67dcddc663588aaf3a8ac2",
+      "new_spec_canonical_sha": "ace25abad9c24c29f5d1caabde6e6a1e1189d0356b434470f7aeb1e3983c5681",
+      "new_peer_review_receipt": "spec-mnqf5a01-97f26c",
+      "peer_review_tally": "5/5 PASS (grok, deepseek, kimi-k2, qwen3-max, mistral)"
+    }
+  },
+  "status": "COMPLETE",
+  "createdAt": "2026-04-08T19:06:30Z",
+  "predecessor_run": "factory-ralph-git-anchored-mnqf"
+}

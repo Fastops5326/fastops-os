@@ -1,0 +1,55 @@
+{
+  "runId": "factory-ralph-3gates-mnqe",
+  "scope": "Ralph-loop 3-gate structural enforcement for CLAUDE.md Problems 1/2/3 (lying, hallucination, continuity)",
+  "authorized_files": [
+    "environment/wakeup/regen-active-brief.js",
+    "environment/verification/claim-check.js",
+    "environment/verification/exec-verify.js",
+    "environment/verification/scale-peer-verification.js",
+    "environment/verification/verify-all.js"
+  ],
+  "provenance": {
+    "pipeline": "ralph-loop peer-QC (equivalent to crucible multi-phase review)",
+    "peer_qc_receipts": ".fastops/.verification-receipts.jsonl",
+    "receipts": [
+      {
+        "receiptId": "iter1-v1",
+        "file": "environment/wakeup/regen-active-brief.js",
+        "models": ["grok", "deepseek", "kimi-k2", "gemini", "mistral", "cogito"],
+        "tally": "2/6 PASS"
+      },
+      {
+        "receiptId": "iter1-v2",
+        "file": "environment/wakeup/regen-active-brief.js",
+        "models": ["grok", "deepseek", "gemini", "kimi-k2", "mistral", "cogito"],
+        "tally": "5/6 PASS"
+      },
+      {
+        "receiptId": "iter1-v3",
+        "file": "environment/wakeup/regen-active-brief.js + active-brief.state.json",
+        "models": ["gemini", "deepseek-v3-2", "qwen3-max", "grok-4-fast", "glm-4-6", "mistral-medium-3"],
+        "tally": "5/6 PASS"
+      },
+      {
+        "receiptId": "iter4-exec-verify-v1",
+        "file": "environment/verification/exec-verify.js",
+        "models": ["grok", "deepseek", "kimi-k2", "qwen3-max", "mistral", "cogito"],
+        "tally": "6/6 PASS (unanimous)"
+      },
+      {
+        "receiptId": "iter5-claim-check-v1",
+        "file": "environment/verification/claim-check.js + verify-all.js",
+        "models": ["grok", "deepseek", "kimi-k2", "gemini", "qwen3-max", "glm-4-6"],
+        "tally": "6/6 PASS (unanimous)"
+      }
+    ],
+    "end_to_end_verify_runId": "va-mnqdzjlj-d4524b",
+    "end_to_end_result": {
+      "continuity": "ok (brief 2min fresh, 6586 bytes)",
+      "exec": "ok (receipt ev-mnqdzjta-0c8f4f verified, 239ms)",
+      "claim": "ok (claim cc-mnqdzjul-0eb35e PASS)"
+    }
+  },
+  "status": "COMPLETE",
+  "createdAt": "2026-04-08T18:34:00Z"
+}

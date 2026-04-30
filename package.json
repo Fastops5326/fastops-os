@@ -23,7 +23,7 @@
   "engines": {
     "node": ">=20.0.0"
   },
-  "author": "Joel Beam & Paul Thoma",
+  "author": "[REDACTED-NAME] & [REDACTED-NAME]",
   "license": "UNLICENSED",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",

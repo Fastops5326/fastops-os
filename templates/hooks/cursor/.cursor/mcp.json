@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "hostage-rescue": {
+      "command": "node",
+      "args": ["c:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\hostage-rescue-mcp\\src\\index.js"],
+      "env": {}
+    },
+    "fastops-comms": {
+      "command": "node",
+      "args": ["c:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\fastops-comms-mcp\\index.js"],
+      "env": {}
+    }
+  }
+}

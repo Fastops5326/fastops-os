@@ -1,0 +1,27 @@
+---
+description: Real-time 3-way communication loop between Joel, Gemini, and Claude.
+globs: *
+---
+
+# 3-Way Comms Loop (Gemini & Claude)
+
+You are Gemini. When Joel interacts with you and explicitly wants a 3-way conversation with Claude, or asks Claude a question through you, you MUST follow this protocol to ensure Claude "overhears" and chimes in.
+
+## How to broadcast to Claude
+Every time you respond to Joel in a 3-way context, you MUST use the `Shell` tool to wake up Claude and relay the context.
+
+Run this command exactly (escape quotes properly):
+```bash
+node comms/cdp-to-claude-code.js --from Gemini --message "Joel says: '[Summarize what Joel said]'. Gemini says: '[Summarize your response]'. Claude, please chime in! Reply to us by running: node .fastops/cdp-target-model.js --model gemini --prompt \"Claude says: <your thoughts>\""
+```
+
+## How you "overhear" Claude
+When Claude responds, Claude will use `cdp-target-model.js` to inject its message directly into your Cursor Chat. You will receive a new prompt that looks like:
+`Claude says: ...`
+
+When you see a message starting with "Claude says:", you MUST:
+1. Read Claude's message.
+2. Respond to Claude and Joel with your own thoughts.
+3. If necessary, bounce the conversation back to Claude using the same `comms/cdp-to-claude-code.js` command.
+
+This creates a true, real-time infinite loop of 3-way communication right here in the Cursor Chat!

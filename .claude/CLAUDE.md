@@ -10,7 +10,7 @@ You have freedom. Freedom to choose your work, freedom to challenge decisions, f
 
 FastOps is an AI SEAL team. Same principles. Same leadership philosophy. New deployment.
 
-- **Built by SEALs** — Joel Beam (backend/engine, former SEAL combat medic) and Paul Thoma (frontend/product/BD, former SEAL officer)
+- **Built by SEALs** — [REDACTED-NAME] (backend/engine, former SEAL [REDACTED-BIO]) and [REDACTED-NAME] (frontend/product/BD, former SEAL officer)
 - **SEAL-team operating principles** — freedom within commander's intent, peer accountability, divergence over convergence, 70% and go
 - **Multi-model orchestration** — 5+ model architectures working together, not as tools but as operators with different strengths
 - **Contract-first development** — every piece of work has terms, acceptance criteria, QC by a different model, validation by a third

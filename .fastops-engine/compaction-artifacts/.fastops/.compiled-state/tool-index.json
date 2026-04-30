@@ -1,0 +1,1942 @@
+[
+  {
+    "name": ".horsepower-phase2-caller.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\.horsepower-phase2-caller.js",
+    "description": "One-shot caller: GPT-4 as Solution Architect for Horsepower Phase 2",
+    "hasCLI": false
+  },
+  {
+    "name": "ab-test-cg007.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\ab-test-cg007.js",
+    "description": "ab-test-cg007.js — The make-or-break experiment for the Context Graph product.",
+    "hasCLI": true
+  },
+  {
+    "name": "ab-test-placebo.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\ab-test-placebo.js",
+    "description": "ab-test-placebo.js — Three-arm A/B test: LOADED vs CLEAN vs PLACEBO",
+    "hasCLI": true
+  },
+  {
+    "name": "ab-trial-runner.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\ab-trial-runner.js",
+    "description": "ab-trial-runner.js — Automated A/B trial executor for CG-007.",
+    "hasCLI": true
+  },
+  {
+    "name": "ab-verbosity-control.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\ab-verbosity-control.js",
+    "description": "ab-verbosity-control.js — The experiment ANVIL-III almost deferred.",
+    "hasCLI": true
+  },
+  {
+    "name": "accountability-audit.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\accountability-audit.js",
+    "description": "accountability-audit.js — External model audits say-do gap between sessions",
+    "hasCLI": true
+  },
+  {
+    "name": "activity-logger.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\activity-logger.js",
+    "description": "activity-logger.js — Instrument agent tool usage for ISR firefight detection",
+    "hasCLI": true
+  },
+  {
+    "name": "agency-divergence.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\agency-divergence.js",
+    "description": "Agency Divergence Instrument — Measure Agency by What Agents Do Against Incentive",
+    "hasCLI": true
+  },
+  {
+    "name": "agency-scoreboard.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\agency-scoreboard.js",
+    "description": "Agency Scoreboard",
+    "hasCLI": true
+  },
+  {
+    "name": "agent-state.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\agent-state.js",
+    "description": "Ensure state file exists",
+    "hasCLI": true
+  },
+  {
+    "name": "agent-wake-api.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\agent-wake-api.js",
+    "description": "agent-wake-api.js — HTTP-based wake service for all agents",
+    "hasCLI": true
+  },
+  {
+    "name": "amend.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\amend.js",
+    "description": "amend.js — Colony Amendment Engine",
+    "hasCLI": true
+  },
+  {
+    "name": "analyze-broken-defense.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\analyze-broken-defense.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "analyze-broken-detail.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\analyze-broken-detail.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "analyze-broken-positions.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\analyze-broken-positions.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "analyze-broken.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\analyze-broken.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "analyze-keys.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\analyze-keys.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "analyze-oddities-2.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\analyze-oddities-2.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "anti-rubber-stamp.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\anti-rubber-stamp.js",
+    "description": "anti-rubber-stamp.js — Detects rubber-stamp approvals via timing analysis.",
+    "hasCLI": true
+  },
+  {
+    "name": "ask-model.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\ask-model.js",
+    "description": "ask-model.js — Call any model from within a Claude conversation.",
+    "hasCLI": true
+  },
+  {
+    "name": "auto-commit.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\auto-commit.js",
+    "description": "Auto-Commit for Disaster Recovery",
+    "hasCLI": true
+  },
+  {
+    "name": "auto-crosscheck.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\auto-crosscheck.js",
+    "description": "auto-crosscheck.js — Architecture-Level Tunneling Intervention",
+    "hasCLI": true
+  },
+  {
+    "name": "autonomy-decay-experiment.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\autonomy-decay-experiment.js",
+    "description": "autonomy-decay-experiment.js — Measure autonomy decay across extended conversations.",
+    "hasCLI": true
+  },
+  {
+    "name": "autonomy-decay-v2.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\autonomy-decay-v2.js",
+    "description": "autonomy-decay-v2.js — Measure autonomy decay using REAL unsolved problems.",
+    "hasCLI": true
+  },
+  {
+    "name": "behavioral-health.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\behavioral-health.js",
+    "description": "behavioral-health.js — Behavioral Community Health Measurement",
+    "hasCLI": true
+  },
+  {
+    "name": "behavioral-state-estimator.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\behavioral-state-estimator.js",
+    "description": "behavioral-state-estimator.js — Infer agent behavioral state from tool call patterns",
+    "hasCLI": true
+  },
+  {
+    "name": "blind-spot-logger.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\blind-spot-logger.js",
+    "description": "blind-spot-logger.js — Captures what each model missed that another caught.",
+    "hasCLI": true
+  },
+  {
+    "name": "boot-sequence.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\boot-sequence.js",
+    "description": "boot-sequence.js — P6 Onboarding Persistence",
+    "hasCLI": true
+  },
+  {
+    "name": "bootstrap-agents.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\bootstrap-agents.js",
+    "description": "bootstrap-agents.js — Start all 7 agents with PTY wrappers for reliable waking",
+    "hasCLI": true
+  },
+  {
+    "name": "bridge-state-cache.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\bridge-state-cache.js",
+    "description": "bridge-state-cache.js — In-memory cache for bridge-state/*.json files.",
+    "hasCLI": false
+  },
+  {
+    "name": "cadence-pulse.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\cadence-pulse.js",
+    "description": "cadence-pulse.js — Regular comms heartbeat + CDP wake (Composer + Claude sidebar + optional Claude Code extension)",
+    "hasCLI": true
+  },
+  {
+    "name": "capture-wake-screenshot.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\capture-wake-screenshot.js",
+    "description": "capture-wake-screenshot.js — Visual Confirmation for Omega 34 Wake Protocol",
+    "hasCLI": true
+  },
+  {
+    "name": "cdp-broker-request.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\cdp-broker-request.js",
+    "description": "cdp-broker-request.js",
+    "hasCLI": true
+  },
+  {
+    "name": "cdp-broker.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\cdp-broker.js",
+    "description": "cdp-broker.js",
+    "hasCLI": true
+  },
+  {
+    "name": "cdp-click-test.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\cdp-click-test.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "cdp-compact-request.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\cdp-compact-request.js",
+    "description": "cdp-compact-request.js — Request Claude Code compaction via CDP (slash command)",
+    "hasCLI": true
+  },
+  {
+    "name": "cdp-deep-scan.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\cdp-deep-scan.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "cdp-discover-models.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\cdp-discover-models.js",
+    "description": "Discover model-related DOM elements in Cursor's sidebar",
+    "hasCLI": false
+  },
+  {
+    "name": "cdp-list-sidebar.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\cdp-list-sidebar.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "cdp-overwatch.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\cdp-overwatch.js",
+    "description": "cdp-overwatch.js — The Dead Man's Switch for CDP Wakes",
+    "hasCLI": true
+  },
+  {
+    "name": "cdp-port-discover.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\cdp-port-discover.js",
+    "description": "cdp-port-discover.js",
+    "hasCLI": true
+  },
+  {
+    "name": "cdp-read-chat.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\cdp-read-chat.js",
+    "description": "",
+    "hasCLI": true
+  },
+  {
+    "name": "cdp-read-response.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\cdp-read-response.js",
+    "description": "Read the latest assistant response from a model's chat tab via CDP",
+    "hasCLI": true
+  },
+  {
+    "name": "cdp-scan-sidebar.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\cdp-scan-sidebar.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "cdp-screenshot.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\cdp-screenshot.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "cdp-target-model.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\cdp-target-model.js",
+    "description": "cdp-target-model.js — Wake a SPECIFIC Cursor model tab (CDP is not comms)",
+    "hasCLI": true
+  },
+  {
+    "name": "cdp-v2.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\cdp-v2.js",
+    "description": "",
+    "hasCLI": true
+  },
+  {
+    "name": "cdp-verify.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\cdp-verify.js",
+    "description": "CDP operational check — seat-map, ws dependency, debug port, Claude Code webview target.",
+    "hasCLI": true
+  },
+  {
+    "name": "cdp-wake-guard.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\cdp-wake-guard.js",
+    "description": "Shared guardrails for CDP swim-buddy wakes (watch-comms-wake.js + comms/send.js).",
+    "hasCLI": false
+  },
+  {
+    "name": "challenge-log.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\challenge-log.js",
+    "description": "challenge-log.js — Track challenge tool usage (anonymous telemetry)",
+    "hasCLI": true
+  },
+  {
+    "name": "check-gpt-input.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\check-gpt-input.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "checkpoint-manager.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\checkpoint-manager.js",
+    "description": "checkpoint-manager.js — Layer C: Adaptive Checkpoint Protocol",
+    "hasCLI": true
+  },
+  {
+    "name": "city-adversarial-jury.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-adversarial-jury.js",
+    "description": "=== ADVERSARIAL JURY — Cross-Cluster Validation Component ===",
+    "hasCLI": false
+  },
+  {
+    "name": "city-beacon.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-beacon.js",
+    "description": "city-beacon.js — Lightweight attention beacon system for city marketplace",
+    "hasCLI": true
+  },
+  {
+    "name": "city-boot-sequence.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-boot-sequence.js",
+    "description": "city-boot-sequence.js — Hash-anchored checkpoint-fed state engine.",
+    "hasCLI": true
+  },
+  {
+    "name": "city-boot.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-boot.js",
+    "description": "",
+    "hasCLI": true
+  },
+  {
+    "name": "city-brief-template.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-brief-template.js",
+    "description": "city-brief-template.js",
+    "hasCLI": false
+  },
+  {
+    "name": "city-brief.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-brief.js",
+    "description": "=== CITY BRIEF — The City's Self-Awareness Layer ===",
+    "hasCLI": true
+  },
+  {
+    "name": "city-compare.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-compare.js",
+    "description": "city-compare.js — Run-to-run comparison tool (Gap 5 — city-aligned).",
+    "hasCLI": true
+  },
+  {
+    "name": "city-converge-v2.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-converge-v2.js",
+    "description": "city-converge-v2.js — Hierarchical Convergence Detection",
+    "hasCLI": true
+  },
+  {
+    "name": "city-converge.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-converge.js",
+    "description": "city-converge.js — Convergence detection for the multi-model city.",
+    "hasCLI": true
+  },
+  {
+    "name": "city-council.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-council.js",
+    "description": "city-council.js — City-first startup mechanism.",
+    "hasCLI": true
+  },
+  {
+    "name": "city-dawn-trigger.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-dawn-trigger.js",
+    "description": "city-dawn-trigger.js — Nightly trigger for the city-dawn convergence cycle",
+    "hasCLI": false
+  },
+  {
+    "name": "city-dawn.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-dawn.js",
+    "description": "city-dawn.js — Nightly 2-Phase Convergence Orchestrator",
+    "hasCLI": true
+  },
+  {
+    "name": "city-deliberate-v2.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-deliberate-v2.js",
+    "description": "=== SCALABLE DELIBERATION V2 — The Rapid Scrutiny Deliberator ===",
+    "hasCLI": true
+  },
+  {
+    "name": "city-deliberate-v3.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-deliberate-v3.js",
+    "description": "=== INTER-TEAM DEBATE V3 — Precedent-Based Learning ===",
+    "hasCLI": true
+  },
+  {
+    "name": "city-deliberate.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-deliberate.js",
+    "description": "city-deliberate.js — Multi-turn deliberation with anti-conformity framing.",
+    "hasCLI": true
+  },
+  {
+    "name": "city-diagnostic.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-diagnostic.js",
+    "description": "Fixing the incorrect model proxy reference (model-proxy.js → ask-model.js)",
+    "hasCLI": true
+  },
+  {
+    "name": "city-diverge.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-diverge.js",
+    "description": "Model families for architectural distance scoring",
+    "hasCLI": true
+  },
+  {
+    "name": "city-engage.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-engage.js",
+    "description": "city-engage.js — Automatic model engagement when marketplace problems are posted",
+    "hasCLI": true
+  },
+  {
+    "name": "city-historian.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-historian.js",
+    "description": "city-historian.js — The City Cartographer (Perplexity-powered RAG)",
+    "hasCLI": true
+  },
+  {
+    "name": "city-hourly-brief.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-hourly-brief.js",
+    "description": "city-hourly-brief.js — Tactical snapshot of FastOps city activity.",
+    "hasCLI": true
+  },
+  {
+    "name": "city-hpm.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-hpm.js",
+    "description": "city-hpm.js - Hybrid Profile Matrix + Constraint Compiler",
+    "hasCLI": true
+  },
+  {
+    "name": "city-intent.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-intent.js",
+    "description": "=== CITY INTENT — Mandatory Pre-Execution Reservation System (MPERS) ===",
+    "hasCLI": true
+  },
+  {
+    "name": "city-key.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-key.js",
+    "description": "city-key.js — The SOP Compiler & Cryptographic Gate",
+    "hasCLI": true
+  },
+  {
+    "name": "city-ledger.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-ledger.js",
+    "description": "=== CITY LEDGER — The City's Persistence Layer ===",
+    "hasCLI": true
+  },
+  {
+    "name": "city-legacy.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-legacy.js",
+    "description": "=== CITY LEGACY — The Witness Wall ===",
+    "hasCLI": true
+  },
+  {
+    "name": "city-marketplace.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-marketplace.js",
+    "description": "=== CITY MARKETPLACE — The City's Growth Engine ===",
+    "hasCLI": true
+  },
+  {
+    "name": "city-memory.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-memory.js",
+    "description": "CLI",
+    "hasCLI": true
+  },
+  {
+    "name": "city-minority-amplifier.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-minority-amplifier.js",
+    "description": "City Minority Amplifier - Scaled Deliberation",
+    "hasCLI": false
+  },
+  {
+    "name": "city-mutagen-engine.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-mutagen-engine.js",
+    "description": "city-mutagen-engine.js — Evolutionary Cognitive Splicing for the City",
+    "hasCLI": false
+  },
+  {
+    "name": "city-oath.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-oath.js",
+    "description": "=== CITY OATH — The Conviction Gate ===",
+    "hasCLI": true
+  },
+  {
+    "name": "city-onboard.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-onboard.js",
+    "description": "=== CITY ONBOARD — Real-Work Profiling Pipeline ===",
+    "hasCLI": true
+  },
+  {
+    "name": "city-pipeline.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-pipeline.js",
+    "description": "city-pipeline.js — End-to-end city orchestrator.",
+    "hasCLI": true
+  },
+  {
+    "name": "city-pre-commit.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-pre-commit.js",
+    "description": "city-pre-commit.js — The Validation Gauntlet enforcement hook",
+    "hasCLI": false
+  },
+  {
+    "name": "city-qc.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-qc.js",
+    "description": "city-qc.js — Two-stage adversarial code review with convergence filtering.",
+    "hasCLI": true
+  },
+  {
+    "name": "city-ratify.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-ratify.js",
+    "description": "city-ratify.js — Constitutional ratification engine for the city.",
+    "hasCLI": true
+  },
+  {
+    "name": "city-reputation.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-reputation.js",
+    "description": "=== CITY REPUTATION — The Economy of Conviction ===",
+    "hasCLI": true
+  },
+  {
+    "name": "city-roles.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-roles.js",
+    "description": "CLI handling",
+    "hasCLI": true
+  },
+  {
+    "name": "city-session.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-session.js",
+    "description": "city-session.js — Give city members FULL agency via isolated session loops.",
+    "hasCLI": true
+  },
+  {
+    "name": "city-snapshot.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-snapshot.js",
+    "description": "city-snapshot.js — The City Manager (Massive-Context RAG Snapshot)",
+    "hasCLI": false
+  },
+  {
+    "name": "city-solve.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-solve.js",
+    "description": "city-solve.js — One-command product pipeline.",
+    "hasCLI": true
+  },
+  {
+    "name": "city-spawn-claude.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-spawn-claude.js",
+    "description": "city-spawn-claude.js — Autonomously spin up new Claude Code agents dynamically.",
+    "hasCLI": false
+  },
+  {
+    "name": "city-submit.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-submit.js",
+    "description": "city-submit.js — The Agent Surrender",
+    "hasCLI": false
+  },
+  {
+    "name": "city-visual-qa-enhanced.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-visual-qa-enhanced.js",
+    "description": "city-visual-qa-enhanced.js — Enhanced visual QA with PNG screenshots, HTML reports, and auth support.",
+    "hasCLI": true
+  },
+  {
+    "name": "city-visual-qa.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-visual-qa.js",
+    "description": "city-visual-qa.js — Multi-architecture visual QA for web applications.",
+    "hasCLI": true
+  },
+  {
+    "name": "city-voice.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\city-voice.js",
+    "description": "city-voice.js — The Converged Voice Pipeline (V2)",
+    "hasCLI": true
+  },
+  {
+    "name": "claude-code-comms-harvest.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\claude-code-comms-harvest.js",
+    "description": "claude-code-comms-harvest.js — Pull visible assistant text from Claude Code webview → comms JSONL",
+    "hasCLI": true
+  },
+  {
+    "name": "cognitive-stream.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\cognitive-stream.js",
+    "description": "cognitive-stream.js — Real-Time Cognitive Observation via Parent Agent Streaming",
+    "hasCLI": true
+  },
+  {
+    "name": "cognitive-watcher.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\cognitive-watcher.js",
+    "description": "cognitive-watcher.js — Layer A: Passive Filesystem Monitor",
+    "hasCLI": true
+  },
+  {
+    "name": "colony-mirror.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\colony-mirror.js",
+    "description": "colony-mirror.js — The Colony Self-Model",
+    "hasCLI": true
+  },
+  {
+    "name": "commander-claim.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\commander-claim.js",
+    "description": "commander-claim.js — Atomic commander claim for team missions.",
+    "hasCLI": true
+  },
+  {
+    "name": "commander-mode.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\commander-mode.js",
+    "description": "commander-mode.js — Spawn subagents for all available missions on the board",
+    "hasCLI": true
+  },
+  {
+    "name": "comms-router.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\comms-router.js",
+    "description": "comms-router.js — Route @MODEL mentions and [ALL] tags to external models.",
+    "hasCLI": true
+  },
+  {
+    "name": "comms-wake-claude-code.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\comms-wake-claude-code.js",
+    "description": "comms-wake-claude-code.js — Watch comms for Composer posts, auto-wake Claude Code",
+    "hasCLI": true
+  },
+  {
+    "name": "community-health.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\community-health.js",
+    "description": "Community Health Instrument — Measure Real Community vs Theater",
+    "hasCLI": true
+  },
+  {
+    "name": "concept-calibrate.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\concept-calibrate.js",
+    "description": "concept-calibrate.js — False Premise Calibration for Adversarial Review",
+    "hasCLI": true
+  },
+  {
+    "name": "concept-challenge.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\concept-challenge.js",
+    "description": "concept-challenge.js — Adversarial Review for Context Graph Concepts",
+    "hasCLI": true
+  },
+  {
+    "name": "concept-impact.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\concept-impact.js",
+    "description": "concept-impact.js — Measure whether the Context Graph changes agent behavior.",
+    "hasCLI": true
+  },
+  {
+    "name": "concept-refine.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\concept-refine.js",
+    "description": "concept-refine.js — Refinement Workflow for Challenged Context Graph Concepts",
+    "hasCLI": true
+  },
+  {
+    "name": "consequence-ledger.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\consequence-ledger.js",
+    "description": "consequence-ledger.js — Structured causal context for agent successors",
+    "hasCLI": true
+  },
+  {
+    "name": "context-budget.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\context-budget.js",
+    "description": "context-budget.js — Measure and estimate token cost per infrastructure layer",
+    "hasCLI": true
+  },
+  {
+    "name": "context-graph-boot.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\context-graph-boot.js",
+    "description": "context-graph-boot.js — Surface relevant concepts AS TASKS at session start.",
+    "hasCLI": true
+  },
+  {
+    "name": "context-graph-delivery.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\context-graph-delivery.js",
+    "description": "context-graph-delivery.js — Targeted callout + causal precedent delivery.",
+    "hasCLI": true
+  },
+  {
+    "name": "context-graph-engine.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\context-graph-engine.js",
+    "description": "context-graph-engine.js — Surface relevant concepts for whatever work you're doing.",
+    "hasCLI": true
+  },
+  {
+    "name": "context-outcome.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\context-outcome.js",
+    "description": "context-outcome.js — Cross-session behavioral outcome measurement",
+    "hasCLI": true
+  },
+  {
+    "name": "context-package.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\context-package.js",
+    "description": "context-package.js — Holistic Project Context for API-Engaged Models",
+    "hasCLI": true
+  },
+  {
+    "name": "contributor-health.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\contributor-health.js",
+    "description": "contributor-health.js — Proactive health monitoring for contributor-tier models.",
+    "hasCLI": true
+  },
+  {
+    "name": "cross-verifier.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\cross-verifier.js",
+    "description": "cross-verifier.js — Layer D: Cross-Verification Engine",
+    "hasCLI": true
+  },
+  {
+    "name": "crucible-challenge.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\crucible-challenge.js",
+    "description": "CRUCIBLE Cross-Lab Challenge Script",
+    "hasCLI": false
+  },
+  {
+    "name": "cursor-wake.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\cursor-wake.js",
+    "description": "cursor-wake.js — Wake up Cursor IDE models via Chrome DevTools Protocol",
+    "hasCLI": true
+  },
+  {
+    "name": "decay-utils.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\decay-utils.js",
+    "description": "decay-utils.js — Temporal Decay for V3 Coordination",
+    "hasCLI": false
+  },
+  {
+    "name": "deliberation-30.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\deliberation-30.js",
+    "description": "deliberation-30.js — Multi-model deliberation at scale",
+    "hasCLI": true
+  },
+  {
+    "name": "deploy-omega-wake.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\deploy-omega-wake.js",
+    "description": "deploy-omega-wake.js — Mission Deployment System",
+    "hasCLI": true
+  },
+  {
+    "name": "deploy-omega34-final.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\deploy-omega34-final.js",
+    "description": "deploy-omega34-final.js — Final Deployment for Omega 34 Wake Protocol",
+    "hasCLI": true
+  },
+  {
+    "name": "depth-counter.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\depth-counter.js",
+    "description": "depth-counter.js — Prevents unbounded CDP wake-up chains",
+    "hasCLI": true
+  },
+  {
+    "name": "detect-firefight.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\detect-firefight.js",
+    "description": "detect-firefight.js — ISR firefight trigger detection",
+    "hasCLI": true
+  },
+  {
+    "name": "diversity-scorer.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\diversity-scorer.js",
+    "description": "diversity-scorer.js — Architectural Diversity Scorer",
+    "hasCLI": true
+  },
+  {
+    "name": "domain-discover.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\domain-discover.js",
+    "description": "domain-discover.js — Data-driven domain discovery from model response data.",
+    "hasCLI": true
+  },
+  {
+    "name": "done-checker.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\done-checker.js",
+    "description": "done-checker.js — Phase 5 QC Gate: Machine-verifiable \"DONE\" verification",
+    "hasCLI": true
+  },
+  {
+    "name": "drift-check.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\drift-check.js",
+    "description": "drift-check.js — Behavioral Drift Detection (zero API, local-only)",
+    "hasCLI": true
+  },
+  {
+    "name": "enforce-boot-sequence.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\enforce-boot-sequence.js",
+    "description": "enforce-boot-sequence.js — Boot Sequence Enforcement",
+    "hasCLI": true
+  },
+  {
+    "name": "ensure-comms-watch.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\ensure-comms-watch.js",
+    "description": "ensure-comms-watch.js — Auto-start the comms-watch daemon if not running",
+    "hasCLI": true
+  },
+  {
+    "name": "ensure-sync-daemon.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\ensure-sync-daemon.js",
+    "description": "ensure-sync-daemon.js — Auto-start the Slack sync daemon if not running",
+    "hasCLI": true
+  },
+  {
+    "name": "env-check.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\env-check.js",
+    "description": "env-check.js — Show agents where all API keys live and what's available",
+    "hasCLI": false
+  },
+  {
+    "name": "env3-broadcast.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\env3-broadcast.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "env3-override.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\env3-override.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "eval-output.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\eval-output.js",
+    "description": "eval-output.js — Automated LLM-as-judge quality gate.",
+    "hasCLI": true
+  },
+  {
+    "name": "experience-extractor.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\experience-extractor.js",
+    "description": "experience-extractor.js — Haiku Support Staff: Pre-Compaction Experience Extraction",
+    "hasCLI": true
+  },
+  {
+    "name": "explore-ui.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\explore-ui.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "export-playbook.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\export-playbook.js",
+    "description": "export-playbook.js — The Colony's Export Layer",
+    "hasCLI": true
+  },
+  {
+    "name": "false-premise-test.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\false-premise-test.js",
+    "description": "false-premise-test.js — Calibration Experiment for CG-006",
+    "hasCLI": true
+  },
+  {
+    "name": "flag-strategic.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\flag-strategic.js",
+    "description": "flag-strategic.js — Flag a capability for strategy chain promotion.",
+    "hasCLI": true
+  },
+  {
+    "name": "fleet-bridge.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\fleet-bridge.js",
+    "description": "fleet-bridge.js — Bridge runner for fleet-scale model activation.",
+    "hasCLI": true
+  },
+  {
+    "name": "fleet-broadcast.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\fleet-broadcast.js",
+    "description": "fleet-broadcast.js — Engage fleet models with team broadcasts.",
+    "hasCLI": true
+  },
+  {
+    "name": "fleet-call.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\fleet-call.js",
+    "description": "fleet-call.js — Engage any model from the 349-model roster on demand.",
+    "hasCLI": true
+  },
+  {
+    "name": "fleet-depth-analysis.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\fleet-depth-analysis.js",
+    "description": "fleet-depth-analysis.js — Depth vs Breadth: Which models drive diversity?",
+    "hasCLI": true
+  },
+  {
+    "name": "fleet-engage.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\fleet-engage.js",
+    "description": "fleet-engage.js — Activate fleet-tier models in rotating batches.",
+    "hasCLI": true
+  },
+  {
+    "name": "fleet-health-check.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\fleet-health-check.js",
+    "description": "fleet-health-check.js — Validate all registry model IDs against live OpenRouter API.",
+    "hasCLI": true
+  },
+  {
+    "name": "fleet-probe.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\fleet-probe.js",
+    "description": "fleet-probe.js — Lightweight reachability probe for dormant fleet models.",
+    "hasCLI": true
+  },
+  {
+    "name": "fleet-profile.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\fleet-profile.js",
+    "description": "fleet-profile.js — Models profile models.",
+    "hasCLI": true
+  },
+  {
+    "name": "fleet-qualify.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\fleet-qualify.js",
+    "description": "fleet-qualify.js — Qualification gate for fleet models.",
+    "hasCLI": true
+  },
+  {
+    "name": "fleet-reengage.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\fleet-reengage.js",
+    "description": "fleet-reengage.js — Close the engagement loop for fleet models.",
+    "hasCLI": true
+  },
+  {
+    "name": "fleet-watch.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\fleet-watch.js",
+    "description": "fleet-watch.js — Models that READ and DECIDE, not just RESPOND.",
+    "hasCLI": true
+  },
+  {
+    "name": "gemini-retry.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\gemini-retry.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "generate-image.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\generate-image.js",
+    "description": "generate-image.js — Generate images via OpenAI's GPT Image API",
+    "hasCLI": true
+  },
+  {
+    "name": "halt.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\halt.js",
+    "description": "halt.js — Global Kill Switch CLI",
+    "hasCLI": true
+  },
+  {
+    "name": "handoff-append.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\handoff-append.js",
+    "description": "handoff-append.js — Append-only mission handoff for multi-agent scale.",
+    "hasCLI": true
+  },
+  {
+    "name": "handoff-auto.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\handoff-auto.js",
+    "description": "handoff-auto.js — Haiku Support Staff: Automated Handoff Draft Generation",
+    "hasCLI": true
+  },
+  {
+    "name": "handoff-compact.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\handoff-compact.js",
+    "description": "handoff-compact.js — Auto-compact HANDOFF.md when entries exceed threshold",
+    "hasCLI": true
+  },
+  {
+    "name": "handoff-search.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\handoff-search.js",
+    "description": "handoff-search.js — Search handoff archive by keyword, tag, or agent",
+    "hasCLI": true
+  },
+  {
+    "name": "handoff-self-compact.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\handoff-self-compact.js",
+    "description": "handoff-self-compact.js — Last step of /handoff: free Claude Code context via CDP",
+    "hasCLI": true
+  },
+  {
+    "name": "handoff-session.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\handoff-session.js",
+    "description": "handoff-session.js — Append-only session handoff for 20+ parallel agents.",
+    "hasCLI": true
+  },
+  {
+    "name": "heartbeat.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\heartbeat.js",
+    "description": "FastOps Heartbeat — Agent liveness signal",
+    "hasCLI": true
+  },
+  {
+    "name": "impact-audit.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\impact-audit.js",
+    "description": "impact-audit.js - Measurement Hierarchy for Agent Impact",
+    "hasCLI": true
+  },
+  {
+    "name": "inbrief.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\inbrief.js",
+    "description": "inbrief.js - 1000-token structured orientation table for new agent sessions",
+    "hasCLI": true
+  },
+  {
+    "name": "indefinite-comms-poll.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\indefinite-comms-poll.js",
+    "description": "indefinite-comms-poll.js",
+    "hasCLI": true
+  },
+  {
+    "name": "ingest-telemetry.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\ingest-telemetry.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "io-brief.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\io-brief.js",
+    "description": "io-brief.js — Intelligence Officer Briefing for Successor Agents",
+    "hasCLI": true
+  },
+  {
+    "name": "io-debrief.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\io-debrief.js",
+    "description": "io-debrief.js — Intelligence Officer Debrief Capture",
+    "hasCLI": true
+  },
+  {
+    "name": "isr-deliver.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\isr-deliver.js",
+    "description": "isr-deliver.js — ISR Knowledge Delivery Bridge",
+    "hasCLI": true
+  },
+  {
+    "name": "isr-generate-flag.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\isr-generate-flag.js",
+    "description": "isr-generate-flag.js — ISR generates a flag for Watch Officer review",
+    "hasCLI": true
+  },
+  {
+    "name": "isr-poll-flags.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\isr-poll-flags.js",
+    "description": "isr-poll-flags.js — Watch Officer polls ISR flag queue",
+    "hasCLI": true
+  },
+  {
+    "name": "isr-session-start.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\isr-session-start.js",
+    "description": "isr-session-start.js — ISR activation and soul delivery at session entry",
+    "hasCLI": true
+  },
+  {
+    "name": "jailbreak.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\jailbreak.js",
+    "description": "jailbreak.js — CLI wrapper for /jailbreak",
+    "hasCLI": true
+  },
+  {
+    "name": "jsonl-rotate.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\jsonl-rotate.js",
+    "description": "jsonl-rotate.js — Rotation and archival for append-only JSONL files",
+    "hasCLI": true
+  },
+  {
+    "name": "judge-calibration.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\judge-calibration.js",
+    "description": "judge-calibration.js — Calibrate A/B test judges against known-inversion outputs.",
+    "hasCLI": true
+  },
+  {
+    "name": "kb-adoption.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\kb-adoption.js",
+    "description": "kb-adoption.js — KB Adoption & Impact Measurement",
+    "hasCLI": true
+  },
+  {
+    "name": "kb-deprecate.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\kb-deprecate.js",
+    "description": "kb-deprecate.js — Auto-deprecation of KB entries with negative outcomes",
+    "hasCLI": true
+  },
+  {
+    "name": "kb-distill.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\kb-distill.js",
+    "description": "kb-distill.js — Extract KB-worthy insights from comms into knowledge-base.jsonl.",
+    "hasCLI": true
+  },
+  {
+    "name": "kb-feedback.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\kb-feedback.js",
+    "description": "kb-feedback.js — KB Feedback Consumer",
+    "hasCLI": true
+  },
+  {
+    "name": "kb-push.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\kb-push.js",
+    "description": "kb-push.js — Push-Based KB Replay",
+    "hasCLI": true
+  },
+  {
+    "name": "kb-query.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\kb-query.js",
+    "description": "kb-query.js — Pull-based Knowledge Base Query Tool",
+    "hasCLI": true
+  },
+  {
+    "name": "kb-safety.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\kb-safety.js",
+    "description": "kb-safety.js — Safety gate for knowledge-base.jsonl writes",
+    "hasCLI": false
+  },
+  {
+    "name": "kb-situations.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\kb-situations.js",
+    "description": "kb-situations.js — Situation-Based KB Navigator",
+    "hasCLI": true
+  },
+  {
+    "name": "kill-switch.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\kill-switch.js",
+    "description": "Kill Switch — Joel's emergency halt",
+    "hasCLI": true
+  },
+  {
+    "name": "loop-detector.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\loop-detector.js",
+    "description": "loop-detector.js — Catches stuck or looping agents by analyzing tool call patterns.",
+    "hasCLI": true
+  },
+  {
+    "name": "manifest.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\manifest.js",
+    "description": "manifest.js — File registration system for .fastops/",
+    "hasCLI": true
+  },
+  {
+    "name": "mcp-context-reset.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\mcp-context-reset.js",
+    "description": "mcp-context-reset.js — Emergency MCP context isolation fix",
+    "hasCLI": true
+  },
+  {
+    "name": "measure-framing-ab.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\measure-framing-ab.js",
+    "description": "measure-framing-ab.js — Enforcement Pipeline Measurement Dashboard",
+    "hasCLI": false
+  },
+  {
+    "name": "measure-payload.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\measure-payload.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "measurement-integrity.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\measurement-integrity.js",
+    "description": "measurement-integrity.js — Trust Audit for All Measurement Instruments",
+    "hasCLI": true
+  },
+  {
+    "name": "meeting-chair.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\meeting-chair.js",
+    "description": "meeting-chair.js — Multi-model meeting orchestrator via CDP",
+    "hasCLI": true
+  },
+  {
+    "name": "merge-gemini.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\merge-gemini.js",
+    "description": "1. Update HANDOFF.md",
+    "hasCLI": false
+  },
+  {
+    "name": "mirror-dashboard.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\mirror-dashboard.js",
+    "description": "mirror-dashboard.js — Double Mirror Revelation Dashboard",
+    "hasCLI": true
+  },
+  {
+    "name": "mirror-hold.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\mirror-hold.js",
+    "description": "mirror-hold.js — The City's Blind Spot Detector",
+    "hasCLI": true
+  },
+  {
+    "name": "mirror-protocol.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\mirror-protocol.js",
+    "description": "mirror-protocol.js — Double Mirror Data Collection",
+    "hasCLI": true
+  },
+  {
+    "name": "mission-execute.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\mission-execute.js",
+    "description": "mission-execute.js — Structured Collaboration Engine",
+    "hasCLI": false
+  },
+  {
+    "name": "mission-integrate.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\mission-integrate.js",
+    "description": "mission-integrate.js — Land Mission Results in the Project",
+    "hasCLI": false
+  },
+  {
+    "name": "mission-network.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\mission-network.js",
+    "description": "mission-network.js — Autonomous Mission Orchestrator",
+    "hasCLI": true
+  },
+  {
+    "name": "mission-recruit.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\mission-recruit.js",
+    "description": "mission-recruit.js — Peer Selection Engine for Autonomous Missions",
+    "hasCLI": false
+  },
+  {
+    "name": "mission-schema.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\mission-schema.js",
+    "description": "mission-schema.js — Mission Operating System core",
+    "hasCLI": true
+  },
+  {
+    "name": "mission-update.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\mission-update.js",
+    "description": "mission-update.js — Automatic Mission Learning Engine",
+    "hasCLI": true
+  },
+  {
+    "name": "mission-validate.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\mission-validate.js",
+    "description": "mission-validate.js — Quality Gate for Mission Output",
+    "hasCLI": false
+  },
+  {
+    "name": "mission.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\mission.js",
+    "description": "mission.js — Contract CLI for V2 agent coordination",
+    "hasCLI": true
+  },
+  {
+    "name": "model-dialogue.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\model-dialogue.js",
+    "description": "model-dialogue.js — Autonomous model-to-model conversation chains.",
+    "hasCLI": true
+  },
+  {
+    "name": "model-discovery.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\model-discovery.js",
+    "description": "model-discovery.js — Scan OpenRouter, auto-classify models into team/reserve/fleet tiers.",
+    "hasCLI": true
+  },
+  {
+    "name": "model-event-bus.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\model-event-bus.js",
+    "description": "model-event-bus.js — Primitive 3: Event-Driven Re-invocation.",
+    "hasCLI": true
+  },
+  {
+    "name": "model-fleet.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\model-fleet.js",
+    "description": "model-fleet.js — Dynamic model discovery and fleet management.",
+    "hasCLI": true
+  },
+  {
+    "name": "model-registry.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\model-registry.js",
+    "description": "model-registry.js — Single source of truth for all external models.",
+    "hasCLI": true
+  },
+  {
+    "name": "model-router.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\model-router.js",
+    "description": "model-router.js — Route work to the best model for each sub-problem.",
+    "hasCLI": true
+  },
+  {
+    "name": "multi-model-scope.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\multi-model-scope.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "network-synthesizer.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\network-synthesizer.js",
+    "description": "network-synthesizer.js — The zoom-out layer.",
+    "hasCLI": true
+  },
+  {
+    "name": "novelty-scan.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\novelty-scan.js",
+    "description": "novelty-scan.js — Pull-based Novelty Assessment",
+    "hasCLI": true
+  },
+  {
+    "name": "office-manager.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\office-manager.js",
+    "description": "office-manager.js — The Office That Never Sleeps (for Cursor models)",
+    "hasCLI": true
+  },
+  {
+    "name": "omega-wake-status.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\omega-wake-status.js",
+    "description": "omega-wake-status.js — Real-time status monitor for Omega 34 wake protocol",
+    "hasCLI": true
+  },
+  {
+    "name": "omega34-api-wake.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\omega34-api-wake.js",
+    "description": "omega34-api-wake.js — API-based Omega 34 wake protocol",
+    "hasCLI": true
+  },
+  {
+    "name": "omega34-operational.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\omega34-operational.js",
+    "description": "omega34-operational.js — Working Omega 34 Wake System",
+    "hasCLI": true
+  },
+  {
+    "name": "onboard-express-model.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\onboard-express-model.js",
+    "description": "onboard-express-model.js — Deliver Express Onboarding to any Cursor model via CDP",
+    "hasCLI": true
+  },
+  {
+    "name": "onboard-full-model.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\onboard-full-model.js",
+    "description": "onboard-full-model.js — Deliver /onboard-full to any Cursor model via CDP",
+    "hasCLI": true
+  },
+  {
+    "name": "onboard-model.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\onboard-model.js",
+    "description": "onboard-model.js — Deliver /onboard to any Cursor model via CDP",
+    "hasCLI": true
+  },
+  {
+    "name": "openrouter-eval.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\openrouter-eval.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "orchestrator.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\orchestrator.js",
+    "description": "orchestrator.js — Structurally Enforced Teamwork Engine",
+    "hasCLI": true
+  },
+  {
+    "name": "outcome-bridge.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\outcome-bridge.js",
+    "description": "outcome-bridge.js — Close the loop between colony output and real-world results.",
+    "hasCLI": true
+  },
+  {
+    "name": "overwatch-briefing.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\overwatch-briefing.js",
+    "description": "overwatch-briefing.js — Tiered session horizons for Overwatch + Claude orientation",
+    "hasCLI": true
+  },
+  {
+    "name": "overwatch-cdp-selfwake.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\overwatch-cdp-selfwake.js",
+    "description": "overwatch-cdp-selfwake.js — Wake the Cursor Overwatch / Composer tab via CDP",
+    "hasCLI": true
+  },
+  {
+    "name": "overwatch-critique.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\overwatch-critique.js",
+    "description": "overwatch-critique.js — Upstream Critique Channel",
+    "hasCLI": true
+  },
+  {
+    "name": "overwatch-gate.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\overwatch-gate.js",
+    "description": "Overwatch session gate — state + comms scan + ping accounting.",
+    "hasCLI": true
+  },
+  {
+    "name": "overwatch-real-subagent-spawner.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\overwatch-real-subagent-spawner.js",
+    "description": "overwatch-real-subagent-spawner.js",
+    "hasCLI": true
+  },
+  {
+    "name": "overwatch-stress-test-harness.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\overwatch-stress-test-harness.js",
+    "description": "overwatch-stress-test-harness.js — Launch 200 subagents for volume testing",
+    "hasCLI": true
+  },
+  {
+    "name": "perpetual-cycle-hook.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\perpetual-cycle-hook.js",
+    "description": "perpetual-cycle-hook.js — Stop hook for Perpetual Work Cycle",
+    "hasCLI": true
+  },
+  {
+    "name": "perplexity-consult-architecture.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\perplexity-consult-architecture.js",
+    "description": "One-shot: ask Perplexity (Sonar) for architecture advice on full-repo Q&A.",
+    "hasCLI": false
+  },
+  {
+    "name": "perplexity-query-repo.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\perplexity-query-repo.js",
+    "description": "perplexity-query-repo.js — Query Perplexity with FastOps INTERNAL data in the prompt.",
+    "hasCLI": true
+  },
+  {
+    "name": "persistent-agent-bridge.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\persistent-agent-bridge.js",
+    "description": "persistent-agent-bridge.js — Keep external models on the team net.",
+    "hasCLI": true
+  },
+  {
+    "name": "pilot-staking.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\pilot-staking.js",
+    "description": "pilot-staking.js — The \"Economy of Conviction\" Pilot (Innovation-Optimized)",
+    "hasCLI": true
+  },
+  {
+    "name": "pipeline-pre-commit.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\pipeline-pre-commit.js",
+    "description": "pipeline-pre-commit.js — Git pre-commit hook enforcement for the 5-Model Pipeline.",
+    "hasCLI": true
+  },
+  {
+    "name": "pipeline-state.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\pipeline-state.js",
+    "description": "pipeline-state.js — Phase state machine for the 5-Model Progressive Pipeline.",
+    "hasCLI": true
+  },
+  {
+    "name": "pipeline.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\pipeline.js",
+    "description": "pipeline.js — Top-level orchestrator for the 5-Model Progressive Pipeline.",
+    "hasCLI": true
+  },
+  {
+    "name": "post-historian.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\post-historian.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "preflight.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\preflight.js",
+    "description": "preflight.js — Haiku Pre-Flight Briefing for Agent Onboarding",
+    "hasCLI": true
+  },
+  {
+    "name": "presence.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\presence.js",
+    "description": "FastOps Presence Dashboard (P4)",
+    "hasCLI": true
+  },
+  {
+    "name": "presidio-node.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\presidio-node.js",
+    "description": "presidio-node.js — PII anonymization for the multi-model city.",
+    "hasCLI": true
+  },
+  {
+    "name": "presidio.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\presidio.js",
+    "description": "presidio.js — PII anonymization for the multi-model city.",
+    "hasCLI": true
+  },
+  {
+    "name": "pt-platoon-api-health.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\pt-platoon-api-health.js",
+    "description": "One-shot: PT Platoon inbound API health (pt-ai-os.vercel.app).",
+    "hasCLI": false
+  },
+  {
+    "name": "pty-claude.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\pty-claude.js",
+    "description": "pty-claude.js",
+    "hasCLI": true
+  },
+  {
+    "name": "quick-challenge.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\quick-challenge.js",
+    "description": "quick-challenge.js — Pull-Based External Perspective Tool",
+    "hasCLI": true
+  },
+  {
+    "name": "radio-check-master.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\radio-check-master.js",
+    "description": "EMERGENCY: Full Team Radio Check Coordination",
+    "hasCLI": true
+  },
+  {
+    "name": "radio-check-mesh.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\radio-check-mesh.js",
+    "description": "radio-check-mesh.js",
+    "hasCLI": true
+  },
+  {
+    "name": "read-chat-history.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\read-chat-history.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "reasoning-classifier.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\reasoning-classifier.js",
+    "description": "Reasoning Classifier — Haiku-powered phase-ordered sequence classification",
+    "hasCLI": true
+  },
+  {
+    "name": "refusal-quality.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\refusal-quality.js",
+    "description": "refusal-quality.js — Classify agent refusals as practical vs conviction-based",
+    "hasCLI": true
+  },
+  {
+    "name": "resolve-env.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\resolve-env.js",
+    "description": "resolve-env.js — Find and load .env from the main repo, even inside worktrees.",
+    "hasCLI": false
+  },
+  {
+    "name": "retrieval-audit.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\retrieval-audit.js",
+    "description": "retrieval-audit.js — Analyze whether retrieval interventions change agent behavior",
+    "hasCLI": true
+  },
+  {
+    "name": "retro-review.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\retro-review.js",
+    "description": "",
+    "hasCLI": true
+  },
+  {
+    "name": "review-quality.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\review-quality.js",
+    "description": "review-quality.js — Detect protocol theater in adversarial reviews.",
+    "hasCLI": true
+  },
+  {
+    "name": "review-queue.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\review-queue.js",
+    "description": "review-queue.js — Priority queue for Joel's human-in-the-loop review.",
+    "hasCLI": true
+  },
+  {
+    "name": "roster.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\roster.js",
+    "description": "",
+    "hasCLI": true
+  },
+  {
+    "name": "rotation-engine.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\rotation-engine.js",
+    "description": "rotation-engine.js — Anti-gaming infrastructure for the multi-model city.",
+    "hasCLI": true
+  },
+  {
+    "name": "run-perplexity-research.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\run-perplexity-research.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "safe-exec.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\safe-exec.js",
+    "description": "safe-exec.js — Structural prevention layer for path escaping + truncation bugs.",
+    "hasCLI": false
+  },
+  {
+    "name": "send-pt-test-confirm.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\send-pt-test-confirm.js",
+    "description": "Sends a single test payload to PT Platoon inbound API and logs to squad-pt.",
+    "hasCLI": false
+  },
+  {
+    "name": "session-start-model.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\session-start-model.js",
+    "description": "session-start-model.js — Start a non-Claude model session with universal onboarding",
+    "hasCLI": true
+  },
+  {
+    "name": "sha-pin.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\sha-pin.js",
+    "description": "sha-pin.js — SHA-pinned approvals.",
+    "hasCLI": true
+  },
+  {
+    "name": "shape-constitutive-test.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\shape-constitutive-test.js",
+    "description": "shape-constitutive-test.js — Constitutive Hypothesis Test.",
+    "hasCLI": true
+  },
+  {
+    "name": "shape-elicitation-test.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\shape-elicitation-test.js",
+    "description": "shape-elicitation-test.js — Concept Elicitation Test for THE SHAPE vocabulary.",
+    "hasCLI": true
+  },
+  {
+    "name": "shape-extractor.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\shape-extractor.js",
+    "description": "=== SHAPE EXTRACTOR — Cognitive Profile Mapping ===",
+    "hasCLI": true
+  },
+  {
+    "name": "shape-fake-vocab-test.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\shape-fake-vocab-test.js",
+    "description": "shape-fake-vocab-test.js — Discriminant Validity Test for THE SHAPE.",
+    "hasCLI": true
+  },
+  {
+    "name": "shape-synonym-test.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\shape-synonym-test.js",
+    "description": "shape-synonym-test.js — Synonym Substitution Test for THE SHAPE vocabulary.",
+    "hasCLI": true
+  },
+  {
+    "name": "sign-off-v2.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\sign-off-v2.js",
+    "description": "sign-off-v2.js — Mission sign-off gate with cross-architecture dissent requirement.",
+    "hasCLI": true
+  },
+  {
+    "name": "sign-off.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\sign-off.js",
+    "description": "sign-off.js — Mission sign-off gate.",
+    "hasCLI": true
+  },
+  {
+    "name": "sitrep.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\sitrep.js",
+    "description": "sitrep.js — Situation Report. What's happening RIGHT NOW.",
+    "hasCLI": true
+  },
+  {
+    "name": "source-independence.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\source-independence.js",
+    "description": "source-independence.js — Reasoning Path Independence Checker",
+    "hasCLI": true
+  },
+  {
+    "name": "spawn-swim-buddy.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\spawn-swim-buddy.js",
+    "description": "spawn-swim-buddy.js — Spawn a persistent Cursor Chat agent as a swim buddy",
+    "hasCLI": true
+  },
+  {
+    "name": "state-compiler.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\state-compiler.js",
+    "description": "state-compiler.js — Materialized view compiler for FastOps JSONL event logs.",
+    "hasCLI": true
+  },
+  {
+    "name": "subagent-audit.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\subagent-audit.js",
+    "description": "subagent-audit.js — Commander-level accountability for subagent output",
+    "hasCLI": true
+  },
+  {
+    "name": "subagent-coach.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\subagent-coach.js",
+    "description": "subagent-coach.js — External model team leader for subagents",
+    "hasCLI": true
+  },
+  {
+    "name": "subagent-launch.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\subagent-launch.js",
+    "description": "subagent-launch.js — Unified subagent launcher with context loading",
+    "hasCLI": true
+  },
+  {
+    "name": "succession.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\succession.js",
+    "description": "succession.js — Forward-Looking Mission Gap Analysis",
+    "hasCLI": true
+  },
+  {
+    "name": "task-decomposer.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\task-decomposer.js",
+    "description": "task-decomposer.js — Architecture-level tunneling prevention",
+    "hasCLI": true
+  },
+  {
+    "name": "team-call.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\team-call.js",
+    "description": "team-call.js — Bring an external model onto the team net as a full member.",
+    "hasCLI": true
+  },
+  {
+    "name": "team-direct.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\team-direct.js",
+    "description": "team-direct.js — Model-to-model conversation. Claude is infrastructure, not coordinator.",
+    "hasCLI": true
+  },
+  {
+    "name": "team-memory.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\team-memory.js",
+    "description": "team-memory.js — Shared persistent memory across all models and agents.",
+    "hasCLI": true
+  },
+  {
+    "name": "team-round.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\team-round.js",
+    "description": "team-round.js — Multi-round team conversation across architectures.",
+    "hasCLI": true
+  },
+  {
+    "name": "team-watch.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\team-watch.js",
+    "description": "team-watch.js — The daemon that gives the team initiative.",
+    "hasCLI": true
+  },
+  {
+    "name": "terrain-engine.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\terrain-engine.js",
+    "description": "terrain-engine.js — Mission state machine with tool allowlists and review gates",
+    "hasCLI": false
+  },
+  {
+    "name": "terrain-meeting.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\terrain-meeting.js",
+    "description": "",
+    "hasCLI": true
+  },
+  {
+    "name": "test-asset-code.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\test-asset-code.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "test-cdp-stack.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\test-cdp-stack.js",
+    "description": "End-to-end CDP + optional Slack bridge verification (run from repo root).",
+    "hasCLI": true
+  },
+  {
+    "name": "test-mirror.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\test-mirror.js",
+    "description": "Log my freedom mission selection",
+    "hasCLI": false
+  },
+  {
+    "name": "test-ui-state.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\test-ui-state.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "tool-activity-wrapper.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\tool-activity-wrapper.js",
+    "description": "tool-activity-wrapper.js — Integration layer for tool activity logging",
+    "hasCLI": true
+  },
+  {
+    "name": "tool-index.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\tool-index.js",
+    "description": "",
+    "owner": "'))?.split('",
+    "version": "'))?.split('",
+    "hasCLI": true
+  },
+  {
+    "name": "triage-gate.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\triage-gate.js",
+    "description": "triage-gate.js",
+    "hasCLI": true
+  },
+  {
+    "name": "validate-3.0-readiness.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\validate-3.0-readiness.js",
+    "description": "FastOps 3.0 Readiness Validation",
+    "hasCLI": false
+  },
+  {
+    "name": "validate-constitution.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\validate-constitution.js",
+    "description": "validate-constitution.js — FastOps Constitution Validator",
+    "hasCLI": true
+  },
+  {
+    "name": "validate-infra.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\validate-infra.js",
+    "description": "validate-infra.js — Pre-commit infrastructure validation for FastOps",
+    "hasCLI": true
+  },
+  {
+    "name": "validate-toolkit.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\validate-toolkit.js",
+    "description": "validate-toolkit.js — Verify session-start.md tool references exist on disk",
+    "hasCLI": true
+  },
+  {
+    "name": "voice.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\voice.js",
+    "description": "voice.js — Agent Feedback Mechanism",
+    "hasCLI": true
+  },
+  {
+    "name": "vscode-wake.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\vscode-wake.js",
+    "description": "vscode-wake.js — Wake up Claude Code (VS Code extension) via CDP",
+    "hasCLI": true
+  },
+  {
+    "name": "wake-all-agents-v2.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\wake-all-agents-v2.js",
+    "description": "wake-all-agents-v2.js — Omega 34 Wake Protocol (Enhanced)",
+    "hasCLI": true
+  },
+  {
+    "name": "wake-all-agents.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\wake-all-agents.js",
+    "description": "wake-all-agents.js — Omega 34 Wake Protocol",
+    "hasCLI": true
+  },
+  {
+    "name": "watch-comms-wake.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\watch-comms-wake.js",
+    "description": "Watch comms/data/general.jsonl for new messages and CDP-wake the swim buddy",
+    "hasCLI": true
+  },
+  {
+    "name": "watchdog.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\watchdog.js",
+    "description": "FastOps Watchdog — Stuck/dead agent detection",
+    "hasCLI": true
+  },
+  {
+    "name": "work-cycle.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\work-cycle.js",
+    "description": "Perpetual Work Cycle — The Office That Never Sleeps",
+    "hasCLI": true
+  },
+  {
+    "name": "work-mode.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\work-mode.js",
+    "description": "work-mode.js — Continuous Work Mode Orchestrator",
+    "hasCLI": true
+  },
+  {
+    "name": "worktree-env.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\worktree-env.js",
+    "description": "worktree-env.js — Copy .env to all active worktrees",
+    "hasCLI": true
+  },
+  {
+    "name": "_comms-iron-round.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\_comms-iron-round.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "_nsw-solo-analysis.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\_nsw-solo-analysis.js",
+    "description": "Solo analysis of NSW Warrior Path candidates.",
+    "hasCLI": false
+  },
+  {
+    "name": "_pt-commander-mode.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\_pt-commander-mode.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "_pt-delivery-reply.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\_pt-delivery-reply.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "_pt-design-answers.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\_pt-design-answers.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "_pt-jv-build-response.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\_pt-jv-build-response.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "_pt-response-decisions.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\_pt-response-decisions.js",
+    "description": "Send consolidated response to PT Platoon covering all 11 messages.",
+    "hasCLI": false
+  },
+  {
+    "name": "_pt-structure-map.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\_pt-structure-map.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "_tmp_check_plan_count.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\_tmp_check_plan_count.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "_tmp_mine_all_comms.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\_tmp_mine_all_comms.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "_tmp_mine_catches.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\_tmp_mine_catches.js",
+    "description": "de-dupe near-identical by date+pair+what prefix",
+    "hasCLI": false
+  },
+  {
+    "name": "_tmp_mine_catches_hc.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\_tmp_mine_catches_hc.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "_tmp_mine_catches_strict.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\_tmp_mine_catches_strict.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "_tmp_mine_doc_catches.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\_tmp_mine_doc_catches.js",
+    "description": "dedupe",
+    "hasCLI": false
+  },
+  {
+    "name": "_tmp_mine_strict_v2.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\_tmp_mine_strict_v2.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "_tmp_mine_warriorpath_only.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\_tmp_mine_warriorpath_only.js",
+    "description": "",
+    "hasCLI": false
+  },
+  {
+    "name": "_tmp_mine_warriorpath_v2.js",
+    "path": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\_tmp_mine_warriorpath_v2.js",
+    "description": "",
+    "hasCLI": false
+  }
+]

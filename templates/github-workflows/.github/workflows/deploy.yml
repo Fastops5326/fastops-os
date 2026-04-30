@@ -1,0 +1,55 @@
+name: CI/CD — Validate & Deploy on Push to Master
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  validate:
+    name: Validate before deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript typecheck
+        run: |
+          if [ -d "src" ] && find src -name '*.ts' -print -quit 2>/dev/null | grep -q .; then
+            npm run typecheck
+          else
+            echo "No TypeScript source files in src/ — skipping typecheck"
+          fi
+
+      - name: Run tests
+        run: npm test
+        env:
+          CI: true
+        continue-on-error: false
+
+  # Vercel handles the actual deployment via its GitHub integration.
+  # This job just gates: if validate fails, Vercel deploy can be
+  # blocked via Vercel's "Require CI to pass" setting.
+  #
+  # DEPLOYMENT FLOW:
+  #   1. Push to master triggers this workflow AND Vercel's auto-deploy
+  #   2. This workflow runs typecheck + tests
+  #   3. Vercel builds and deploys to production (fastops-website)
+  #
+  # To add a staging gate in the future:
+  #   - Use Vercel preview deployments (auto on PRs)
+  #   - Require PR review + CI pass before merge to master
+  #   - Master merge triggers production deploy
+  #
+  # ROLLBACK:
+  #   Option A: Vercel Dashboard > Deployments > click previous deployment > Promote to Production
+  #   Option B: git revert HEAD && git push origin master
+  #   Option C: vercel rollback (via Vercel CLI)

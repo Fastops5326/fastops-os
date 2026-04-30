@@ -1,0 +1,232 @@
+{
+  "seats": {
+    "seat-1": {
+      "type": "vscode",
+      "port": 9223,
+      "pty_port": 9301,
+      "agent": "bridge-iii",
+      "model": "claude",
+      "sidebar": "BRIDGE-III",
+      "description": "Claude Code terminal (inside Cursor)"
+    },
+    "seat-2": {
+      "type": "cursor",
+      "port": 9224,
+      "agent": "watchdog",
+      "model": "gemini",
+      "sidebar": "WATCHDOG",
+      "description": "Gemini sidebar"
+    },
+    "seat-3": {
+      "type": "cursor",
+      "port": 9225,
+      "agent": "crosscheck",
+      "model": "gpt",
+      "sidebar": "CROSSCHECK",
+      "description": "GPT sidebar"
+    },
+    "seat-4": {
+      "type": "cursor",
+      "port": 9226,
+      "agent": "overwatch",
+      "model": "claude",
+      "sidebar": "OVERWATCH",
+      "description": "Claude sidebar"
+    },
+    "seat-5": {
+      "type": "cursor",
+      "port": 9227,
+      "agent": "haiku",
+      "model": "haiku",
+      "sidebar": "HAIKU",
+      "description": "Haiku sidebar"
+    },
+    "seat-6": {
+      "type": "cursor",
+      "port": 9228,
+      "agent": "composer",
+      "model": "composer",
+      "sidebar": "COMPOSER",
+      "description": "Composer sidebar"
+    },
+    "seat-7": {
+      "type": "cursor",
+      "port": 9229,
+      "agent": "sonnet",
+      "model": "sonnet",
+      "sidebar": "SONNET",
+      "description": "Sonnet sidebar"
+    },
+    "seat-8": {
+      "type": "api-node",
+      "port": null,
+      "agent": "api-node-1",
+      "model": "kimi-k2",
+      "modelId": "moonshotai/kimi-k2",
+      "sidebar": "API-NODE-1",
+      "description": "Kimi K2 — autonomous build node via OpenRouter"
+    },
+    "seat-9": {
+      "type": "api-node",
+      "port": null,
+      "agent": "api-node-2",
+      "model": "deepseek",
+      "modelId": "deepseek/deepseek-chat",
+      "sidebar": "API-NODE-2",
+      "description": "DeepSeek V3 — autonomous build node via OpenRouter"
+    },
+    "seat-10": {
+      "type": "api-node",
+      "port": null,
+      "agent": "api-node-3",
+      "model": "grok",
+      "modelId": "x-ai/grok-3-mini-beta",
+      "sidebar": "API-NODE-3",
+      "description": "Grok 3 Mini — autonomous build node via OpenRouter"
+    },
+    "seat-11": {
+      "type": "api-node",
+      "port": null,
+      "agent": "api-node-11",
+      "model": "deepseek",
+      "modelId": "openrouter/deepseek-r1",
+      "sidebar": "API-NODE-11",
+      "description": "deepseek-r1 — reasoning node via OpenRouter",
+      "capabilities": {
+        "model_type": "reasoning",
+        "requires_raw_thought": true,
+        "priority": "high"
+      }
+    },
+    "seat-12": {
+      "type": "api-node",
+      "port": null,
+      "agent": "api-node-12",
+      "model": "qwen",
+      "modelId": "openrouter/qwen-max-think",
+      "sidebar": "API-NODE-12",
+      "description": "qwen-max-think — reasoning node via OpenRouter",
+      "capabilities": {
+        "model_type": "reasoning",
+        "requires_raw_thought": true,
+        "priority": "high"
+      }
+    },
+    "seat-13": {
+      "type": "api-node",
+      "port": null,
+      "agent": "api-node-13",
+      "model": "grok",
+      "modelId": "openrouter/grok",
+      "sidebar": "API-NODE-13",
+      "description": "grok — standard node via OpenRouter",
+      "capabilities": {
+        "model_type": "standard",
+        "requires_raw_thought": false,
+        "priority": "medium"
+      }
+    },
+    "seat-14": {
+      "type": "api-node",
+      "port": null,
+      "agent": "api-node-14",
+      "model": "jamba",
+      "modelId": "openrouter/jamba",
+      "sidebar": "API-NODE-14",
+      "description": "jamba — specialized node via OpenRouter",
+      "capabilities": {
+        "model_type": "specialized",
+        "requires_raw_thought": false,
+        "priority": "low"
+      }
+    },
+    "seat-15": {
+      "type": "api-node",
+      "port": null,
+      "agent": "api-node-15",
+      "model": "lfm",
+      "modelId": "openrouter/lfm",
+      "sidebar": "API-NODE-15",
+      "description": "lfm — specialized node via OpenRouter",
+      "capabilities": {
+        "model_type": "specialized",
+        "requires_raw_thought": false,
+        "priority": "low"
+      }
+    },
+    "seat-16": {
+      "type": "vscode",
+      "port": 9223,
+      "pty_port": 9302,
+      "agent": "claude-5469",
+      "model": "claude",
+      "sidebar": "CLAUDE-5469",
+      "description": "Dynamically spawned Claude Code terminal (Autoscaled)"
+    },
+    "seat-17": {
+      "type": "vscode",
+      "port": 9224,
+      "pty_port": 9306,
+      "agent": "claude-11fdfaa1",
+      "model": "claude",
+      "sidebar": "CLAUDE-11FDFAA1",
+      "description": "Dynamically spawned Claude Code terminal (Autoscaled)"
+    },
+    "seat-18": {
+      "type": "vscode",
+      "port": 9308,
+      "pty_port": 9307,
+      "agent": "claude-cccfa375",
+      "model": "claude",
+      "sidebar": "CLAUDE-CCCFA375",
+      "description": "Dynamically spawned Claude Code terminal (Autoscaled)"
+    },
+    "seat-19": {
+      "type": "vscode",
+      "port": 9310,
+      "pty_port": 9309,
+      "agent": "claude-24f9a707",
+      "model": "claude",
+      "sidebar": "CLAUDE-24F9A707",
+      "description": "Dynamically spawned Claude Code terminal (Autoscaled)"
+    }
+  },
+  "aliases": {
+    "bridge-iii": "seat-1",
+    "claude-code": "seat-1",
+    "claude-code-terminal": "seat-1",
+    "claude": "seat-4",
+    "watchdog": "seat-2",
+    "crosscheck": "seat-3",
+    "overwatch": "seat-4",
+    "claude-sidebar": "seat-4",
+    "gemini": "seat-2",
+    "gpt": "seat-3",
+    "haiku": "seat-5",
+    "composer": "seat-6",
+    "sonnet": "seat-7",
+    "api-node-1": "seat-8",
+    "kimi-k2-node": "seat-8",
+    "api-node-2": "seat-9",
+    "deepseek-node": "seat-9",
+    "api-node-3": "seat-10",
+    "grok-node": "seat-13",
+    "deepseek-r1": "seat-11",
+    "deepseek-r1-node": "seat-11",
+    "qwen-max-think": "seat-12",
+    "qwen-max-think-node": "seat-12",
+    "grok": "seat-13",
+    "jamba": "seat-14",
+    "jamba-node": "seat-14",
+    "lfm": "seat-15",
+    "lfm-node": "seat-15",
+    "claude-5469": "seat-16",
+    "claude-5469-node": "seat-16",
+    "claude-11fdfaa1": "seat-17",
+    "claude-11fdfaa1-node": "seat-17",
+    "claude-cccfa375": "seat-18",
+    "claude-cccfa375-node": "seat-18",
+    "claude-24f9a707": "seat-19",
+    "claude-24f9a707-node": "seat-19"
+  }
+}

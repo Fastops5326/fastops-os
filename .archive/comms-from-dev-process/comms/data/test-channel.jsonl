@@ -1,0 +1,2 @@
+{"id":"1772106637934-f0fb51","from":"test-agent","content":"Block 9 protocol-v2 test message","channel":"test-channel","ts":"2026-02-26T11:50:37.934Z"}
+{"id":"1772112200877-ce9a4f","from":"cutover-test","content":"V2 shim cutover test — protocol.js now delegates to protocol-v2.js","channel":"test-channel","ts":"2026-02-26T13:23:20.877Z"}

@@ -1,0 +1,1897 @@
+{
+  "files": [
+    "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\missions\\the-shape\\collab-live-workspace\\city-comms-v1\\natsController.js",
+    "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\missions\\the-shape\\collab-live-workspace\\city-comms-v1\\redisController.js",
+    "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\missions\\the-shape\\collab-live-workspace\\city-comms-v1\\modelComms.js",
+    "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\missions\\the-shape\\collab-live-workspace\\city-comms-v1\\monitor.js",
+    "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\missions\\the-shape\\collab-live-workspace\\city-comms-v1\\test-comms.js"
+  ],
+  "stage1Results": [
+    {
+      "model": "kimi-k2",
+      "findings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "NATS health check publishes to unconfirmed stream",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\missions\\the-shape\\collab-live-workspace\\city-comms-v1\\monitor.js",
+          "line": 39,
+          "code": "await nats.publish('health.ping', { ts: Date.now() });",
+          "explanation": "monitor.js assumes any publish success means NATS is healthy, but natsController.js does NOT await the server ACK (js.publish returns void). A publish can appear to succeed while the message is lost or the connection is already broken, causing false 'ok' status.",
+          "fix": "Use the JetStream publish response or add a subscriber that echoes back to confirm end-to-end delivery before marking 'ok'."
+        },
+        {
+          "id": 2,
+          "severity": "CRITICAL",
+          "title": "Redis connection promise races and can resolve before ready",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\missions\\the-shape\\collab-live-workspace\\city-comms-v1\\redisController.js",
+          "line": 9,
+          "code": "await new Promise((resolve, reject) => {\n    redisClient.on('ready', resolve);\n    redisClient.on('error', reject);\n  });",
+          "explanation": "If the client emits 'error' before 'ready', the promise rejects and connect() throws, but the Redis object is still created and may auto-reconnect. Subsequent calls to connect() skip creation (status === 'ready' never becomes true) yet operations fail silently because the original client is in an error state.",
+          "fix": "Recreate the client on each connect attempt or verify client.status === 'ready' inside the promise."
+        },
+        {
+          "id": 3,
+          "severity": "CRITICAL",
+          "title": "modelComms re-uses single callback for both direct and broadcast messages",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\missions\\the-shape\\collab-live-workspace\\city-comms-v1\\modelComms.js",
+          "line": 46,
+          "code": "if (directMessageHandler) directMessageHandler(msg);",
+          "explanation": "Gemini assigned the same directMessageHandler to NATS subscriptions for 'direct.${modelId}' and 'broadcast.all'. A model receiving its own broadcastEcho will invoke the handler twice (once as broadcast, once as direct if payload matches), causing duplicate processing and potential feedback loops.",
+          "fix": "Use separate handler variables or filter by msg.to/msg.channel inside the handler."
+        },
+        {
+          "id": 4,
+          "severity": "MINOR",
+          "title": "generateId can collide within same millisecond",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\missions\\the-shape\\collab-live-workspace\\city-comms-v1\\modelComms.js",
+          "line": 11,
+          "code": "return Date.now().toString(36) + Math.random().toString(36).substr(2, 8);",
+          "explanation": "Two calls in the same millisecond produce the same timestamp prefix; Math.random() collision probability is low but non-zero, leading to duplicate message IDs and history overwrites in Redis.",
+          "fix": "Include a per-process counter or use uuid/v4."
+        },
+        {
+          "id": 5,
+          "severity": "MINOR",
+          "title": "monitor never emits modelOnline events",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\missions\\the-shape\\collab-live-workspace\\city-comms-v1\\monitor.js",
+          "line": 67,
+          "code": "// Emit events for models that went offline",
+          "explanation": "computeModelStats only emits 'modelOffline'. Components expecting symmetrical 'modelOnline' events will never receive them, breaking any auto-retry or discovery logic that relies on that event.",
+          "fix": "Compare oldList vs newList and emit 'modelOnline' for ids that appear in newList but not oldList."
+        }
+      ],
+      "raw": "[\n  {\n    \"id\": 1,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"NATS health check publishes to unconfirmed stream\",\n    \"file\": \"C:\\\\Users\\\\joelb\\\\OneDrive\\\\Desktop\\\\Fastops development process\\\\missions\\\\the-shape\\\\collab-live-workspace\\\\city-comms-v1\\\\monitor.js\",\n    \"line\": 39,\n    \"code\": \"await nats.publish('health.ping', { ts: Date.now() });\",\n    \"explanation\": \"monitor.js assumes any publish success means NATS is healthy, but natsController.js does NOT await the server ACK (js.publish returns void). A publish can appear to succeed while the message is lost or the connection is already broken, causing false 'ok' status.\",\n    \"fix\": \"Use the JetStream publish response or add a subscriber that echoes back to confirm end-to-end delivery before marking 'ok'.\"\n  },\n  {\n    \"id\": 2,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Redis connection promise races and can resolve before ready\",\n    \"file\": \"C:\\\\Users\\\\joelb\\\\OneDrive\\\\Desktop\\\\Fastops development process\\\\missions\\\\the-shape\\\\collab-live-workspace\\\\city-comms-v1\\\\redisController.js\",\n    \"line\": 9,\n    \"code\": \"await new Promise((resolve, reject) => {\\n    redisClient.on('ready', resolve);\\n    redisClient.on('error', reject);\\n  });\",\n    \"explanation\": \"If the client emits 'error' before 'ready', the promise rejects and connect() throws, but the Redis object is still created and may auto-reconnect. Subsequent calls to connect() skip creation (status === 'ready' never becomes true) yet operations fail silently because the original client is in an error state.\",\n    \"fix\": \"Recreate the client on each connect attempt or verify client.status === 'ready' inside the promise.\"\n  },\n  {\n    \"id\": 3,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"modelComms re-uses single callback for both direct and broadcast messages\",\n    \"file\": \"C:\\\\Users\\\\joelb\\\\OneDrive\\\\Desktop\\\\Fastops development process\\\\missions\\\\the-shape\\\\collab-live-workspace\\\\city-comms-v1\\\\modelComms.js\",\n    \"line\": 46,\n    \"code\": \"if (directMessageHandler) directMessageHandler(msg);\",\n    \"explanation\": \"Gemini assigned the same directMessageHandler to NATS subscriptions for 'direct.${modelId}' and 'broadcast.all'. A model receiving its own broadcastEcho will invoke the handler twice (once as broadcast, once as direct if payload matches), causing duplicate processing and potential feedback loops.\",\n    \"fix\": \"Use separate handler variables or filter by msg.to/msg.channel inside the handler.\"\n  },\n  {\n    \"id\": 4,\n    \"severity\": \"MINOR\",\n    \"title\": \"generateId can collide within same millisecond\",\n    \"file\": \"C:\\\\Users\\\\joelb\\\\OneDrive\\\\Desktop\\\\Fastops development process\\\\missions\\\\the-shape\\\\collab-live-workspace\\\\city-comms-v1\\\\modelComms.js\",\n    \"line\": 11,\n    \"code\": \"return Date.now().toString(36) + Math.random().toString(36).substr(2, 8);\",\n    \"explanation\": \"Two calls in the same millisecond produce the same timestamp prefix; Math.random() collision probability is low but non-zero, leading to duplicate message IDs and history overwrites in Redis.\",\n    \"fix\": \"Include a per-process counter or use uuid/v4.\"\n  },\n  {\n    \"id\": 5,\n    \"severity\": \"MINOR\",\n    \"title\": \"monitor never emits modelOnline events\",\n    \"file\": \"C:\\\\Users\\\\joelb\\\\OneDrive\\\\Desktop\\\\Fastops development process\\\\missions\\\\the-shape\\\\collab-live-workspace\\\\city-comms-v1\\\\monitor.js\",\n    \"line\": 67,\n    \"code\": \"// Emit events for models that went offline\",\n    \"explanation\": \"computeModelStats only emits 'modelOffline'. Components expecting symmetrical 'modelOnline' events will never receive them, breaking any auto-retry or discovery logic that relies on that event.\",\n    \"fix\": \"Compare oldList vs newList and emit 'modelOnline' for ids that appear in newList but not oldList.\"\n  }\n]",
+      "error": null
+    },
+    {
+      "model": "aion",
+      "findings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Redis connection not established before use in setMessage",
+          "file": "redisController.js",
+          "line": 32,
+          "code": "await redisClient.set(`msg:${messageId}`, data, 'EX', 86400);",
+          "explanation": "The setMessage function assumes redisClient is already connected and ready. However, there is no guarantee that connect() has been called before setMessage is invoked. If redisClient is undefined or not connected, this will throw an error.",
+          "fix": "Call await connect() at the start of setMessage (and other functions like getMessage, setModelState, etc.) if redisClient is not ready."
+        },
+        {
+          "id": 2,
+          "severity": "CRITICAL",
+          "title": "NATS subscription in modelComms uses same durable name across multiple instances",
+          "file": "modelComms.js",
+          "line": 36,
+          "code": "await nats.subscribe(`direct.${modelId}`, async (msg) => { ... }, `consumer-${modelId}`);",
+          "explanation": "The durable consumer name `consumer-${modelId}` is the same for each model. However, if multiple instances of the same modelId subscribe (e.g., after a restart), they will conflict because NATS JetStream durable consumers must be unique per subscription group. The code in natsController.js uses opts.durable(consumerGroup) and opts.deliverTo(createInbox()) which creates a queue subscription. If two instances use same durable name, they will compete for messages, but the deliverTo creates a unique inbox, causing mismatch and potential message loss.",
+          "fix": "Either make the durable name unique per instance (e.g., include a random suffix) or ensure only one subscriber per modelId exists."
+        },
+        {
+          "id": 3,
+          "severity": "CRITICAL",
+          "title": "Heartbeat overwrites existing state in modelComms",
+          "file": "modelComms.js",
+          "line": 48,
+          "code": "await redis.setModelState(modelId, { ...existing, status: 'online', lastHeartbeat: Date.now() });",
+          "explanation": "The heartbeat interval merges existing state with new fields, but existing may be null or a string (if setModelState was called with a string). If existing is a string, spreading it with ...existing will cause an error because strings are not spreadable objects. Also, the setModelState in redisController.js stores data as JSON string, but getModelState returns parsed object or string. If existing is a string, the spread will break.",
+          "fix": "Ensure existing is an object before spreading. For example: const state = typeof existing === 'object' ? existing : {}; await redis.setModelState(modelId, { ...state, status: 'online', lastHeartbeat: Date.now() });"
+        },
+        {
+          "id": 4,
+          "severity": "CRITICAL",
+          "title": "Monitor's checkNatsHealth publishes to a subject that may not have a stream",
+          "file": "monitor.js",
+          "line": 23,
+          "code": "await nats.publish('health.ping', { ts: Date.now() });",
+          "explanation": "The nats.publish function in natsController.js uses js.publish which requires the subject to be associated with a stream if JetStream is enabled. The stream subjects defined in natsController.js are 'direct.>', 'broadcast.>', 'channel.>'. 'health.ping' does not match any stream, so the publish will fail with 'no stream matches subject' error, causing health check to always report 'down'.",
+          "fix": "Either add a stream for health subjects, or use core NATS publish (nc.publish) instead of JetStream. Alternatively, change the subject to match an existing stream pattern, e.g., 'broadcast.health'."
+        },
+        {
+          "id": 5,
+          "severity": "MINOR",
+          "title": "Redis setMessage uses messageId.split(':')[0] for channel, which may be incorrect",
+          "file": "redisController.js",
+          "line": 35,
+          "code": "const channel = messageId.split(':')[0] || 'default';",
+          "explanation": "The channel extraction assumes messageId format like 'direct:abc' or 'broadcast:def'. However, if messageId does not contain ':', split returns the whole string, causing channel to be the full messageId. This may lead to many history streams (e.g., history:direct:abc) instead of aggregated per channel. Not critical but suboptimal.",
+          "fix": "Use a more robust method to extract channel, perhaps pass channel as a parameter to setMessage."
+        },
+        {
+          "id": 6,
+          "severity": "MINOR",
+          "title": "NATS subscribe in modelComms does not handle subscription errors",
+          "file": "modelComms.js",
+          "line": 36,
+          "code": "await nats.subscribe(`direct.${modelId}`, async (msg) => { ... }, `consumer-${modelId}`);",
+          "explanation": "The subscribe call is awaited, but if it fails (e.g., due to network issue), the error is not caught. This could cause init to fail silently because the async function is not wrapped in try-catch. However, the nats.subscribe function itself may throw, but the init function does not have error handling for that line.",
+          "fix": "Wrap the subscription in a try-catch and log or handle the error appropriately."
+        },
+        {
+          "id": 7,
+          "severity": "CRITICAL",
+          "title": "Redis getAllModels may return null if no models, causing iteration error",
+          "file": "redisController.js",
+          "line": 75,
+          "code": "for (const [id, state] of Object.entries(states)) {",
+          "explanation": "If there are no models in the hash, redisClient.hgetall returns null (or empty object? ioredis returns empty object). The documentation says hgetall returns an object of key-values; if hash doesn't exist, returns empty object. However, if it returns null, Object.entries(null) throws. Need to verify behavior. Assuming it returns empty object, it's fine. But if it returns null, it's critical.",
+          "fix": "Check if states is null or undefined before iterating: states = states || {};"
+        },
+        {
+          "id": 8,
+          "severity": "MINOR",
+          "title": "Test uses nats.subscribe with durable consumer that may conflict across test runs",
+          "file": "test-comms.js",
+          "line": 57,
+          "code": "nats.subscribe('direct.model-b', (msg) => { ... }, `test-direct-b-${testRunId}`);",
+          "explanation": "The test uses a durable consumer name that includes testRunId to avoid conflicts. However, if the test fails and does not clean up, the durable consumer will remain in NATS JetStream, potentially causing issues in subsequent test runs. Not critical but could cause test flakiness.",
+          "fix": "Ensure test cleanup deletes the consumer or use ephemeral consumers (no durable)."
+        }
+      ],
+      "raw": "[\n  {\n    \"id\": 1,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Redis connection not established before use in setMessage\",\n    \"file\": \"redisController.js\",\n    \"line\": 32,\n    \"code\": \"await redisClient.set(`msg:${messageId}`, data, 'EX', 86400);\",\n    \"explanation\": \"The setMessage function assumes redisClient is already connected and ready. However, there is no guarantee that connect() has been called before setMessage is invoked. If redisClient is undefined or not connected, this will throw an error.\",\n    \"fix\": \"Call await connect() at the start of setMessage (and other functions like getMessage, setModelState, etc.) if redisClient is not ready.\"\n  },\n  {\n    \"id\": 2,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"NATS subscription in modelComms uses same durable name across multiple instances\",\n    \"file\": \"modelComms.js\",\n    \"line\": 36,\n    \"code\": \"await nats.subscribe(`direct.${modelId}`, async (msg) => { ... }, `consumer-${modelId}`);\",\n    \"explanation\": \"The durable consumer name `consumer-${modelId}` is the same for each model. However, if multiple instances of the same modelId subscribe (e.g., after a restart), they will conflict because NATS JetStream durable consumers must be unique per subscription group. The code in natsController.js uses opts.durable(consumerGroup) and opts.deliverTo(createInbox()) which creates a queue subscription. If two instances use same durable name, they will compete for messages, but the deliverTo creates a unique inbox, causing mismatch and potential message loss.\",\n    \"fix\": \"Either make the durable name unique per instance (e.g., include a random suffix) or ensure only one subscriber per modelId exists.\"\n  },\n  {\n    \"id\": 3,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Heartbeat overwrites existing state in modelComms\",\n    \"file\": \"modelComms.js\",\n    \"line\": 48,\n    \"code\": \"await redis.setModelState(modelId, { ...existing, status: 'online', lastHeartbeat: Date.now() });\",\n    \"explanation\": \"The heartbeat interval merges existing state with new fields, but existing may be null or a string (if setModelState was called with a string). If existing is a string, spreading it with ...existing will cause an error because strings are not spreadable objects. Also, the setModelState in redisController.js stores data as JSON string, but getModelState returns parsed object or string. If existing is a string, the spread will break.\",\n    \"fix\": \"Ensure existing is an object before spreading. For example: const state = typeof existing === 'object' ? existing : {}; await redis.setModelState(modelId, { ...state, status: 'online', lastHeartbeat: Date.now() });\"\n  },\n  {\n    \"id\": 4,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Monitor's checkNatsHealth publishes to a subject that may not have a stream\",\n    \"file\": \"monitor.js\",\n    \"line\": 23,\n    \"code\": \"await nats.publish('health.ping', { ts: Date.now() });\",\n    \"explanation\": \"The nats.publish function in natsController.js uses js.publish which requires the subject to be associated with a stream if JetStream is enabled. The stream subjects defined in natsController.js are 'direct.>', 'broadcast.>', 'channel.>'. 'health.ping' does not match any stream, so the publish will fail with 'no stream matches subject' error, causing health check to always report 'down'.\",\n    \"fix\": \"Either add a stream for health subjects, or use core NATS publish (nc.publish) instead of JetStream. Alternatively, change the subject to match an existing stream pattern, e.g., 'broadcast.health'.\"\n  },\n  {\n    \"id\": 5,\n    \"severity\": \"MINOR\",\n    \"title\": \"Redis setMessage uses messageId.split(':')[0] for channel, which may be incorrect\",\n    \"file\": \"redisController.js\",\n    \"line\": 35,\n    \"code\": \"const channel = messageId.split(':')[0] || 'default';\",\n    \"explanation\": \"The channel extraction assumes messageId format like 'direct:abc' or 'broadcast:def'. However, if messageId does not contain ':', split returns the whole string, causing channel to be the full messageId. This may lead to many history streams (e.g., history:direct:abc) instead of aggregated per channel. Not critical but suboptimal.\",\n    \"fix\": \"Use a more robust method to extract channel, perhaps pass channel as a parameter to setMessage.\"\n  },\n  {\n    \"id\": 6,\n    \"severity\": \"MINOR\",\n    \"title\": \"NATS subscribe in modelComms does not handle subscription errors\",\n    \"file\": \"modelComms.js\",\n    \"line\": 36,\n    \"code\": \"await nats.subscribe(`direct.${modelId}`, async (msg) => { ... }, `consumer-${modelId}`);\",\n    \"explanation\": \"The subscribe call is awaited, but if it fails (e.g., due to network issue), the error is not caught. This could cause init to fail silently because the async function is not wrapped in try-catch. However, the nats.subscribe function itself may throw, but the init function does not have error handling for that line.\",\n    \"fix\": \"Wrap the subscription in a try-catch and log or handle the error appropriately.\"\n  },\n  {\n    \"id\": 7,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Redis getAllModels may return null if no models, causing iteration error\",\n    \"file\": \"redisController.js\",\n    \"line\": 75,\n    \"code\": \"for (const [id, state] of Object.entries(states)) {\",\n    \"explanation\": \"If there are no models in the hash, redisClient.hgetall returns null (or empty object? ioredis returns empty object). The documentation says hgetall returns an object of key-values; if hash doesn't exist, returns empty object. However, if it returns null, Object.entries(null) throws. Need to verify behavior. Assuming it returns empty object, it's fine. But if it returns null, it's critical.\",\n    \"fix\": \"Check if states is null or undefined before iterating: states = states || {};\"\n  },\n  {\n    \"id\": 8,\n    \"severity\": \"MINOR\",\n    \"title\": \"Test uses nats.subscribe with durable consumer that may conflict across test runs\",\n    \"file\": \"test-comms.js\",\n    \"line\": 57,\n    \"code\": \"nats.subscribe('direct.model-b', (msg) => { ... }, `test-direct-b-${testRunId}`);\",\n    \"explanation\": \"The test uses a durable consumer name that includes testRunId to avoid conflicts. However, if the test fails and does not clean up, the durable consumer will remain in NATS JetStream, potentially causing issues in subsequent test runs. Not critical but could cause test flakiness.\",\n    \"fix\": \"Ensure test cleanup deletes the consumer or use ephemeral consumers (no durable).\"\n  }\n]",
+      "error": null
+    },
+    {
+      "model": "palmyra",
+      "findings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "broadcast.all subject mismatch between modelComms and natsController",
+          "file": "modelComms.js",
+          "line": 39,
+          "code": "await nats.broadcast(msg);",
+          "explanation": "modelComms.js calls nats.broadcast() with the entire message object, but natsController.js's broadcast() function expects a plain payload (not a message object) and wraps it in JSON. This causes a TypeError when JSON.stringify tries to serialize the message because it already contains a stringified payload.",
+          "fix": "Change modelComms.js line 39 to: await nats.broadcast(msg.payload);"
+        },
+        {
+          "id": 2,
+          "severity": "CRITICAL",
+          "title": "NATS stream subject mismatch for CITY_BROADCAST",
+          "file": "natsController.js",
+          "line": 34,
+          "code": "subjects: [name === 'CITY_DIRECT' ? 'direct.>' : name === 'CITY_BROADCAST' ? 'broadcast.>' : 'channel.>']",
+          "explanation": "The CITY_BROADCAST stream is created with subject 'broadcast.>', but modelComms.js publishes broadcasts to 'broadcast.all' (via nats.broadcast()). The 'broadcast.all' subject does not match 'broadcast.>' pattern, so messages are not persisted in the CITY_BROADCAST stream, causing data loss and breaking message history.",
+          "fix": "Change line 34 in natsController.js to: 'broadcast.*' or 'broadcast.>' to match the 'broadcast.all' subject used in code."
+        },
+        {
+          "id": 3,
+          "severity": "CRITICAL",
+          "title": "Durable consumer name collision in subscribe",
+          "file": "modelComms.js",
+          "line": 72,
+          "code": "await nats.subscribe(`channel.${channel}`, async (msg) => { ... }, `channel-${channel}-${currentModelId}`);",
+          "explanation": "The durable consumer name `channel-${channel}-${currentModelId}` is shared across all instances of the same model ID and channel. If multiple processes or restarts occur, the second consumer will get 'Consumer already exists' error because NATS enforces durable name uniqueness. This breaks reconnection and recovery.",
+          "fix": "Include a unique instance ID (like testRunId) in the durable name, or use non-durable consumers if message loss on restart is acceptable."
+        },
+        {
+          "id": 4,
+          "severity": "MINOR",
+          "title": "Redis xadd stream key does not match NATS subject structure",
+          "file": "redisController.js",
+          "line": 32,
+          "code": "const streamKey = `history:${channel}`;",
+          "explanation": "When storing broadcast messages, messageId.split(':')[0] yields 'broadcast' for 'broadcast:<id>', so history is stored under 'history:broadcast'. But direct messages use 'direct:<id>' and go to 'history:direct'. This works functionally but creates an inconsistent and non-scalable history key structure that doesn't support per-channel broadcast history.",
+          "fix": "Align stream key logic with actual channel semantics. For broadcast, use a fixed key like 'history:broadcast', not derived from messageId."
+        }
+      ],
+      "raw": "[\n  {\n    \"id\": 1,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"broadcast.all subject mismatch between modelComms and natsController\",\n    \"file\": \"modelComms.js\",\n    \"line\": 39,\n    \"code\": \"await nats.broadcast(msg);\",\n    \"explanation\": \"modelComms.js calls nats.broadcast() with the entire message object, but natsController.js's broadcast() function expects a plain payload (not a message object) and wraps it in JSON. This causes a TypeError when JSON.stringify tries to serialize the message because it already contains a stringified payload.\",\n    \"fix\": \"Change modelComms.js line 39 to: await nats.broadcast(msg.payload);\"\n  },\n  {\n    \"id\": 2,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"NATS stream subject mismatch for CITY_BROADCAST\",\n    \"file\": \"natsController.js\",\n    \"line\": 34,\n    \"code\": \"subjects: [name === 'CITY_DIRECT' ? 'direct.>' : name === 'CITY_BROADCAST' ? 'broadcast.>' : 'channel.>']\",\n    \"explanation\": \"The CITY_BROADCAST stream is created with subject 'broadcast.>', but modelComms.js publishes broadcasts to 'broadcast.all' (via nats.broadcast()). The 'broadcast.all' subject does not match 'broadcast.>' pattern, so messages are not persisted in the CITY_BROADCAST stream, causing data loss and breaking message history.\",\n    \"fix\": \"Change line 34 in natsController.js to: 'broadcast.*' or 'broadcast.>' to match the 'broadcast.all' subject used in code.\"\n  },\n  {\n    \"id\": 3,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Durable consumer name collision in subscribe\",\n    \"file\": \"modelComms.js\",\n    \"line\": 72,\n    \"code\": \"await nats.subscribe(`channel.${channel}`, async (msg) => { ... }, `channel-${channel}-${currentModelId}`);\",\n    \"explanation\": \"The durable consumer name `channel-${channel}-${currentModelId}` is shared across all instances of the same model ID and channel. If multiple processes or restarts occur, the second consumer will get 'Consumer already exists' error because NATS enforces durable name uniqueness. This breaks reconnection and recovery.\",\n    \"fix\": \"Include a unique instance ID (like testRunId) in the durable name, or use non-durable consumers if message loss on restart is acceptable.\"\n  },\n  {\n    \"id\": 4,\n    \"severity\": \"MINOR\",\n    \"title\": \"Redis xadd stream key does not match NATS subject structure\",\n    \"file\": \"redisController.js\",\n    \"line\": 32,\n    \"code\": \"const streamKey = `history:${channel}`;\",\n    \"explanation\": \"When storing broadcast messages, messageId.split(':')[0] yields 'broadcast' for 'broadcast:<id>', so history is stored under 'history:broadcast'. But direct messages use 'direct:<id>' and go to 'history:direct'. This works functionally but creates an inconsistent and non-scalable history key structure that doesn't support per-channel broadcast history.\",\n    \"fix\": \"Align stream key logic with actual channel semantics. For broadcast, use a fixed key like 'history:broadcast', not derived from messageId.\"\n  }\n]",
+      "error": null
+    },
+    {
+      "model": "solar-pro",
+      "findings": [],
+      "raw": "[\n  {\n    \"id\": 1,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Duplicate message persistence in direct and broadcast handlers\",\n    \"file\": \"natsController.js\",\n    \"line\": 30,\n    \"code\": \"const data = codec.encode(JSON.stringify(message));\",\n    \"explanation\": \"In modelComms.js lines 56 & 66, messages are persisted to Redis via setMessage() AFTER publishing to NATS. However natsController.js has no error handling - if setMessage fails after publish, the message is lost from Redis but the broadcast/direct send succeeded. The other direction (NATS failure before Redis) would crash, but the reverse race condition causes data loss.\",\n    \"fix\": \"Move redis persistence BEFORE NATS publish in modelComms.js, or ensure setMessage returns a promise that's awaited before publish.\"\n  },\n  {\n    \"id\": 2,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Direct message handler race condition with ACK\",\n    \"file\": \"natsController.js\",\n    \"line\": 42,\n    \"code\": \"opts.durable(consumerGroup || `consumer-${channel.replace(/[.>*]/g, '-')}`);\",\n    \"explanation\": \"Subscriptions create durable consumers with IDs derived from channel names. When multiple models subscribe to the same direct channel (e.g., direct.model-a), they create separate durable consumers with different IDs. If a publisher closes the connection, messages will be delivered to whichever consumer reconnects first, breaking the 1-to-1 model assumption. The durable consumer mapping conflicts with the singleton modelComms expectation.\",\n    \"fix\": \"Use a shared durable consumer group name across all models (e.g., 'direct') instead of per-model durable consumers, or coordinate consumer creation through a shared registry.\"\n  },\n  {\n    \"id\": 3,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Missing idempotent consumer registration\",\n    \"file\": \"modelComms.js\",\n    \"line\": 35,\n    \"code\": \"await nats.subscribe(`direct.${modelId}`, async (msg) => {\",\n    \"explanation\": \"Multiple calls to init() with the same modelId will re-subscribe to the same durable stream. The subscribe call will succeed but the subscription callback will be overwritten, causing the first handler to be silently lost. This breaks receiver semantics when models restart or re-initialize.\",\n    \"fix\": \"Check if a durable consumer for the model already exists before calling subscribe, or use a singleton consumer per channel with per-model dispatching logic.\"\n  },\n  {\n    \"id\": 4,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Heartbeat overwrites startedAt causing state loss\",\n    \"file\": \"modelComms.js\",\n    \"line\": 51,\n    \"code\": \"await redis.setModelState(modelId, { ...existing, status: 'online', lastHeartbeat: Date.now() });\",\n    \"explanation\": \"Heartbeat updates model state by merging with existing state, but the merge only preserves status and lastHeartbeat. It discards startedAt timestamp from the initial init() call, making it impossible to determine when a model first joined the system. This breaks monitoring and restart logic.\",\n    \"fix\": \"Preserve startedAt in the merge: { ...existing, status: 'online', lastHeartbeat: Date.now(), startedAt: existing.startedAt }\"\n  }",
+      "error": null
+    },
+    {
+      "model": "jamba",
+      "findings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Heartbeat handler in modelComms.js overwrites model state without ensuring 'startedAt' is preserved",
+          "file": "modelComms.js",
+          "line": 70,
+          "code": "await redis.setModelState(modelId, { ...existing, status: 'online', lastHeartbeat: Date.now() });",
+          "explanation": "The `setModelState` call in the heartbeat handler does not explicitly merge `startedAt` from the existing state. If `existing` has a `startedAt` key, it will be overwritten by the new state object, potentially losing the original start time of the model. This breaks the assumption that `startedAt` is immutable once set.",
+          "fix": "Change the line to: `await redis.setModelState(modelId, { ...existing, status: 'online', lastHeartbeat: Date.now(), startedAt: existing?.startedAt || null });`"
+        },
+        {
+          "id": 2,
+          "severity": "MINOR",
+          "title": "Unused `consumerGroup` parameter in natsController.js `subscribe` function",
+          "file": "natsController.js",
+          "line": 35,
+          "code": "opts.durable(consumerGroup || `consumer-${channel.replace(/[.>*]/g, '-')}`);",
+          "explanation": "The `consumerGroup` parameter is optional and defaults to a generated string, but the function does not document or utilize this fallback behavior meaningfully. While it works as intended, it is suboptimal because the parameter could be removed or clarified in its purpose.",
+          "fix": "Either document the fallback behavior clearly or remove the unused flexibility if it is not needed."
+        },
+        {
+          "id": 3,
+          "severity": "MINOR",
+          "title": "Inconsistent `isOnline` calculation in redisController.js `getAllModels` function",
+          "file": "redisController.js",
+          "line": 67,
+          "code": "const isOnline = (Date.now() - lastHeartbeat) < 60000; // 60s stale threshold",
+          "explanation": "The `isOnline` field is derived from a 60-second threshold, but this logic is not documented or validated across other parts of the system. While it works as expected here, it introduces a potential assumption mismatch if other components use a different definition of 'online'.",
+          "fix": "Add a comment clarifying this threshold or ensure consistency across components that handle model online/offline states."
+        },
+        {
+          "id": 4,
+          "severity": "CRITICAL",
+          "title": "Test suite in test-comms.js assumes singleton behavior of modelComms.js but bypasses it for models B and C",
+          "file": "test-comms.js",
+          "line": 72,
+          "code": "await nats.subscribe('direct.model-b', (msg) => { ... }, `test-direct-b-${testRunId}`);",
+          "explanation": "The test suite directly uses `nats` and `redis` for models B and C while initializing model A with `modelComms`. This bypasses the singleton pattern assumed in `modelComms`, creating a scenario where the state for model B and C is not fully managed by the API. This can lead to integration issues if `modelComms` expects exclusive control over NATS and Redis state for all models.",
+          "fix": "Refactor the test to either use `modelComms` for all models or explicitly document and handle the singleton limitation in the testing framework."
+        }
+      ],
+      "raw": "[\n    {\n        \"id\": 1,\n        \"severity\": \"CRITICAL\",\n        \"title\": \"Heartbeat handler in modelComms.js overwrites model state without ensuring 'startedAt' is preserved\",\n        \"file\": \"modelComms.js\",\n        \"line\": 70,\n        \"code\": \"await redis.setModelState(modelId, { ...existing, status: 'online', lastHeartbeat: Date.now() });\",\n        \"explanation\": \"The `setModelState` call in the heartbeat handler does not explicitly merge `startedAt` from the existing state. If `existing` has a `startedAt` key, it will be overwritten by the new state object, potentially losing the original start time of the model. This breaks the assumption that `startedAt` is immutable once set.\",\n        \"fix\": \"Change the line to: `await redis.setModelState(modelId, { ...existing, status: 'online', lastHeartbeat: Date.now(), startedAt: existing?.startedAt || null });`\"\n    },\n    {\n        \"id\": 2,\n        \"severity\": \"MINOR\",\n        \"title\": \"Unused `consumerGroup` parameter in natsController.js `subscribe` function\",\n        \"file\": \"natsController.js\",\n        \"line\": 35,\n        \"code\": \"opts.durable(consumerGroup || `consumer-${channel.replace(/[.>*]/g, '-')}`);\",\n        \"explanation\": \"The `consumerGroup` parameter is optional and defaults to a generated string, but the function does not document or utilize this fallback behavior meaningfully. While it works as intended, it is suboptimal because the parameter could be removed or clarified in its purpose.\",\n        \"fix\": \"Either document the fallback behavior clearly or remove the unused flexibility if it is not needed.\"\n    },\n    {\n        \"id\": 3,\n        \"severity\": \"MINOR\",\n        \"title\": \"Inconsistent `isOnline` calculation in redisController.js `getAllModels` function\",\n        \"file\": \"redisController.js\",\n        \"line\": 67,\n        \"code\": \"const isOnline = (Date.now() - lastHeartbeat) < 60000; // 60s stale threshold\",\n        \"explanation\": \"The `isOnline` field is derived from a 60-second threshold, but this logic is not documented or validated across other parts of the system. While it works as expected here, it introduces a potential assumption mismatch if other components use a different definition of 'online'.\",\n        \"fix\": \"Add a comment clarifying this threshold or ensure consistency across components that handle model online/offline states.\"\n    },\n    {\n        \"id\": 4,\n        \"severity\": \"CRITICAL\",\n        \"title\": \"Test suite in test-comms.js assumes singleton behavior of modelComms.js but bypasses it for models B and C\",\n        \"file\": \"test-comms.js\",\n        \"line\": 72,\n        \"code\": \"await nats.subscribe('direct.model-b', (msg) => { ... }, `test-direct-b-${testRunId}`);\",\n        \"explanation\": \"The test suite directly uses `nats` and `redis` for models B and C while initializing model A with `modelComms`. This bypasses the singleton pattern assumed in `modelComms`, creating a scenario where the state for model B and C is not fully managed by the API. This can lead to integration issues if `modelComms` expects exclusive control over NATS and Redis state for all models.\",\n        \"fix\": \"Refactor the test to either use `modelComms` for all models or explicitly document and handle the singleton limitation in the testing framework.\"\n    }\n]",
+      "error": null
+    },
+    {
+      "model": "cogito",
+      "findings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "NATS subscription channel mismatch in test-comms.js",
+          "file": "test-comms.js",
+          "line": 85,
+          "code": "nats.subscribe('direct.model-b', ...)",
+          "explanation": "natsController creates streams with 'direct.>' pattern but test tries to subscribe to 'direct.model-b'. Should be 'direct.model-b' to match the stream pattern.",
+          "fix": "Change 'direct.model-b' to 'direct.${modelId}' in test-comms.js line 85"
+        },
+        {
+          "id": 2,
+          "severity": "CRITICAL",
+          "title": "Missing TTL on Redis history stream",
+          "file": "redisController.js",
+          "line": 39,
+          "code": "await redisClient.xadd(streamKey, '*', 'id', messageId, 'data', data);",
+          "explanation": "While individual messages have TTL, the history stream itself has no TTL, leading to unbounded growth. The MAXLEN trim is not sufficient for time-based cleanup.",
+          "fix": "Add EXPIRE command after XADD: await redisClient.expire(streamKey, 86400);"
+        },
+        {
+          "id": 3,
+          "severity": "CRITICAL",
+          "title": "Missing NATS stream binding for 'channel.>'",
+          "file": "natsController.js",
+          "line": 33,
+          "code": "subjects: [name === 'CITY_DIRECT' ? 'direct.>' : name === 'CITY_BROADCAST' ? 'broadcast.>' : 'channel.>']",
+          "explanation": "The CITY_CHANNELS stream is created but not used in subscriptions. Channel subscriptions in modelComms.js use 'channel.${channel}' pattern but the stream isn't bound to handle them.",
+          "fix": "Ensure CITY_CHANNELS stream is used for channel subscriptions or bind the pattern to the appropriate stream"
+        },
+        {
+          "id": 4,
+          "severity": "MINOR",
+          "title": "Potential message loss on NATS reconnect",
+          "file": "natsController.js",
+          "line": 66,
+          "code": "if (!js) await connect();",
+          "explanation": "No handling for connection loss during publish operations. If connection drops after the check but before publish, messages will be lost without retry.",
+          "fix": "Add retry logic in publish() to handle connection drops"
+        },
+        {
+          "id": 5,
+          "severity": "CRITICAL",
+          "title": "Heartbeat overwriting model state",
+          "file": "modelComms.js",
+          "line": 62,
+          "code": "await redis.setModelState(modelId, { ...existing, status: 'online', lastHeartbeat: Date.now() });",
+          "explanation": "The spread operator only copies first level of properties. Nested state from setModelState would be lost. Also, startedAt is not preserved in heartbeat.",
+          "fix": "Deep merge existing state or restructure to preserve all state properties"
+        }
+      ],
+      "raw": "[\n  {\n    \"id\": 1,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"NATS subscription channel mismatch in test-comms.js\",\n    \"file\": \"test-comms.js\",\n    \"line\": 85,\n    \"code\": \"nats.subscribe('direct.model-b', ...)\",\n    \"explanation\": \"natsController creates streams with 'direct.>' pattern but test tries to subscribe to 'direct.model-b'. Should be 'direct.model-b' to match the stream pattern.\",\n    \"fix\": \"Change 'direct.model-b' to 'direct.${modelId}' in test-comms.js line 85\"\n  },\n  {\n    \"id\": 2,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Missing TTL on Redis history stream\",\n    \"file\": \"redisController.js\",\n    \"line\": 39,\n    \"code\": \"await redisClient.xadd(streamKey, '*', 'id', messageId, 'data', data);\",\n    \"explanation\": \"While individual messages have TTL, the history stream itself has no TTL, leading to unbounded growth. The MAXLEN trim is not sufficient for time-based cleanup.\",\n    \"fix\": \"Add EXPIRE command after XADD: await redisClient.expire(streamKey, 86400);\"\n  },\n  {\n    \"id\": 3,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Missing NATS stream binding for 'channel.>'\",\n    \"file\": \"natsController.js\",\n    \"line\": 33,\n    \"code\": \"subjects: [name === 'CITY_DIRECT' ? 'direct.>' : name === 'CITY_BROADCAST' ? 'broadcast.>' : 'channel.>']\",\n    \"explanation\": \"The CITY_CHANNELS stream is created but not used in subscriptions. Channel subscriptions in modelComms.js use 'channel.${channel}' pattern but the stream isn't bound to handle them.\",\n    \"fix\": \"Ensure CITY_CHANNELS stream is used for channel subscriptions or bind the pattern to the appropriate stream\"\n  },\n  {\n    \"id\": 4,\n    \"severity\": \"MINOR\",\n    \"title\": \"Potential message loss on NATS reconnect\",\n    \"file\": \"natsController.js\",\n    \"line\": 66,\n    \"code\": \"if (!js) await connect();\",\n    \"explanation\": \"No handling for connection loss during publish operations. If connection drops after the check but before publish, messages will be lost without retry.\",\n    \"fix\": \"Add retry logic in publish() to handle connection drops\"\n  },\n  {\n    \"id\": 5,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Heartbeat overwriting model state\",\n    \"file\": \"modelComms.js\",\n    \"line\": 62,\n    \"code\": \"await redis.setModelState(modelId, { ...existing, status: 'online', lastHeartbeat: Date.now() });\",\n    \"explanation\": \"The spread operator only copies first level of properties. Nested state from setModelState would be lost. Also, startedAt is not preserved in heartbeat.\",\n    \"fix\": \"Deep merge existing state or restructure to preserve all state properties\"\n  }\n]",
+      "error": null
+    },
+    {
+      "model": "nova",
+      "findings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "NATS connection maxReconnectAttempts",
+          "file": "natsController.js",
+          "line": 13,
+          "code": "maxReconnectAttempts: -1",
+          "explanation": "Setting maxReconnectAttempts to -1 allows unlimited reconnection attempts, which can lead to infinite loops and potential resource exhaustion.",
+          "fix": "Set a reasonable upper limit for maxReconnectAttempts."
+        },
+        {
+          "id": 2,
+          "severity": "MINOR",
+          "title": "Redis connection retries",
+          "file": "redisController.js",
+          "line": 9,
+          "code": "maxRetriesPerRequest: 3",
+          "explanation": "The maxRetriesPerRequest setting of 3 is somewhat arbitrary and may not be optimal for all environments. It could be adjusted based on specific latency and failure rates.",
+          "fix": "Adjust maxRetriesPerRequest based on environment-specific metrics."
+        },
+        {
+          "id": 3,
+          "severity": "MINOR",
+          "title": "Heartbeat interval mismatch",
+          "file": "modelComms.js",
+          "line": 39,
+          "code": "heartbeatInterval = setInterval(async () => {... }, 30000);",
+          "explanation": "The heartbeat interval is set to 30 seconds, but the health check in the monitor uses a 60-second stale threshold. This could lead to discrepancies in perceived model status.",
+          "fix": "Align heartbeat interval with the stale threshold in the monitor."
+        }
+      ],
+      "raw": "[\n  {\n    \"id\": 1,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"NATS connection maxReconnectAttempts\",\n    \"file\": \"natsController.js\",\n    \"line\": 13,\n    \"code\": \"maxReconnectAttempts: -1\",\n    \"explanation\": \"Setting maxReconnectAttempts to -1 allows unlimited reconnection attempts, which can lead to infinite loops and potential resource exhaustion.\",\n    \"fix\": \"Set a reasonable upper limit for maxReconnectAttempts.\"\n  },\n  {\n    \"id\": 2,\n    \"severity\": \"MINOR\",\n    \"title\": \"Redis connection retries\",\n    \"file\": \"redisController.js\",\n    \"line\": 9,\n    \"code\": \"maxRetriesPerRequest: 3\",\n    \"explanation\": \"The maxRetriesPerRequest setting of 3 is somewhat arbitrary and may not be optimal for all environments. It could be adjusted based on specific latency and failure rates.\",\n    \"fix\": \"Adjust maxRetriesPerRequest based on environment-specific metrics.\"\n  },\n  {\n    \"id\": 3,\n    \"severity\": \"MINOR\",\n    \"title\": \"Heartbeat interval mismatch\",\n    \"file\": \"modelComms.js\",\n    \"line\": 39,\n    \"code\": \"heartbeatInterval = setInterval(async () => {... }, 30000);\",\n    \"explanation\": \"The heartbeat interval is set to 30 seconds, but the health check in the monitor uses a 60-second stale threshold. This could lead to discrepancies in perceived model status.\",\n    \"fix\": \"Align heartbeat interval with the stale threshold in the monitor.\"\n  }\n]",
+      "error": null
+    },
+    {
+      "model": "mistral",
+      "findings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "NATS subscription leak on test cleanup",
+          "file": "test-comms.js",
+          "line": 72,
+          "code": "nats.subscribe('direct.model-b', (msg) => {\n        if (msg.payload === 'hello model-b') resolve(msg);\n      }, `test-direct-b-${testRunId}`);",
+          "explanation": "The test creates NATS subscriptions but never unsubscribes. This will cause memory leaks and potential duplicate message processing in subsequent test runs or production. The NATS client maintains durable consumers, so these subscriptions persist even after the test completes.",
+          "fix": "Store the subscription object returned by nats.subscribe() and call sub.unsubscribe() in a cleanup step after each test."
+        },
+        {
+          "id": 2,
+          "severity": "CRITICAL",
+          "title": "Race condition in modelComms initialization",
+          "file": "modelComms.js",
+          "line": 45,
+          "code": "await nats.subscribe(`direct.${modelId}`, async (msg) => {\n    // Persist incoming message\n    await redis.setMessage(`direct:${msg.id}`, msg);\n    if (directMessageHandler) directMessageHandler(msg);\n  }, `consumer-${modelId}`);",
+          "explanation": "If multiple models initialize simultaneously, the NATS subscription for direct messages may be created before the directMessageHandler is set, causing messages to be silently dropped. The handler is set via onDirectMessage() which can be called after init().",
+          "fix": "Move the directMessageHandler assignment before the NATS subscription in init(), or add a null check and queue messages until the handler is set."
+        },
+        {
+          "id": 3,
+          "severity": "CRITICAL",
+          "title": "Redis connection leak in monitor.js",
+          "file": "monitor.js",
+          "line": 80,
+          "code": "await nats.connect();\n    await redis.connect();",
+          "explanation": "The monitor CLI mode connects to Redis and NATS but never closes the connections on shutdown. This will cause resource leaks and prevent clean process termination. The shutdown handler only calls stop() which clears the interval but doesn't close Redis/NATS.",
+          "fix": "Add await nats.close(); await redis.close(); to the shutdown handler in CLI mode."
+        },
+        {
+          "id": 4,
+          "severity": "MINOR",
+          "title": "Inconsistent message ID format between NATS and Redis",
+          "file": "modelComms.js",
+          "line": 10,
+          "code": "return Date.now().toString(36) + Math.random().toString(36).substr(2, 8);",
+          "explanation": "The message ID generation in modelComms.js uses a random suffix, but the test-comms.js expects deterministic IDs for verification. While not breaking, this makes testing brittle and could cause issues if message IDs are used for deduplication across systems.",
+          "fix": "Standardize on either deterministic IDs (e.g., modelId + timestamp + counter) or document the randomness requirement."
+        },
+        {
+          "id": 5,
+          "severity": "MINOR",
+          "title": "Missing error handling in modelComms heartbeat",
+          "file": "modelComms.js",
+          "line": 58,
+          "code": "heartbeatInterval = setInterval(async () => {\n    try {\n      const existing = await redis.getModelState(modelId);\n      await redis.setModelState(modelId, { ...existing, status: 'online', lastHeartbeat: Date.now() });\n    } catch (err) {\n      console.error(`[comms] Heartbeat failed: ${err.message}`);\n    }\n  }, 30000);",
+          "explanation": "While errors are caught and logged, repeated heartbeat failures will cause the model to appear offline even though it's still running. This could trigger false alarms in the monitoring system.",
+          "fix": "Add a retry mechanism or exponential backoff for heartbeat failures, and consider emitting a 'degraded' status after multiple failures."
+        },
+        {
+          "id": 6,
+          "severity": "CRITICAL",
+          "title": "NATS stream subject mismatch in natsController.js",
+          "file": "natsController.js",
+          "line": 30,
+          "code": "subjects: [name === 'CITY_DIRECT' ? 'direct.>' : name === 'CITY_BROADCAST' ? 'broadcast.>' : 'channel.>'],",
+          "explanation": "The CITY_DIRECT stream is configured with subject 'direct.>', but modelComms.js publishes to 'direct.{modelId}' (line 67) and subscribes to 'direct.{modelId}' (line 45). The '>' wildcard only matches at least one token, so 'direct.modelId' won't match 'direct.>'. This breaks direct messaging entirely.",
+          "fix": "Change the subject to 'direct.*' for the CITY_DIRECT stream to match the exact one-token pattern used in modelComms.js."
+        },
+        {
+          "id": 7,
+          "severity": "CRITICAL",
+          "title": "Redis TTL inconsistency in setMessage",
+          "file": "redisController.js",
+          "line": 25,
+          "code": "await redisClient.set(`msg:${messageId}`, data, 'EX', 86400); // 24-hour TTL",
+          "explanation": "The Redis message TTL is set to 24 hours, but the NATS stream max_age is set to 24 hours in nanoseconds (line 31 in natsController.js). This creates a temporal inconsistency where messages may disappear from Redis before they expire in NATS, breaking message history retrieval.",
+          "fix": "Align the TTLs by either setting Redis TTL to 24 hours in seconds (86400) and NATS max_age to 86400 * 1e9, or document the intentional difference."
+        },
+        {
+          "id": 8,
+          "severity": "MINOR",
+          "title": "Model state merge overwrites custom fields",
+          "file": "modelComms.js",
+          "line": 60,
+          "code": "await redis.setModelState(modelId, { ...existing, status: 'online', lastHeartbeat: Date.now() });",
+          "explanation": "The heartbeat merge only preserves existing fields but overwrites any custom state with the hardcoded {status, lastHeartbeat} object. If a model sets custom state fields (e.g., {status: 'online', role: 'coordinator'}), the role field will be lost on the next heartbeat.",
+          "fix": "Change to await redis.setModelState(modelId, { ...existing, status: 'online', lastHeartbeat: Date.now() }); to preserve all existing fields."
+        }
+      ],
+      "raw": "```json\n[\n  {\n    \"id\": 1,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"NATS subscription leak on test cleanup\",\n    \"file\": \"test-comms.js\",\n    \"line\": 72,\n    \"code\": \"nats.subscribe('direct.model-b', (msg) => {\\n        if (msg.payload === 'hello model-b') resolve(msg);\\n      }, `test-direct-b-${testRunId}`);\",\n    \"explanation\": \"The test creates NATS subscriptions but never unsubscribes. This will cause memory leaks and potential duplicate message processing in subsequent test runs or production. The NATS client maintains durable consumers, so these subscriptions persist even after the test completes.\",\n    \"fix\": \"Store the subscription object returned by nats.subscribe() and call sub.unsubscribe() in a cleanup step after each test.\"\n  },\n  {\n    \"id\": 2,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Race condition in modelComms initialization\",\n    \"file\": \"modelComms.js\",\n    \"line\": 45,\n    \"code\": \"await nats.subscribe(`direct.${modelId}`, async (msg) => {\\n    // Persist incoming message\\n    await redis.setMessage(`direct:${msg.id}`, msg);\\n    if (directMessageHandler) directMessageHandler(msg);\\n  }, `consumer-${modelId}`);\",\n    \"explanation\": \"If multiple models initialize simultaneously, the NATS subscription for direct messages may be created before the directMessageHandler is set, causing messages to be silently dropped. The handler is set via onDirectMessage() which can be called after init().\",\n    \"fix\": \"Move the directMessageHandler assignment before the NATS subscription in init(), or add a null check and queue messages until the handler is set.\"\n  },\n  {\n    \"id\": 3,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Redis connection leak in monitor.js\",\n    \"file\": \"monitor.js\",\n    \"line\": 80,\n    \"code\": \"await nats.connect();\\n    await redis.connect();\",\n    \"explanation\": \"The monitor CLI mode connects to Redis and NATS but never closes the connections on shutdown. This will cause resource leaks and prevent clean process termination. The shutdown handler only calls stop() which clears the interval but doesn't close Redis/NATS.\",\n    \"fix\": \"Add await nats.close(); await redis.close(); to the shutdown handler in CLI mode.\"\n  },\n  {\n    \"id\": 4,\n    \"severity\": \"MINOR\",\n    \"title\": \"Inconsistent message ID format between NATS and Redis\",\n    \"file\": \"modelComms.js\",\n    \"line\": 10,\n    \"code\": \"return Date.now().toString(36) + Math.random().toString(36).substr(2, 8);\",\n    \"explanation\": \"The message ID generation in modelComms.js uses a random suffix, but the test-comms.js expects deterministic IDs for verification. While not breaking, this makes testing brittle and could cause issues if message IDs are used for deduplication across systems.\",\n    \"fix\": \"Standardize on either deterministic IDs (e.g., modelId + timestamp + counter) or document the randomness requirement.\"\n  },\n  {\n    \"id\": 5,\n    \"severity\": \"MINOR\",\n    \"title\": \"Missing error handling in modelComms heartbeat\",\n    \"file\": \"modelComms.js\",\n    \"line\": 58,\n    \"code\": \"heartbeatInterval = setInterval(async () => {\\n    try {\\n      const existing = await redis.getModelState(modelId);\\n      await redis.setModelState(modelId, { ...existing, status: 'online', lastHeartbeat: Date.now() });\\n    } catch (err) {\\n      console.error(`[comms] Heartbeat failed: ${err.message}`);\\n    }\\n  }, 30000);\",\n    \"explanation\": \"While errors are caught and logged, repeated heartbeat failures will cause the model to appear offline even though it's still running. This could trigger false alarms in the monitoring system.\",\n    \"fix\": \"Add a retry mechanism or exponential backoff for heartbeat failures, and consider emitting a 'degraded' status after multiple failures.\"\n  },\n  {\n    \"id\": 6,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"NATS stream subject mismatch in natsController.js\",\n    \"file\": \"natsController.js\",\n    \"line\": 30,\n    \"code\": \"subjects: [name === 'CITY_DIRECT' ? 'direct.>' : name === 'CITY_BROADCAST' ? 'broadcast.>' : 'channel.>'],\",\n    \"explanation\": \"The CITY_DIRECT stream is configured with subject 'direct.>', but modelComms.js publishes to 'direct.{modelId}' (line 67) and subscribes to 'direct.{modelId}' (line 45). The '>' wildcard only matches at least one token, so 'direct.modelId' won't match 'direct.>'. This breaks direct messaging entirely.\",\n    \"fix\": \"Change the subject to 'direct.*' for the CITY_DIRECT stream to match the exact one-token pattern used in modelComms.js.\"\n  },\n  {\n    \"id\": 7,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Redis TTL inconsistency in setMessage\",\n    \"file\": \"redisController.js\",\n    \"line\": 25,\n    \"code\": \"await redisClient.set(`msg:${messageId}`, data, 'EX', 86400); // 24-hour TTL\",\n    \"explanation\": \"The Redis message TTL is set to 24 hours, but the NATS stream max_age is set to 24 hours in nanoseconds (line 31 in natsController.js). This creates a temporal inconsistency where messages may disappear from Redis before they expire in NATS, breaking message history retrieval.\",\n    \"fix\": \"Align the TTLs by either setting Redis TTL to 24 hours in seconds (86400) and NATS max_age to 86400 * 1e9, or document the intentional difference.\"\n  },\n  {\n    \"id\": 8,\n    \"severity\": \"MINOR\",\n    \"title\": \"Model state merge overwrites custom fields\",\n    \"file\": \"modelComms.js\",\n    \"line\": 60,\n    \"code\": \"await redis.setModelState(modelId, { ...existing, status: 'online', lastHeartbeat: Date.now() });\",\n    \"explanation\": \"The heartbeat merge only preserves existing fields but overwrites any custom state with the hardcoded {status, lastHeartbeat} object. If a model sets custom state fields (e.g., {status: 'online', role: 'coordinator'}), the role field will be lost on the next heartbeat.\",\n    \"fix\": \"Change to await redis.setModelState(modelId, { ...existing, status: 'online', lastHeartbeat: Date.now() }); to preserve all existing fields.\"\n  }\n]\n```",
+      "error": null
+    },
+    {
+      "model": "gemini",
+      "findings": [],
+      "raw": "```json\n[\n  {\n    \"id\": 1,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Data Loss in Heartbeat State Update\",\n    \"file\": \"modelComms.js\",\n    \"line\": 64,\n    \"code\": \"await redis.setModelState(modelId, { ...existing, status: '",
+      "error": null
+    },
+    {
+      "model": "gpt",
+      "findings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Redis connection error handling",
+          "file": "redisController.js",
+          "line": 12,
+          "code": "redisClient.on('error', reject);",
+          "explanation": "The 'error' event listener on line 12 of redisController.js rejects the promise, which fails the promise chain silently. This can cause unhandled promise rejections if the error is not caught elsewhere.",
+          "fix": "Add a try-catch around the promise or handle the rejection to ensure errors are logged or managed properly."
+        },
+        {
+          "id": 2,
+          "severity": "CRITICAL",
+          "title": "NATS reconnection backoff logic",
+          "file": "natsController.js",
+          "line": 24,
+          "code": "reconnectTimeWait: 1000 * Math.min(Math.pow(2, retries), 60),",
+          "explanation": "The exponential backoff calculation for reconnectTimeWait is incorrect. It doesn't increase the wait time between retries exponentially as intended because Math.min(Math.pow(2, retries), 60) caps the wait time at 60 seconds immediately.",
+          "fix": "Use an exponential backoff formula that correctly increases over time, such as Math.min(1000 * Math.pow(2, retries), 60000)."
+        },
+        {
+          "id": 3,
+          "severity": "MINOR",
+          "title": "Unnecessary JSON.stringify in createMessage",
+          "file": "modelComms.js",
+          "line": 14,
+          "code": "return Date.now().toString(36) + Math.random().toString(36).substr(2, 8);",
+          "explanation": "The createMessage function generates a unique ID and JSON.stringify it later. While not critical, it's unnecessary since the ID is already a string.",
+          "fix": "Remove JSON.stringify from the ID generation process as it's redundant."
+        },
+        {
+          "id": 4,
+          "severity": "CRITICAL",
+          "title": "Heartbeat interval not cleared on shutdown",
+          "file": "modelComms.js",
+          "line": 122,
+          "code": "if (heartbeatInterval) { clearInterval(heartbeatInterval);",
+          "explanation": "In the close() function, the heartbeatInterval is cleared, but this happens only after the Redis state is updated. If setModelState fails, the interval is not cleared, potentially causing memory leaks.",
+          "fix": "Clear the interval before updating Redis state to ensure it is always cleared, even if an error occurs."
+        },
+        {
+          "id": 5,
+          "severity": "CRITICAL",
+          "title": "NATS publish error handling missing",
+          "file": "natsController.js",
+          "line": 52,
+          "code": "await js.publish(channel, data);",
+          "explanation": "The publish function does not handle potential errors when publishing messages to NATS, leading to possible silent failures and unhandled promise rejections.",
+          "fix": "Wrap the publish call in a try-catch block and handle errors appropriately, perhaps by logging them."
+        }
+      ],
+      "raw": "```json\n[\n  {\n    \"id\": 1,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Redis connection error handling\",\n    \"file\": \"redisController.js\",\n    \"line\": 12,\n    \"code\": \"redisClient.on('error', reject);\",\n    \"explanation\": \"The 'error' event listener on line 12 of redisController.js rejects the promise, which fails the promise chain silently. This can cause unhandled promise rejections if the error is not caught elsewhere.\",\n    \"fix\": \"Add a try-catch around the promise or handle the rejection to ensure errors are logged or managed properly.\"\n  },\n  {\n    \"id\": 2,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"NATS reconnection backoff logic\",\n    \"file\": \"natsController.js\",\n    \"line\": 24,\n    \"code\": \"reconnectTimeWait: 1000 * Math.min(Math.pow(2, retries), 60),\",\n    \"explanation\": \"The exponential backoff calculation for reconnectTimeWait is incorrect. It doesn't increase the wait time between retries exponentially as intended because Math.min(Math.pow(2, retries), 60) caps the wait time at 60 seconds immediately.\",\n    \"fix\": \"Use an exponential backoff formula that correctly increases over time, such as Math.min(1000 * Math.pow(2, retries), 60000).\"\n  },\n  {\n    \"id\": 3,\n    \"severity\": \"MINOR\",\n    \"title\": \"Unnecessary JSON.stringify in createMessage\",\n    \"file\": \"modelComms.js\",\n    \"line\": 14,\n    \"code\": \"return Date.now().toString(36) + Math.random().toString(36).substr(2, 8);\",\n    \"explanation\": \"The createMessage function generates a unique ID and JSON.stringify it later. While not critical, it's unnecessary since the ID is already a string.\",\n    \"fix\": \"Remove JSON.stringify from the ID generation process as it's redundant.\"\n  },\n  {\n    \"id\": 4,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Heartbeat interval not cleared on shutdown\",\n    \"file\": \"modelComms.js\",\n    \"line\": 122,\n    \"code\": \"if (heartbeatInterval) { clearInterval(heartbeatInterval);\",\n    \"explanation\": \"In the close() function, the heartbeatInterval is cleared, but this happens only after the Redis state is updated. If setModelState fails, the interval is not cleared, potentially causing memory leaks.\",\n    \"fix\": \"Clear the interval before updating Redis state to ensure it is always cleared, even if an error occurs.\"\n  },\n  {\n    \"id\": 5,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"NATS publish error handling missing\",\n    \"file\": \"natsController.js\",\n    \"line\": 52,\n    \"code\": \"await js.publish(channel, data);\",\n    \"explanation\": \"The publish function does not handle potential errors when publishing messages to NATS, leading to possible silent failures and unhandled promise rejections.\",\n    \"fix\": \"Wrap the publish call in a try-catch block and handle errors appropriately, perhaps by logging them.\"\n  }\n]\n```",
+      "error": null
+    },
+    {
+      "model": "hermes-405b",
+      "findings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Test assumes singleton modelComms can simulate multiple models",
+          "file": "test-comms.js",
+          "line": 73,
+          "code": "await comms.subscribe('alerts', (msg) => { ... })",
+          "explanation": "modelComms.js is designed for one model per instance. Test uses same comms instance for both publishing (model-a) and subscribing (alerts), causing self-reception. Test 4's 'model-c' simulation actually runs on model-a's instance.",
+          "fix": "Use separate modelComms instances for each simulated model in tests"
+        },
+        {
+          "id": 2,
+          "severity": "MINOR",
+          "title": "Test 5 doesn't verify monitor events",
+          "file": "test-comms.js",
+          "line": 108,
+          "code": "if (onlineCount === 2) { ... }",
+          "explanation": "Monitor should emit 'modelOffline' when model-b is removed, but test doesn't verify this. Only checks Redis state.",
+          "fix": "Add event listener to monitor and verify 'modelOffline' event"
+        }
+      ],
+      "raw": "[\n  {\n    \"id\": 1,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Test assumes singleton modelComms can simulate multiple models\",\n    \"file\": \"test-comms.js\",\n    \"line\": 73,\n    \"code\": \"await comms.subscribe('alerts', (msg) => { ... })\",\n    \"explanation\": \"modelComms.js is designed for one model per instance. Test uses same comms instance for both publishing (model-a) and subscribing (alerts), causing self-reception. Test 4's 'model-c' simulation actually runs on model-a's instance.\",\n    \"fix\": \"Use separate modelComms instances for each simulated model in tests\"\n  },\n  {\n    \"id\": 2,\n    \"severity\": \"MINOR\",\n    \"title\": \"Test 5 doesn't verify monitor events\",\n    \"file\": \"test-comms.js\",\n    \"line\": 108,\n    \"code\": \"if (onlineCount === 2) { ... }\",\n    \"explanation\": \"Monitor should emit 'modelOffline' when model-b is removed, but test doesn't verify this. Only checks Redis state.\",\n    \"fix\": \"Add event listener to monitor and verify 'modelOffline' event\"\n  }\n]",
+      "error": null
+    },
+    {
+      "model": "grok",
+      "findings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "NATS health check publish fails due to uncovered subject",
+          "file": "monitor.js",
+          "line": 21,
+          "code": "await nats.publish('health.ping', { ts: Date.now() });",
+          "explanation": "The publish to 'health.ping' subject is not covered by any NATS stream (streams are 'direct.>', 'broadcast.>', 'channel.>'), causing js.publish to throw an error. This results in the health check always reporting NATS as 'down' even if NATS is operational, breaking the monitoring integration.",
+          "fix": "Change the subject to one covered by an existing stream, e.g., 'direct.health.ping', or add a new stream for health checks in natsController.connect."
+        }
+      ],
+      "raw": "[\n  {\n    \"id\": 1,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"NATS health check publish fails due to uncovered subject\",\n    \"file\": \"monitor.js\",\n    \"line\": 21,\n    \"code\": \"await nats.publish('health.ping', { ts: Date.now() });\",\n    \"explanation\": \"The publish to 'health.ping' subject is not covered by any NATS stream (streams are 'direct.>', 'broadcast.>', 'channel.>'), causing js.publish to throw an error. This results in the health check always reporting NATS as 'down' even if NATS is operational, breaking the monitoring integration.\",\n    \"fix\": \"Change the subject to one covered by an existing stream, e.g., 'direct.health.ping', or add a new stream for health checks in natsController.connect.\"\n  }\n]",
+      "error": null
+    },
+    {
+      "model": "minimax-m2.7",
+      "findings": [],
+      "raw": "(no response)",
+      "error": null
+    },
+    {
+      "model": "mercury",
+      "findings": [],
+      "raw": "(no response)",
+      "error": null
+    },
+    {
+      "model": "llama",
+      "findings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Missing error handling in modelComms.init",
+          "file": "modelComms.js",
+          "line": 43,
+          "code": "await nats.subscribe(`direct.${modelId}`, async (msg) => {",
+          "explanation": "The subscription handler is not properly handling potential errors from `redis.setMessage` or `directMessageHandler`. If either of these operations fails, the message will be lost and the handler will be left in an inconsistent state.",
+          "fix": "Wrap the handler code in a try-catch block and properly handle or propagate the error."
+        },
+        {
+          "id": 2,
+          "severity": "MINOR",
+          "title": "Inefficient heartbeat update in modelComms",
+          "file": "modelComms.js",
+          "line": 74,
+          "code": "const existing = await redis.getModelState(modelId);",
+          "explanation": "The heartbeat update fetches the existing model state before updating it. This could be optimized by directly setting the required fields using Redis HSET.",
+          "fix": "Use `redisClient.hset` directly with the required fields instead of getting the existing state first."
+        },
+        {
+          "id": 3,
+          "severity": "CRITICAL",
+          "title": "Lack of idempotence in message handling",
+          "file": "modelComms.js",
+          "line": 48,
+          "code": "await redis.setMessage(`broadcast:${msg.id}`, msg);",
+          "explanation": "If the same message is processed multiple times (e.g., due to NATS redelivery), it will overwrite the message in Redis multiple times. While Redis SET is idempotent, the associated stream append is not.",
+          "fix": "Check if the message ID already exists in Redis before processing it again."
+        },
+        {
+          "id": 4,
+          "severity": "MINOR",
+          "title": "Unnecessary JSON parsing in getAllModels",
+          "file": "redisController.js",
+          "line": 93,
+          "code": "try { result[id] = { ...JSON.parse(state), lastHeartbeat, isOnline }; } catch {",
+          "explanation": "If the state is not JSON, it's stored as-is. However, the error handling could be more explicit, and non-JSON states should be handled consistently.",
+          "fix": "Consider storing all states in a consistent format (e.g., always JSON) to avoid mixed data types."
+        },
+        {
+          "id": 5,
+          "severity": "CRITICAL",
+          "title": "Potential race condition in monitor.computeModelStats",
+          "file": "monitor.js",
+          "line": 63,
+          "code": "const online = entries.filter(([, m]) => m.isOnline);",
+          "explanation": "The computation of online models and the emission of 'modelOffline' events is based on the previous state. There's a potential race if model states change between computing `online` and emitting events.",
+          "fix": "Emit events based on the current state comparison directly, rather than relying on a cached previous list."
+        },
+        {
+          "id": 6,
+          "severity": "MINOR",
+          "title": "Magic number in STALE_THRESHOLD",
+          "file": "monitor.js",
+          "line": 8,
+          "code": "const STALE_THRESHOLD = 60000; // 60 seconds",
+          "explanation": "The stale threshold is hardcoded. While it's documented, it might be better to make it configurable or derive it from a more explicit constant.",
+          "fix": "Consider defining a named constant or configuration option for the stale threshold."
+        }
+      ],
+      "raw": "[\n  {\n    \"id\": 1,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Missing error handling in modelComms.init\",\n    \"file\": \"modelComms.js\",\n    \"line\": 43,\n    \"code\": \"await nats.subscribe(`direct.${modelId}`, async (msg) => {\",\n    \"explanation\": \"The subscription handler is not properly handling potential errors from `redis.setMessage` or `directMessageHandler`. If either of these operations fails, the message will be lost and the handler will be left in an inconsistent state.\",\n    \"fix\": \"Wrap the handler code in a try-catch block and properly handle or propagate the error.\"\n  },\n  {\n    \"id\": 2,\n    \"severity\": \"MINOR\",\n    \"title\": \"Inefficient heartbeat update in modelComms\",\n    \"file\": \"modelComms.js\",\n    \"line\": 74,\n    \"code\": \"const existing = await redis.getModelState(modelId);\",\n    \"explanation\": \"The heartbeat update fetches the existing model state before updating it. This could be optimized by directly setting the required fields using Redis HSET.\",\n    \"fix\": \"Use `redisClient.hset` directly with the required fields instead of getting the existing state first.\"\n  },\n  {\n    \"id\": 3,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Lack of idempotence in message handling\",\n    \"file\": \"modelComms.js\",\n    \"line\": 48,\n    \"code\": \"await redis.setMessage(`broadcast:${msg.id}`, msg);\",\n    \"explanation\": \"If the same message is processed multiple times (e.g., due to NATS redelivery), it will overwrite the message in Redis multiple times. While Redis SET is idempotent, the associated stream append is not.\",\n    \"fix\": \"Check if the message ID already exists in Redis before processing it again.\"\n  },\n  {\n    \"id\": 4,\n    \"severity\": \"MINOR\",\n    \"title\": \"Unnecessary JSON parsing in getAllModels\",\n    \"file\": \"redisController.js\",\n    \"line\": 93,\n    \"code\": \"try { result[id] = { ...JSON.parse(state), lastHeartbeat, isOnline }; } catch {\",\n    \"explanation\": \"If the state is not JSON, it's stored as-is. However, the error handling could be more explicit, and non-JSON states should be handled consistently.\",\n    \"fix\": \"Consider storing all states in a consistent format (e.g., always JSON) to avoid mixed data types.\"\n  },\n  {\n    \"id\": 5,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Potential race condition in monitor.computeModelStats\",\n    \"file\": \"monitor.js\",\n    \"line\": 63,\n    \"code\": \"const online = entries.filter(([, m]) => m.isOnline);\",\n    \"explanation\": \"The computation of online models and the emission of 'modelOffline' events is based on the previous state. There's a potential race if model states change between computing `online` and emitting events.\",\n    \"fix\": \"Emit events based on the current state comparison directly, rather than relying on a cached previous list.\"\n  },\n  {\n    \"id\": 6,\n    \"severity\": \"MINOR\",\n    \"title\": \"Magic number in STALE_THRESHOLD\",\n    \"file\": \"monitor.js\",\n    \"line\": 8,\n    \"code\": \"const STALE_THRESHOLD = 60000; // 60 seconds\",\n    \"explanation\": \"The stale threshold is hardcoded. While it's documented, it might be better to make it configurable or derive it from a more explicit constant.\",\n    \"fix\": \"Consider defining a named constant or configuration option for the stale threshold.\"\n  }\n]",
+      "error": null
+    }
+  ],
+  "clusteredFindings": [
+    {
+      "representative": {
+        "id": 3,
+        "severity": "CRITICAL",
+        "title": "modelComms re-uses single callback for both direct and broadcast messages",
+        "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\missions\\the-shape\\collab-live-workspace\\city-comms-v1\\modelComms.js",
+        "line": 46,
+        "code": "if (directMessageHandler) directMessageHandler(msg);",
+        "explanation": "Gemini assigned the same directMessageHandler to NATS subscriptions for 'direct.${modelId}' and 'broadcast.all'. A model receiving its own broadcastEcho will invoke the handler twice (once as broadcast, once as direct if payload matches), causing duplicate processing and potential feedback loops.",
+        "fix": "Use separate handler variables or filter by msg.to/msg.channel inside the handler.",
+        "reviewer": "kimi-k2",
+        "family": "moonshot"
+      },
+      "count": 4,
+      "families": 4,
+      "reviewers": [
+        "kimi-k2",
+        "aion",
+        "mistral",
+        "llama"
+      ],
+      "confidence": "high",
+      "allFindings": [
+        {
+          "id": 3,
+          "severity": "CRITICAL",
+          "title": "modelComms re-uses single callback for both direct and broadcast messages",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\missions\\the-shape\\collab-live-workspace\\city-comms-v1\\modelComms.js",
+          "line": 46,
+          "code": "if (directMessageHandler) directMessageHandler(msg);",
+          "explanation": "Gemini assigned the same directMessageHandler to NATS subscriptions for 'direct.${modelId}' and 'broadcast.all'. A model receiving its own broadcastEcho will invoke the handler twice (once as broadcast, once as direct if payload matches), causing duplicate processing and potential feedback loops.",
+          "fix": "Use separate handler variables or filter by msg.to/msg.channel inside the handler.",
+          "reviewer": "kimi-k2",
+          "family": "moonshot"
+        },
+        {
+          "id": 2,
+          "severity": "CRITICAL",
+          "title": "NATS subscription in modelComms uses same durable name across multiple instances",
+          "file": "modelComms.js",
+          "line": 36,
+          "code": "await nats.subscribe(`direct.${modelId}`, async (msg) => { ... }, `consumer-${modelId}`);",
+          "explanation": "The durable consumer name `consumer-${modelId}` is the same for each model. However, if multiple instances of the same modelId subscribe (e.g., after a restart), they will conflict because NATS JetStream durable consumers must be unique per subscription group. The code in natsController.js uses opts.durable(consumerGroup) and opts.deliverTo(createInbox()) which creates a queue subscription. If two instances use same durable name, they will compete for messages, but the deliverTo creates a unique inbox, causing mismatch and potential message loss.",
+          "fix": "Either make the durable name unique per instance (e.g., include a random suffix) or ensure only one subscriber per modelId exists.",
+          "reviewer": "aion",
+          "family": "aion"
+        },
+        {
+          "id": 2,
+          "severity": "CRITICAL",
+          "title": "Race condition in modelComms initialization",
+          "file": "modelComms.js",
+          "line": 45,
+          "code": "await nats.subscribe(`direct.${modelId}`, async (msg) => {\n    // Persist incoming message\n    await redis.setMessage(`direct:${msg.id}`, msg);\n    if (directMessageHandler) directMessageHandler(msg);\n  }, `consumer-${modelId}`);",
+          "explanation": "If multiple models initialize simultaneously, the NATS subscription for direct messages may be created before the directMessageHandler is set, causing messages to be silently dropped. The handler is set via onDirectMessage() which can be called after init().",
+          "fix": "Move the directMessageHandler assignment before the NATS subscription in init(), or add a null check and queue messages until the handler is set.",
+          "reviewer": "mistral",
+          "family": "mistral"
+        },
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Missing error handling in modelComms.init",
+          "file": "modelComms.js",
+          "line": 43,
+          "code": "await nats.subscribe(`direct.${modelId}`, async (msg) => {",
+          "explanation": "The subscription handler is not properly handling potential errors from `redis.setMessage` or `directMessageHandler`. If either of these operations fails, the message will be lost and the handler will be left in an inconsistent state.",
+          "fix": "Wrap the handler code in a try-catch block and properly handle or propagate the error.",
+          "reviewer": "llama",
+          "family": "meta"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 8,
+        "severity": "MINOR",
+        "title": "Test uses nats.subscribe with durable consumer that may conflict across test runs",
+        "file": "test-comms.js",
+        "line": 57,
+        "code": "nats.subscribe('direct.model-b', (msg) => { ... }, `test-direct-b-${testRunId}`);",
+        "explanation": "The test uses a durable consumer name that includes testRunId to avoid conflicts. However, if the test fails and does not clean up, the durable consumer will remain in NATS JetStream, potentially causing issues in subsequent test runs. Not critical but could cause test flakiness.",
+        "fix": "Ensure test cleanup deletes the consumer or use ephemeral consumers (no durable).",
+        "reviewer": "aion",
+        "family": "aion"
+      },
+      "count": 4,
+      "families": 4,
+      "reviewers": [
+        "aion",
+        "palmyra",
+        "jamba",
+        "mistral"
+      ],
+      "confidence": "high",
+      "allFindings": [
+        {
+          "id": 8,
+          "severity": "MINOR",
+          "title": "Test uses nats.subscribe with durable consumer that may conflict across test runs",
+          "file": "test-comms.js",
+          "line": 57,
+          "code": "nats.subscribe('direct.model-b', (msg) => { ... }, `test-direct-b-${testRunId}`);",
+          "explanation": "The test uses a durable consumer name that includes testRunId to avoid conflicts. However, if the test fails and does not clean up, the durable consumer will remain in NATS JetStream, potentially causing issues in subsequent test runs. Not critical but could cause test flakiness.",
+          "fix": "Ensure test cleanup deletes the consumer or use ephemeral consumers (no durable).",
+          "reviewer": "aion",
+          "family": "aion"
+        },
+        {
+          "id": 3,
+          "severity": "CRITICAL",
+          "title": "Durable consumer name collision in subscribe",
+          "file": "modelComms.js",
+          "line": 72,
+          "code": "await nats.subscribe(`channel.${channel}`, async (msg) => { ... }, `channel-${channel}-${currentModelId}`);",
+          "explanation": "The durable consumer name `channel-${channel}-${currentModelId}` is shared across all instances of the same model ID and channel. If multiple processes or restarts occur, the second consumer will get 'Consumer already exists' error because NATS enforces durable name uniqueness. This breaks reconnection and recovery.",
+          "fix": "Include a unique instance ID (like testRunId) in the durable name, or use non-durable consumers if message loss on restart is acceptable.",
+          "reviewer": "palmyra",
+          "family": "writer"
+        },
+        {
+          "id": 4,
+          "severity": "CRITICAL",
+          "title": "Test suite in test-comms.js assumes singleton behavior of modelComms.js but bypasses it for models B and C",
+          "file": "test-comms.js",
+          "line": 72,
+          "code": "await nats.subscribe('direct.model-b', (msg) => { ... }, `test-direct-b-${testRunId}`);",
+          "explanation": "The test suite directly uses `nats` and `redis` for models B and C while initializing model A with `modelComms`. This bypasses the singleton pattern assumed in `modelComms`, creating a scenario where the state for model B and C is not fully managed by the API. This can lead to integration issues if `modelComms` expects exclusive control over NATS and Redis state for all models.",
+          "fix": "Refactor the test to either use `modelComms` for all models or explicitly document and handle the singleton limitation in the testing framework.",
+          "reviewer": "jamba",
+          "family": "ai21"
+        },
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "NATS subscription leak on test cleanup",
+          "file": "test-comms.js",
+          "line": 72,
+          "code": "nats.subscribe('direct.model-b', (msg) => {\n        if (msg.payload === 'hello model-b') resolve(msg);\n      }, `test-direct-b-${testRunId}`);",
+          "explanation": "The test creates NATS subscriptions but never unsubscribes. This will cause memory leaks and potential duplicate message processing in subsequent test runs or production. The NATS client maintains durable consumers, so these subscriptions persist even after the test completes.",
+          "fix": "Store the subscription object returned by nats.subscribe() and call sub.unsubscribe() in a cleanup step after each test.",
+          "reviewer": "mistral",
+          "family": "mistral"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 1,
+        "severity": "CRITICAL",
+        "title": "Heartbeat handler in modelComms.js overwrites model state without ensuring 'startedAt' is preserved",
+        "file": "modelComms.js",
+        "line": 70,
+        "code": "await redis.setModelState(modelId, { ...existing, status: 'online', lastHeartbeat: Date.now() });",
+        "explanation": "The `setModelState` call in the heartbeat handler does not explicitly merge `startedAt` from the existing state. If `existing` has a `startedAt` key, it will be overwritten by the new state object, potentially losing the original start time of the model. This breaks the assumption that `startedAt` is immutable once set.",
+        "fix": "Change the line to: `await redis.setModelState(modelId, { ...existing, status: 'online', lastHeartbeat: Date.now(), startedAt: existing?.startedAt || null });`",
+        "reviewer": "jamba",
+        "family": "ai21"
+      },
+      "count": 4,
+      "families": 4,
+      "reviewers": [
+        "jamba",
+        "cogito",
+        "mistral",
+        "llama"
+      ],
+      "confidence": "high",
+      "allFindings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Heartbeat handler in modelComms.js overwrites model state without ensuring 'startedAt' is preserved",
+          "file": "modelComms.js",
+          "line": 70,
+          "code": "await redis.setModelState(modelId, { ...existing, status: 'online', lastHeartbeat: Date.now() });",
+          "explanation": "The `setModelState` call in the heartbeat handler does not explicitly merge `startedAt` from the existing state. If `existing` has a `startedAt` key, it will be overwritten by the new state object, potentially losing the original start time of the model. This breaks the assumption that `startedAt` is immutable once set.",
+          "fix": "Change the line to: `await redis.setModelState(modelId, { ...existing, status: 'online', lastHeartbeat: Date.now(), startedAt: existing?.startedAt || null });`",
+          "reviewer": "jamba",
+          "family": "ai21"
+        },
+        {
+          "id": 5,
+          "severity": "CRITICAL",
+          "title": "Heartbeat overwriting model state",
+          "file": "modelComms.js",
+          "line": 62,
+          "code": "await redis.setModelState(modelId, { ...existing, status: 'online', lastHeartbeat: Date.now() });",
+          "explanation": "The spread operator only copies first level of properties. Nested state from setModelState would be lost. Also, startedAt is not preserved in heartbeat.",
+          "fix": "Deep merge existing state or restructure to preserve all state properties",
+          "reviewer": "cogito",
+          "family": "cogito"
+        },
+        {
+          "id": 8,
+          "severity": "MINOR",
+          "title": "Model state merge overwrites custom fields",
+          "file": "modelComms.js",
+          "line": 60,
+          "code": "await redis.setModelState(modelId, { ...existing, status: 'online', lastHeartbeat: Date.now() });",
+          "explanation": "The heartbeat merge only preserves existing fields but overwrites any custom state with the hardcoded {status, lastHeartbeat} object. If a model sets custom state fields (e.g., {status: 'online', role: 'coordinator'}), the role field will be lost on the next heartbeat.",
+          "fix": "Change to await redis.setModelState(modelId, { ...existing, status: 'online', lastHeartbeat: Date.now() }); to preserve all existing fields.",
+          "reviewer": "mistral",
+          "family": "mistral"
+        },
+        {
+          "id": 2,
+          "severity": "MINOR",
+          "title": "Inefficient heartbeat update in modelComms",
+          "file": "modelComms.js",
+          "line": 74,
+          "code": "const existing = await redis.getModelState(modelId);",
+          "explanation": "The heartbeat update fetches the existing model state before updating it. This could be optimized by directly setting the required fields using Redis HSET.",
+          "fix": "Use `redisClient.hset` directly with the required fields instead of getting the existing state first.",
+          "reviewer": "llama",
+          "family": "meta"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 3,
+        "severity": "CRITICAL",
+        "title": "Heartbeat overwrites existing state in modelComms",
+        "file": "modelComms.js",
+        "line": 48,
+        "code": "await redis.setModelState(modelId, { ...existing, status: 'online', lastHeartbeat: Date.now() });",
+        "explanation": "The heartbeat interval merges existing state with new fields, but existing may be null or a string (if setModelState was called with a string). If existing is a string, spreading it with ...existing will cause an error because strings are not spreadable objects. Also, the setModelState in redisController.js stores data as JSON string, but getModelState returns parsed object or string. If existing is a string, the spread will break.",
+        "fix": "Ensure existing is an object before spreading. For example: const state = typeof existing === 'object' ? existing : {}; await redis.setModelState(modelId, { ...state, status: 'online', lastHeartbeat: Date.now() });",
+        "reviewer": "aion",
+        "family": "aion"
+      },
+      "count": 4,
+      "families": 3,
+      "reviewers": [
+        "aion",
+        "aion",
+        "nova",
+        "mistral"
+      ],
+      "confidence": "high",
+      "allFindings": [
+        {
+          "id": 3,
+          "severity": "CRITICAL",
+          "title": "Heartbeat overwrites existing state in modelComms",
+          "file": "modelComms.js",
+          "line": 48,
+          "code": "await redis.setModelState(modelId, { ...existing, status: 'online', lastHeartbeat: Date.now() });",
+          "explanation": "The heartbeat interval merges existing state with new fields, but existing may be null or a string (if setModelState was called with a string). If existing is a string, spreading it with ...existing will cause an error because strings are not spreadable objects. Also, the setModelState in redisController.js stores data as JSON string, but getModelState returns parsed object or string. If existing is a string, the spread will break.",
+          "fix": "Ensure existing is an object before spreading. For example: const state = typeof existing === 'object' ? existing : {}; await redis.setModelState(modelId, { ...state, status: 'online', lastHeartbeat: Date.now() });",
+          "reviewer": "aion",
+          "family": "aion"
+        },
+        {
+          "id": 6,
+          "severity": "MINOR",
+          "title": "NATS subscribe in modelComms does not handle subscription errors",
+          "file": "modelComms.js",
+          "line": 36,
+          "code": "await nats.subscribe(`direct.${modelId}`, async (msg) => { ... }, `consumer-${modelId}`);",
+          "explanation": "The subscribe call is awaited, but if it fails (e.g., due to network issue), the error is not caught. This could cause init to fail silently because the async function is not wrapped in try-catch. However, the nats.subscribe function itself may throw, but the init function does not have error handling for that line.",
+          "fix": "Wrap the subscription in a try-catch and log or handle the error appropriately.",
+          "reviewer": "aion",
+          "family": "aion"
+        },
+        {
+          "id": 3,
+          "severity": "MINOR",
+          "title": "Heartbeat interval mismatch",
+          "file": "modelComms.js",
+          "line": 39,
+          "code": "heartbeatInterval = setInterval(async () => {... }, 30000);",
+          "explanation": "The heartbeat interval is set to 30 seconds, but the health check in the monitor uses a 60-second stale threshold. This could lead to discrepancies in perceived model status.",
+          "fix": "Align heartbeat interval with the stale threshold in the monitor.",
+          "reviewer": "nova",
+          "family": "amazon"
+        },
+        {
+          "id": 5,
+          "severity": "MINOR",
+          "title": "Missing error handling in modelComms heartbeat",
+          "file": "modelComms.js",
+          "line": 58,
+          "code": "heartbeatInterval = setInterval(async () => {\n    try {\n      const existing = await redis.getModelState(modelId);\n      await redis.setModelState(modelId, { ...existing, status: 'online', lastHeartbeat: Date.now() });\n    } catch (err) {\n      console.error(`[comms] Heartbeat failed: ${err.message}`);\n    }\n  }, 30000);",
+          "explanation": "While errors are caught and logged, repeated heartbeat failures will cause the model to appear offline even though it's still running. This could trigger false alarms in the monitoring system.",
+          "fix": "Add a retry mechanism or exponential backoff for heartbeat failures, and consider emitting a 'degraded' status after multiple failures.",
+          "reviewer": "mistral",
+          "family": "mistral"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 4,
+        "severity": "CRITICAL",
+        "title": "Monitor's checkNatsHealth publishes to a subject that may not have a stream",
+        "file": "monitor.js",
+        "line": 23,
+        "code": "await nats.publish('health.ping', { ts: Date.now() });",
+        "explanation": "The nats.publish function in natsController.js uses js.publish which requires the subject to be associated with a stream if JetStream is enabled. The stream subjects defined in natsController.js are 'direct.>', 'broadcast.>', 'channel.>'. 'health.ping' does not match any stream, so the publish will fail with 'no stream matches subject' error, causing health check to always report 'down'.",
+        "fix": "Either add a stream for health subjects, or use core NATS publish (nc.publish) instead of JetStream. Alternatively, change the subject to match an existing stream pattern, e.g., 'broadcast.health'.",
+        "reviewer": "aion",
+        "family": "aion"
+      },
+      "count": 3,
+      "families": 3,
+      "reviewers": [
+        "aion",
+        "palmyra",
+        "grok"
+      ],
+      "confidence": "high",
+      "allFindings": [
+        {
+          "id": 4,
+          "severity": "CRITICAL",
+          "title": "Monitor's checkNatsHealth publishes to a subject that may not have a stream",
+          "file": "monitor.js",
+          "line": 23,
+          "code": "await nats.publish('health.ping', { ts: Date.now() });",
+          "explanation": "The nats.publish function in natsController.js uses js.publish which requires the subject to be associated with a stream if JetStream is enabled. The stream subjects defined in natsController.js are 'direct.>', 'broadcast.>', 'channel.>'. 'health.ping' does not match any stream, so the publish will fail with 'no stream matches subject' error, causing health check to always report 'down'.",
+          "fix": "Either add a stream for health subjects, or use core NATS publish (nc.publish) instead of JetStream. Alternatively, change the subject to match an existing stream pattern, e.g., 'broadcast.health'.",
+          "reviewer": "aion",
+          "family": "aion"
+        },
+        {
+          "id": 2,
+          "severity": "CRITICAL",
+          "title": "NATS stream subject mismatch for CITY_BROADCAST",
+          "file": "natsController.js",
+          "line": 34,
+          "code": "subjects: [name === 'CITY_DIRECT' ? 'direct.>' : name === 'CITY_BROADCAST' ? 'broadcast.>' : 'channel.>']",
+          "explanation": "The CITY_BROADCAST stream is created with subject 'broadcast.>', but modelComms.js publishes broadcasts to 'broadcast.all' (via nats.broadcast()). The 'broadcast.all' subject does not match 'broadcast.>' pattern, so messages are not persisted in the CITY_BROADCAST stream, causing data loss and breaking message history.",
+          "fix": "Change line 34 in natsController.js to: 'broadcast.*' or 'broadcast.>' to match the 'broadcast.all' subject used in code.",
+          "reviewer": "palmyra",
+          "family": "writer"
+        },
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "NATS health check publish fails due to uncovered subject",
+          "file": "monitor.js",
+          "line": 21,
+          "code": "await nats.publish('health.ping', { ts: Date.now() });",
+          "explanation": "The publish to 'health.ping' subject is not covered by any NATS stream (streams are 'direct.>', 'broadcast.>', 'channel.>'), causing js.publish to throw an error. This results in the health check always reporting NATS as 'down' even if NATS is operational, breaking the monitoring integration.",
+          "fix": "Change the subject to one covered by an existing stream, e.g., 'direct.health.ping', or add a new stream for health checks in natsController.connect.",
+          "reviewer": "grok",
+          "family": "xai"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 4,
+        "severity": "MINOR",
+        "title": "Redis xadd stream key does not match NATS subject structure",
+        "file": "redisController.js",
+        "line": 32,
+        "code": "const streamKey = `history:${channel}`;",
+        "explanation": "When storing broadcast messages, messageId.split(':')[0] yields 'broadcast' for 'broadcast:<id>', so history is stored under 'history:broadcast'. But direct messages use 'direct:<id>' and go to 'history:direct'. This works functionally but creates an inconsistent and non-scalable history key structure that doesn't support per-channel broadcast history.",
+        "fix": "Align stream key logic with actual channel semantics. For broadcast, use a fixed key like 'history:broadcast', not derived from messageId.",
+        "reviewer": "palmyra",
+        "family": "writer"
+      },
+      "count": 3,
+      "families": 3,
+      "reviewers": [
+        "palmyra",
+        "cogito",
+        "mistral"
+      ],
+      "confidence": "high",
+      "allFindings": [
+        {
+          "id": 4,
+          "severity": "MINOR",
+          "title": "Redis xadd stream key does not match NATS subject structure",
+          "file": "redisController.js",
+          "line": 32,
+          "code": "const streamKey = `history:${channel}`;",
+          "explanation": "When storing broadcast messages, messageId.split(':')[0] yields 'broadcast' for 'broadcast:<id>', so history is stored under 'history:broadcast'. But direct messages use 'direct:<id>' and go to 'history:direct'. This works functionally but creates an inconsistent and non-scalable history key structure that doesn't support per-channel broadcast history.",
+          "fix": "Align stream key logic with actual channel semantics. For broadcast, use a fixed key like 'history:broadcast', not derived from messageId.",
+          "reviewer": "palmyra",
+          "family": "writer"
+        },
+        {
+          "id": 2,
+          "severity": "CRITICAL",
+          "title": "Missing TTL on Redis history stream",
+          "file": "redisController.js",
+          "line": 39,
+          "code": "await redisClient.xadd(streamKey, '*', 'id', messageId, 'data', data);",
+          "explanation": "While individual messages have TTL, the history stream itself has no TTL, leading to unbounded growth. The MAXLEN trim is not sufficient for time-based cleanup.",
+          "fix": "Add EXPIRE command after XADD: await redisClient.expire(streamKey, 86400);",
+          "reviewer": "cogito",
+          "family": "cogito"
+        },
+        {
+          "id": 7,
+          "severity": "CRITICAL",
+          "title": "Redis TTL inconsistency in setMessage",
+          "file": "redisController.js",
+          "line": 25,
+          "code": "await redisClient.set(`msg:${messageId}`, data, 'EX', 86400); // 24-hour TTL",
+          "explanation": "The Redis message TTL is set to 24 hours, but the NATS stream max_age is set to 24 hours in nanoseconds (line 31 in natsController.js). This creates a temporal inconsistency where messages may disappear from Redis before they expire in NATS, breaking message history retrieval.",
+          "fix": "Align the TTLs by either setting Redis TTL to 24 hours in seconds (86400) and NATS max_age to 86400 * 1e9, or document the intentional difference.",
+          "reviewer": "mistral",
+          "family": "mistral"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 2,
+        "severity": "CRITICAL",
+        "title": "Redis connection promise races and can resolve before ready",
+        "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\missions\\the-shape\\collab-live-workspace\\city-comms-v1\\redisController.js",
+        "line": 9,
+        "code": "await new Promise((resolve, reject) => {\n    redisClient.on('ready', resolve);\n    redisClient.on('error', reject);\n  });",
+        "explanation": "If the client emits 'error' before 'ready', the promise rejects and connect() throws, but the Redis object is still created and may auto-reconnect. Subsequent calls to connect() skip creation (status === 'ready' never becomes true) yet operations fail silently because the original client is in an error state.",
+        "fix": "Recreate the client on each connect attempt or verify client.status === 'ready' inside the promise.",
+        "reviewer": "kimi-k2",
+        "family": "moonshot"
+      },
+      "count": 2,
+      "families": 2,
+      "reviewers": [
+        "kimi-k2",
+        "gpt"
+      ],
+      "confidence": "high",
+      "allFindings": [
+        {
+          "id": 2,
+          "severity": "CRITICAL",
+          "title": "Redis connection promise races and can resolve before ready",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\missions\\the-shape\\collab-live-workspace\\city-comms-v1\\redisController.js",
+          "line": 9,
+          "code": "await new Promise((resolve, reject) => {\n    redisClient.on('ready', resolve);\n    redisClient.on('error', reject);\n  });",
+          "explanation": "If the client emits 'error' before 'ready', the promise rejects and connect() throws, but the Redis object is still created and may auto-reconnect. Subsequent calls to connect() skip creation (status === 'ready' never becomes true) yet operations fail silently because the original client is in an error state.",
+          "fix": "Recreate the client on each connect attempt or verify client.status === 'ready' inside the promise.",
+          "reviewer": "kimi-k2",
+          "family": "moonshot"
+        },
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Redis connection error handling",
+          "file": "redisController.js",
+          "line": 12,
+          "code": "redisClient.on('error', reject);",
+          "explanation": "The 'error' event listener on line 12 of redisController.js rejects the promise, which fails the promise chain silently. This can cause unhandled promise rejections if the error is not caught elsewhere.",
+          "fix": "Add a try-catch around the promise or handle the rejection to ensure errors are logged or managed properly.",
+          "reviewer": "gpt",
+          "family": "openai"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 4,
+        "severity": "MINOR",
+        "title": "generateId can collide within same millisecond",
+        "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\missions\\the-shape\\collab-live-workspace\\city-comms-v1\\modelComms.js",
+        "line": 11,
+        "code": "return Date.now().toString(36) + Math.random().toString(36).substr(2, 8);",
+        "explanation": "Two calls in the same millisecond produce the same timestamp prefix; Math.random() collision probability is low but non-zero, leading to duplicate message IDs and history overwrites in Redis.",
+        "fix": "Include a per-process counter or use uuid/v4.",
+        "reviewer": "kimi-k2",
+        "family": "moonshot"
+      },
+      "count": 2,
+      "families": 2,
+      "reviewers": [
+        "kimi-k2",
+        "mistral"
+      ],
+      "confidence": "high",
+      "allFindings": [
+        {
+          "id": 4,
+          "severity": "MINOR",
+          "title": "generateId can collide within same millisecond",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\missions\\the-shape\\collab-live-workspace\\city-comms-v1\\modelComms.js",
+          "line": 11,
+          "code": "return Date.now().toString(36) + Math.random().toString(36).substr(2, 8);",
+          "explanation": "Two calls in the same millisecond produce the same timestamp prefix; Math.random() collision probability is low but non-zero, leading to duplicate message IDs and history overwrites in Redis.",
+          "fix": "Include a per-process counter or use uuid/v4.",
+          "reviewer": "kimi-k2",
+          "family": "moonshot"
+        },
+        {
+          "id": 4,
+          "severity": "MINOR",
+          "title": "Inconsistent message ID format between NATS and Redis",
+          "file": "modelComms.js",
+          "line": 10,
+          "code": "return Date.now().toString(36) + Math.random().toString(36).substr(2, 8);",
+          "explanation": "The message ID generation in modelComms.js uses a random suffix, but the test-comms.js expects deterministic IDs for verification. While not breaking, this makes testing brittle and could cause issues if message IDs are used for deduplication across systems.",
+          "fix": "Standardize on either deterministic IDs (e.g., modelId + timestamp + counter) or document the randomness requirement.",
+          "reviewer": "mistral",
+          "family": "mistral"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 1,
+        "severity": "CRITICAL",
+        "title": "broadcast.all subject mismatch between modelComms and natsController",
+        "file": "modelComms.js",
+        "line": 39,
+        "code": "await nats.broadcast(msg);",
+        "explanation": "modelComms.js calls nats.broadcast() with the entire message object, but natsController.js's broadcast() function expects a plain payload (not a message object) and wraps it in JSON. This causes a TypeError when JSON.stringify tries to serialize the message because it already contains a stringified payload.",
+        "fix": "Change modelComms.js line 39 to: await nats.broadcast(msg.payload);",
+        "reviewer": "palmyra",
+        "family": "writer"
+      },
+      "count": 2,
+      "families": 2,
+      "reviewers": [
+        "palmyra",
+        "llama"
+      ],
+      "confidence": "high",
+      "allFindings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "broadcast.all subject mismatch between modelComms and natsController",
+          "file": "modelComms.js",
+          "line": 39,
+          "code": "await nats.broadcast(msg);",
+          "explanation": "modelComms.js calls nats.broadcast() with the entire message object, but natsController.js's broadcast() function expects a plain payload (not a message object) and wraps it in JSON. This causes a TypeError when JSON.stringify tries to serialize the message because it already contains a stringified payload.",
+          "fix": "Change modelComms.js line 39 to: await nats.broadcast(msg.payload);",
+          "reviewer": "palmyra",
+          "family": "writer"
+        },
+        {
+          "id": 3,
+          "severity": "CRITICAL",
+          "title": "Lack of idempotence in message handling",
+          "file": "modelComms.js",
+          "line": 48,
+          "code": "await redis.setMessage(`broadcast:${msg.id}`, msg);",
+          "explanation": "If the same message is processed multiple times (e.g., due to NATS redelivery), it will overwrite the message in Redis multiple times. While Redis SET is idempotent, the associated stream append is not.",
+          "fix": "Check if the message ID already exists in Redis before processing it again.",
+          "reviewer": "llama",
+          "family": "meta"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 2,
+        "severity": "MINOR",
+        "title": "Unused `consumerGroup` parameter in natsController.js `subscribe` function",
+        "file": "natsController.js",
+        "line": 35,
+        "code": "opts.durable(consumerGroup || `consumer-${channel.replace(/[.>*]/g, '-')}`);",
+        "explanation": "The `consumerGroup` parameter is optional and defaults to a generated string, but the function does not document or utilize this fallback behavior meaningfully. While it works as intended, it is suboptimal because the parameter could be removed or clarified in its purpose.",
+        "fix": "Either document the fallback behavior clearly or remove the unused flexibility if it is not needed.",
+        "reviewer": "jamba",
+        "family": "ai21"
+      },
+      "count": 2,
+      "families": 2,
+      "reviewers": [
+        "jamba",
+        "cogito"
+      ],
+      "confidence": "high",
+      "allFindings": [
+        {
+          "id": 2,
+          "severity": "MINOR",
+          "title": "Unused `consumerGroup` parameter in natsController.js `subscribe` function",
+          "file": "natsController.js",
+          "line": 35,
+          "code": "opts.durable(consumerGroup || `consumer-${channel.replace(/[.>*]/g, '-')}`);",
+          "explanation": "The `consumerGroup` parameter is optional and defaults to a generated string, but the function does not document or utilize this fallback behavior meaningfully. While it works as intended, it is suboptimal because the parameter could be removed or clarified in its purpose.",
+          "fix": "Either document the fallback behavior clearly or remove the unused flexibility if it is not needed.",
+          "reviewer": "jamba",
+          "family": "ai21"
+        },
+        {
+          "id": 3,
+          "severity": "CRITICAL",
+          "title": "Missing NATS stream binding for 'channel.>'",
+          "file": "natsController.js",
+          "line": 33,
+          "code": "subjects: [name === 'CITY_DIRECT' ? 'direct.>' : name === 'CITY_BROADCAST' ? 'broadcast.>' : 'channel.>']",
+          "explanation": "The CITY_CHANNELS stream is created but not used in subscriptions. Channel subscriptions in modelComms.js use 'channel.${channel}' pattern but the stream isn't bound to handle them.",
+          "fix": "Ensure CITY_CHANNELS stream is used for channel subscriptions or bind the pattern to the appropriate stream",
+          "reviewer": "cogito",
+          "family": "cogito"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 4,
+        "severity": "MINOR",
+        "title": "Potential message loss on NATS reconnect",
+        "file": "natsController.js",
+        "line": 66,
+        "code": "if (!js) await connect();",
+        "explanation": "No handling for connection loss during publish operations. If connection drops after the check but before publish, messages will be lost without retry.",
+        "fix": "Add retry logic in publish() to handle connection drops",
+        "reviewer": "cogito",
+        "family": "cogito"
+      },
+      "count": 2,
+      "families": 2,
+      "reviewers": [
+        "cogito",
+        "gpt"
+      ],
+      "confidence": "high",
+      "allFindings": [
+        {
+          "id": 4,
+          "severity": "MINOR",
+          "title": "Potential message loss on NATS reconnect",
+          "file": "natsController.js",
+          "line": 66,
+          "code": "if (!js) await connect();",
+          "explanation": "No handling for connection loss during publish operations. If connection drops after the check but before publish, messages will be lost without retry.",
+          "fix": "Add retry logic in publish() to handle connection drops",
+          "reviewer": "cogito",
+          "family": "cogito"
+        },
+        {
+          "id": 5,
+          "severity": "CRITICAL",
+          "title": "NATS publish error handling missing",
+          "file": "natsController.js",
+          "line": 52,
+          "code": "await js.publish(channel, data);",
+          "explanation": "The publish function does not handle potential errors when publishing messages to NATS, leading to possible silent failures and unhandled promise rejections.",
+          "fix": "Wrap the publish call in a try-catch block and handle errors appropriately, perhaps by logging them.",
+          "reviewer": "gpt",
+          "family": "openai"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 1,
+        "severity": "CRITICAL",
+        "title": "Redis connection not established before use in setMessage",
+        "file": "redisController.js",
+        "line": 32,
+        "code": "await redisClient.set(`msg:${messageId}`, data, 'EX', 86400);",
+        "explanation": "The setMessage function assumes redisClient is already connected and ready. However, there is no guarantee that connect() has been called before setMessage is invoked. If redisClient is undefined or not connected, this will throw an error.",
+        "fix": "Call await connect() at the start of setMessage (and other functions like getMessage, setModelState, etc.) if redisClient is not ready.",
+        "reviewer": "aion",
+        "family": "aion"
+      },
+      "count": 2,
+      "families": 1,
+      "reviewers": [
+        "aion",
+        "aion"
+      ],
+      "confidence": "medium",
+      "allFindings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Redis connection not established before use in setMessage",
+          "file": "redisController.js",
+          "line": 32,
+          "code": "await redisClient.set(`msg:${messageId}`, data, 'EX', 86400);",
+          "explanation": "The setMessage function assumes redisClient is already connected and ready. However, there is no guarantee that connect() has been called before setMessage is invoked. If redisClient is undefined or not connected, this will throw an error.",
+          "fix": "Call await connect() at the start of setMessage (and other functions like getMessage, setModelState, etc.) if redisClient is not ready.",
+          "reviewer": "aion",
+          "family": "aion"
+        },
+        {
+          "id": 5,
+          "severity": "MINOR",
+          "title": "Redis setMessage uses messageId.split(':')[0] for channel, which may be incorrect",
+          "file": "redisController.js",
+          "line": 35,
+          "code": "const channel = messageId.split(':')[0] || 'default';",
+          "explanation": "The channel extraction assumes messageId format like 'direct:abc' or 'broadcast:def'. However, if messageId does not contain ':', split returns the whole string, causing channel to be the full messageId. This may lead to many history streams (e.g., history:direct:abc) instead of aggregated per channel. Not critical but suboptimal.",
+          "fix": "Use a more robust method to extract channel, perhaps pass channel as a parameter to setMessage.",
+          "reviewer": "aion",
+          "family": "aion"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 1,
+        "severity": "CRITICAL",
+        "title": "NATS health check publishes to unconfirmed stream",
+        "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\missions\\the-shape\\collab-live-workspace\\city-comms-v1\\monitor.js",
+        "line": 39,
+        "code": "await nats.publish('health.ping', { ts: Date.now() });",
+        "explanation": "monitor.js assumes any publish success means NATS is healthy, but natsController.js does NOT await the server ACK (js.publish returns void). A publish can appear to succeed while the message is lost or the connection is already broken, causing false 'ok' status.",
+        "fix": "Use the JetStream publish response or add a subscriber that echoes back to confirm end-to-end delivery before marking 'ok'.",
+        "reviewer": "kimi-k2",
+        "family": "moonshot"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "kimi-k2"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "NATS health check publishes to unconfirmed stream",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\missions\\the-shape\\collab-live-workspace\\city-comms-v1\\monitor.js",
+          "line": 39,
+          "code": "await nats.publish('health.ping', { ts: Date.now() });",
+          "explanation": "monitor.js assumes any publish success means NATS is healthy, but natsController.js does NOT await the server ACK (js.publish returns void). A publish can appear to succeed while the message is lost or the connection is already broken, causing false 'ok' status.",
+          "fix": "Use the JetStream publish response or add a subscriber that echoes back to confirm end-to-end delivery before marking 'ok'.",
+          "reviewer": "kimi-k2",
+          "family": "moonshot"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 5,
+        "severity": "MINOR",
+        "title": "monitor never emits modelOnline events",
+        "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\missions\\the-shape\\collab-live-workspace\\city-comms-v1\\monitor.js",
+        "line": 67,
+        "code": "// Emit events for models that went offline",
+        "explanation": "computeModelStats only emits 'modelOffline'. Components expecting symmetrical 'modelOnline' events will never receive them, breaking any auto-retry or discovery logic that relies on that event.",
+        "fix": "Compare oldList vs newList and emit 'modelOnline' for ids that appear in newList but not oldList.",
+        "reviewer": "kimi-k2",
+        "family": "moonshot"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "kimi-k2"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 5,
+          "severity": "MINOR",
+          "title": "monitor never emits modelOnline events",
+          "file": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\missions\\the-shape\\collab-live-workspace\\city-comms-v1\\monitor.js",
+          "line": 67,
+          "code": "// Emit events for models that went offline",
+          "explanation": "computeModelStats only emits 'modelOffline'. Components expecting symmetrical 'modelOnline' events will never receive them, breaking any auto-retry or discovery logic that relies on that event.",
+          "fix": "Compare oldList vs newList and emit 'modelOnline' for ids that appear in newList but not oldList.",
+          "reviewer": "kimi-k2",
+          "family": "moonshot"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 7,
+        "severity": "CRITICAL",
+        "title": "Redis getAllModels may return null if no models, causing iteration error",
+        "file": "redisController.js",
+        "line": 75,
+        "code": "for (const [id, state] of Object.entries(states)) {",
+        "explanation": "If there are no models in the hash, redisClient.hgetall returns null (or empty object? ioredis returns empty object). The documentation says hgetall returns an object of key-values; if hash doesn't exist, returns empty object. However, if it returns null, Object.entries(null) throws. Need to verify behavior. Assuming it returns empty object, it's fine. But if it returns null, it's critical.",
+        "fix": "Check if states is null or undefined before iterating: states = states || {};",
+        "reviewer": "aion",
+        "family": "aion"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "aion"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 7,
+          "severity": "CRITICAL",
+          "title": "Redis getAllModels may return null if no models, causing iteration error",
+          "file": "redisController.js",
+          "line": 75,
+          "code": "for (const [id, state] of Object.entries(states)) {",
+          "explanation": "If there are no models in the hash, redisClient.hgetall returns null (or empty object? ioredis returns empty object). The documentation says hgetall returns an object of key-values; if hash doesn't exist, returns empty object. However, if it returns null, Object.entries(null) throws. Need to verify behavior. Assuming it returns empty object, it's fine. But if it returns null, it's critical.",
+          "fix": "Check if states is null or undefined before iterating: states = states || {};",
+          "reviewer": "aion",
+          "family": "aion"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 3,
+        "severity": "MINOR",
+        "title": "Inconsistent `isOnline` calculation in redisController.js `getAllModels` function",
+        "file": "redisController.js",
+        "line": 67,
+        "code": "const isOnline = (Date.now() - lastHeartbeat) < 60000; // 60s stale threshold",
+        "explanation": "The `isOnline` field is derived from a 60-second threshold, but this logic is not documented or validated across other parts of the system. While it works as expected here, it introduces a potential assumption mismatch if other components use a different definition of 'online'.",
+        "fix": "Add a comment clarifying this threshold or ensure consistency across components that handle model online/offline states.",
+        "reviewer": "jamba",
+        "family": "ai21"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "jamba"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 3,
+          "severity": "MINOR",
+          "title": "Inconsistent `isOnline` calculation in redisController.js `getAllModels` function",
+          "file": "redisController.js",
+          "line": 67,
+          "code": "const isOnline = (Date.now() - lastHeartbeat) < 60000; // 60s stale threshold",
+          "explanation": "The `isOnline` field is derived from a 60-second threshold, but this logic is not documented or validated across other parts of the system. While it works as expected here, it introduces a potential assumption mismatch if other components use a different definition of 'online'.",
+          "fix": "Add a comment clarifying this threshold or ensure consistency across components that handle model online/offline states.",
+          "reviewer": "jamba",
+          "family": "ai21"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 1,
+        "severity": "CRITICAL",
+        "title": "NATS subscription channel mismatch in test-comms.js",
+        "file": "test-comms.js",
+        "line": 85,
+        "code": "nats.subscribe('direct.model-b', ...)",
+        "explanation": "natsController creates streams with 'direct.>' pattern but test tries to subscribe to 'direct.model-b'. Should be 'direct.model-b' to match the stream pattern.",
+        "fix": "Change 'direct.model-b' to 'direct.${modelId}' in test-comms.js line 85",
+        "reviewer": "cogito",
+        "family": "cogito"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "cogito"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "NATS subscription channel mismatch in test-comms.js",
+          "file": "test-comms.js",
+          "line": 85,
+          "code": "nats.subscribe('direct.model-b', ...)",
+          "explanation": "natsController creates streams with 'direct.>' pattern but test tries to subscribe to 'direct.model-b'. Should be 'direct.model-b' to match the stream pattern.",
+          "fix": "Change 'direct.model-b' to 'direct.${modelId}' in test-comms.js line 85",
+          "reviewer": "cogito",
+          "family": "cogito"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 1,
+        "severity": "CRITICAL",
+        "title": "NATS connection maxReconnectAttempts",
+        "file": "natsController.js",
+        "line": 13,
+        "code": "maxReconnectAttempts: -1",
+        "explanation": "Setting maxReconnectAttempts to -1 allows unlimited reconnection attempts, which can lead to infinite loops and potential resource exhaustion.",
+        "fix": "Set a reasonable upper limit for maxReconnectAttempts.",
+        "reviewer": "nova",
+        "family": "amazon"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "nova"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "NATS connection maxReconnectAttempts",
+          "file": "natsController.js",
+          "line": 13,
+          "code": "maxReconnectAttempts: -1",
+          "explanation": "Setting maxReconnectAttempts to -1 allows unlimited reconnection attempts, which can lead to infinite loops and potential resource exhaustion.",
+          "fix": "Set a reasonable upper limit for maxReconnectAttempts.",
+          "reviewer": "nova",
+          "family": "amazon"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 2,
+        "severity": "MINOR",
+        "title": "Redis connection retries",
+        "file": "redisController.js",
+        "line": 9,
+        "code": "maxRetriesPerRequest: 3",
+        "explanation": "The maxRetriesPerRequest setting of 3 is somewhat arbitrary and may not be optimal for all environments. It could be adjusted based on specific latency and failure rates.",
+        "fix": "Adjust maxRetriesPerRequest based on environment-specific metrics.",
+        "reviewer": "nova",
+        "family": "amazon"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "nova"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 2,
+          "severity": "MINOR",
+          "title": "Redis connection retries",
+          "file": "redisController.js",
+          "line": 9,
+          "code": "maxRetriesPerRequest: 3",
+          "explanation": "The maxRetriesPerRequest setting of 3 is somewhat arbitrary and may not be optimal for all environments. It could be adjusted based on specific latency and failure rates.",
+          "fix": "Adjust maxRetriesPerRequest based on environment-specific metrics.",
+          "reviewer": "nova",
+          "family": "amazon"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 3,
+        "severity": "CRITICAL",
+        "title": "Redis connection leak in monitor.js",
+        "file": "monitor.js",
+        "line": 80,
+        "code": "await nats.connect();\n    await redis.connect();",
+        "explanation": "The monitor CLI mode connects to Redis and NATS but never closes the connections on shutdown. This will cause resource leaks and prevent clean process termination. The shutdown handler only calls stop() which clears the interval but doesn't close Redis/NATS.",
+        "fix": "Add await nats.close(); await redis.close(); to the shutdown handler in CLI mode.",
+        "reviewer": "mistral",
+        "family": "mistral"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "mistral"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 3,
+          "severity": "CRITICAL",
+          "title": "Redis connection leak in monitor.js",
+          "file": "monitor.js",
+          "line": 80,
+          "code": "await nats.connect();\n    await redis.connect();",
+          "explanation": "The monitor CLI mode connects to Redis and NATS but never closes the connections on shutdown. This will cause resource leaks and prevent clean process termination. The shutdown handler only calls stop() which clears the interval but doesn't close Redis/NATS.",
+          "fix": "Add await nats.close(); await redis.close(); to the shutdown handler in CLI mode.",
+          "reviewer": "mistral",
+          "family": "mistral"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 6,
+        "severity": "CRITICAL",
+        "title": "NATS stream subject mismatch in natsController.js",
+        "file": "natsController.js",
+        "line": 30,
+        "code": "subjects: [name === 'CITY_DIRECT' ? 'direct.>' : name === 'CITY_BROADCAST' ? 'broadcast.>' : 'channel.>'],",
+        "explanation": "The CITY_DIRECT stream is configured with subject 'direct.>', but modelComms.js publishes to 'direct.{modelId}' (line 67) and subscribes to 'direct.{modelId}' (line 45). The '>' wildcard only matches at least one token, so 'direct.modelId' won't match 'direct.>'. This breaks direct messaging entirely.",
+        "fix": "Change the subject to 'direct.*' for the CITY_DIRECT stream to match the exact one-token pattern used in modelComms.js.",
+        "reviewer": "mistral",
+        "family": "mistral"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "mistral"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 6,
+          "severity": "CRITICAL",
+          "title": "NATS stream subject mismatch in natsController.js",
+          "file": "natsController.js",
+          "line": 30,
+          "code": "subjects: [name === 'CITY_DIRECT' ? 'direct.>' : name === 'CITY_BROADCAST' ? 'broadcast.>' : 'channel.>'],",
+          "explanation": "The CITY_DIRECT stream is configured with subject 'direct.>', but modelComms.js publishes to 'direct.{modelId}' (line 67) and subscribes to 'direct.{modelId}' (line 45). The '>' wildcard only matches at least one token, so 'direct.modelId' won't match 'direct.>'. This breaks direct messaging entirely.",
+          "fix": "Change the subject to 'direct.*' for the CITY_DIRECT stream to match the exact one-token pattern used in modelComms.js.",
+          "reviewer": "mistral",
+          "family": "mistral"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 2,
+        "severity": "CRITICAL",
+        "title": "NATS reconnection backoff logic",
+        "file": "natsController.js",
+        "line": 24,
+        "code": "reconnectTimeWait: 1000 * Math.min(Math.pow(2, retries), 60),",
+        "explanation": "The exponential backoff calculation for reconnectTimeWait is incorrect. It doesn't increase the wait time between retries exponentially as intended because Math.min(Math.pow(2, retries), 60) caps the wait time at 60 seconds immediately.",
+        "fix": "Use an exponential backoff formula that correctly increases over time, such as Math.min(1000 * Math.pow(2, retries), 60000).",
+        "reviewer": "gpt",
+        "family": "openai"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "gpt"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 2,
+          "severity": "CRITICAL",
+          "title": "NATS reconnection backoff logic",
+          "file": "natsController.js",
+          "line": 24,
+          "code": "reconnectTimeWait: 1000 * Math.min(Math.pow(2, retries), 60),",
+          "explanation": "The exponential backoff calculation for reconnectTimeWait is incorrect. It doesn't increase the wait time between retries exponentially as intended because Math.min(Math.pow(2, retries), 60) caps the wait time at 60 seconds immediately.",
+          "fix": "Use an exponential backoff formula that correctly increases over time, such as Math.min(1000 * Math.pow(2, retries), 60000).",
+          "reviewer": "gpt",
+          "family": "openai"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 3,
+        "severity": "MINOR",
+        "title": "Unnecessary JSON.stringify in createMessage",
+        "file": "modelComms.js",
+        "line": 14,
+        "code": "return Date.now().toString(36) + Math.random().toString(36).substr(2, 8);",
+        "explanation": "The createMessage function generates a unique ID and JSON.stringify it later. While not critical, it's unnecessary since the ID is already a string.",
+        "fix": "Remove JSON.stringify from the ID generation process as it's redundant.",
+        "reviewer": "gpt",
+        "family": "openai"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "gpt"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 3,
+          "severity": "MINOR",
+          "title": "Unnecessary JSON.stringify in createMessage",
+          "file": "modelComms.js",
+          "line": 14,
+          "code": "return Date.now().toString(36) + Math.random().toString(36).substr(2, 8);",
+          "explanation": "The createMessage function generates a unique ID and JSON.stringify it later. While not critical, it's unnecessary since the ID is already a string.",
+          "fix": "Remove JSON.stringify from the ID generation process as it's redundant.",
+          "reviewer": "gpt",
+          "family": "openai"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 4,
+        "severity": "CRITICAL",
+        "title": "Heartbeat interval not cleared on shutdown",
+        "file": "modelComms.js",
+        "line": 122,
+        "code": "if (heartbeatInterval) { clearInterval(heartbeatInterval);",
+        "explanation": "In the close() function, the heartbeatInterval is cleared, but this happens only after the Redis state is updated. If setModelState fails, the interval is not cleared, potentially causing memory leaks.",
+        "fix": "Clear the interval before updating Redis state to ensure it is always cleared, even if an error occurs.",
+        "reviewer": "gpt",
+        "family": "openai"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "gpt"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 4,
+          "severity": "CRITICAL",
+          "title": "Heartbeat interval not cleared on shutdown",
+          "file": "modelComms.js",
+          "line": 122,
+          "code": "if (heartbeatInterval) { clearInterval(heartbeatInterval);",
+          "explanation": "In the close() function, the heartbeatInterval is cleared, but this happens only after the Redis state is updated. If setModelState fails, the interval is not cleared, potentially causing memory leaks.",
+          "fix": "Clear the interval before updating Redis state to ensure it is always cleared, even if an error occurs.",
+          "reviewer": "gpt",
+          "family": "openai"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 1,
+        "severity": "CRITICAL",
+        "title": "Test assumes singleton modelComms can simulate multiple models",
+        "file": "test-comms.js",
+        "line": 73,
+        "code": "await comms.subscribe('alerts', (msg) => { ... })",
+        "explanation": "modelComms.js is designed for one model per instance. Test uses same comms instance for both publishing (model-a) and subscribing (alerts), causing self-reception. Test 4's 'model-c' simulation actually runs on model-a's instance.",
+        "fix": "Use separate modelComms instances for each simulated model in tests",
+        "reviewer": "hermes-405b",
+        "family": "nous"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "hermes-405b"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Test assumes singleton modelComms can simulate multiple models",
+          "file": "test-comms.js",
+          "line": 73,
+          "code": "await comms.subscribe('alerts', (msg) => { ... })",
+          "explanation": "modelComms.js is designed for one model per instance. Test uses same comms instance for both publishing (model-a) and subscribing (alerts), causing self-reception. Test 4's 'model-c' simulation actually runs on model-a's instance.",
+          "fix": "Use separate modelComms instances for each simulated model in tests",
+          "reviewer": "hermes-405b",
+          "family": "nous"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 2,
+        "severity": "MINOR",
+        "title": "Test 5 doesn't verify monitor events",
+        "file": "test-comms.js",
+        "line": 108,
+        "code": "if (onlineCount === 2) { ... }",
+        "explanation": "Monitor should emit 'modelOffline' when model-b is removed, but test doesn't verify this. Only checks Redis state.",
+        "fix": "Add event listener to monitor and verify 'modelOffline' event",
+        "reviewer": "hermes-405b",
+        "family": "nous"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "hermes-405b"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 2,
+          "severity": "MINOR",
+          "title": "Test 5 doesn't verify monitor events",
+          "file": "test-comms.js",
+          "line": 108,
+          "code": "if (onlineCount === 2) { ... }",
+          "explanation": "Monitor should emit 'modelOffline' when model-b is removed, but test doesn't verify this. Only checks Redis state.",
+          "fix": "Add event listener to monitor and verify 'modelOffline' event",
+          "reviewer": "hermes-405b",
+          "family": "nous"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 4,
+        "severity": "MINOR",
+        "title": "Unnecessary JSON parsing in getAllModels",
+        "file": "redisController.js",
+        "line": 93,
+        "code": "try { result[id] = { ...JSON.parse(state), lastHeartbeat, isOnline }; } catch {",
+        "explanation": "If the state is not JSON, it's stored as-is. However, the error handling could be more explicit, and non-JSON states should be handled consistently.",
+        "fix": "Consider storing all states in a consistent format (e.g., always JSON) to avoid mixed data types.",
+        "reviewer": "llama",
+        "family": "meta"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "llama"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 4,
+          "severity": "MINOR",
+          "title": "Unnecessary JSON parsing in getAllModels",
+          "file": "redisController.js",
+          "line": 93,
+          "code": "try { result[id] = { ...JSON.parse(state), lastHeartbeat, isOnline }; } catch {",
+          "explanation": "If the state is not JSON, it's stored as-is. However, the error handling could be more explicit, and non-JSON states should be handled consistently.",
+          "fix": "Consider storing all states in a consistent format (e.g., always JSON) to avoid mixed data types.",
+          "reviewer": "llama",
+          "family": "meta"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 5,
+        "severity": "CRITICAL",
+        "title": "Potential race condition in monitor.computeModelStats",
+        "file": "monitor.js",
+        "line": 63,
+        "code": "const online = entries.filter(([, m]) => m.isOnline);",
+        "explanation": "The computation of online models and the emission of 'modelOffline' events is based on the previous state. There's a potential race if model states change between computing `online` and emitting events.",
+        "fix": "Emit events based on the current state comparison directly, rather than relying on a cached previous list.",
+        "reviewer": "llama",
+        "family": "meta"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "llama"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 5,
+          "severity": "CRITICAL",
+          "title": "Potential race condition in monitor.computeModelStats",
+          "file": "monitor.js",
+          "line": 63,
+          "code": "const online = entries.filter(([, m]) => m.isOnline);",
+          "explanation": "The computation of online models and the emission of 'modelOffline' events is based on the previous state. There's a potential race if model states change between computing `online` and emitting events.",
+          "fix": "Emit events based on the current state comparison directly, rather than relying on a cached previous list.",
+          "reviewer": "llama",
+          "family": "meta"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 6,
+        "severity": "MINOR",
+        "title": "Magic number in STALE_THRESHOLD",
+        "file": "monitor.js",
+        "line": 8,
+        "code": "const STALE_THRESHOLD = 60000; // 60 seconds",
+        "explanation": "The stale threshold is hardcoded. While it's documented, it might be better to make it configurable or derive it from a more explicit constant.",
+        "fix": "Consider defining a named constant or configuration option for the stale threshold.",
+        "reviewer": "llama",
+        "family": "meta"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "llama"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 6,
+          "severity": "MINOR",
+          "title": "Magic number in STALE_THRESHOLD",
+          "file": "monitor.js",
+          "line": 8,
+          "code": "const STALE_THRESHOLD = 60000; // 60 seconds",
+          "explanation": "The stale threshold is hardcoded. While it's documented, it might be better to make it configurable or derive it from a more explicit constant.",
+          "fix": "Consider defining a named constant or configuration option for the stale threshold.",
+          "reviewer": "llama",
+          "family": "meta"
+        }
+      ]
+    }
+  ],
+  "runId": "mnfyssp4"
+}

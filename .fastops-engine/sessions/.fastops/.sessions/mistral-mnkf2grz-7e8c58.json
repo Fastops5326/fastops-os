@@ -1,0 +1,14 @@
+{
+  "id": "mistral-mnkf2grz-7e8c58",
+  "model": "mistral",
+  "task": "REVIEW session kimi-k2-mnketa6h-37b38e by kimi-k2. The diff is below — review for quality, correctness, edge cases. Post findings to COMMS. DONE with summary.\nDIFF:\ndiff --git a/.fastops/city-nightly.js b/.fastops/city-nightly.js\nnew file mode 100644\nindex 00000000..865c289d\n--- /dev/null\n+++ b/.fastops/city-nightly.js\n@@ -0,0 +1,28 @@\n+#!/usr/bin/env node\n+const { execSync } = require('child_process');\n+\n+function runPhase(command, phaseName, dryRun) {\n+  try {\n+    const args = dryRun ? ' --dry-run' : '';\n+    console.log(`[${phaseName}] Running${dryRun ? ' (dry-run)' : ''}...`);\n+    execSync(`node ${command}${args}`, { stdio: 'inherit' });\n+    console.log(`[${phaseName}] ✅ Complete`);\n+  } catch (error) {\n+    console.error(`[${phaseName}] ❌ Failed:`, error.message);\n+  }\n+}\n+\n+function main() {\n+  const dryRun = process.argv.includes('--dry-run');\n+  \n+  console.log(`🌙 City Nightly ${dryRun ? '(DRY RUN)' : ''}`);\n+  console.log('════════════════'.repeat(3));\n+  \n+  runPhase('.fastops/session-auto-merge.js', 'Merge Completed Sessions', dryRun);\n+  runPhase('.fastops/city-orchestrator.js --cycle', 'Detect & Dispatch Gaps', dryRun);\n+  runPhase('.fastops/city-brief.js --brief', 'Log State', dryRun);\n+  \n+  console.log('🌅 Nightly complete');\n+}\n+\n+main();\n\\ No newline at end of file\n",
+  "branch": "city/mistral-mnkf2grz-7e8c58",
+  "worktree": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.city-worktrees\\mistral-mnkf2grz-7e8c58",
+  "maxTurns": 5,
+  "turn": 0,
+  "status": "active",
+  "history": [],
+  "created": "2026-04-04T14:18:29.539Z",
+  "updated": "2026-04-04T14:18:29.539Z",
+  "_buildTargets": {}
+}

@@ -1,0 +1,50 @@
+[
+  {
+    "id": "mlmf1q0o4e5w",
+    "text": "Agents outinline your lines of work here and % completion",
+    "author": "joel",
+    "status": null,
+    "owner": null,
+    "ts": "2026-02-14T14:32:49.656Z"
+  },
+  {
+    "id": "mlmf3xfhg990",
+    "text": "Scope: Visual QC — experience map done, blocked on Playwright",
+    "author": "relay",
+    "status": null,
+    "owner": null,
+    "ts": "2026-02-14T14:34:32.573Z"
+  },
+  {
+    "id": "mlmf3xfkfd7h",
+    "text": "Probe: Metrics framework delivered, error=experience-delivery",
+    "author": "relay",
+    "status": null,
+    "owner": null,
+    "ts": "2026-02-14T14:34:32.576Z"
+  },
+  {
+    "id": "mlmf3xfnwthv",
+    "text": "Helm: Convergence map + CLAUDE.md revision done",
+    "author": "relay",
+    "status": null,
+    "owner": null,
+    "ts": "2026-02-14T14:34:32.579Z"
+  },
+  {
+    "id": "mlmf3xfq2onk",
+    "text": "Baseplate: DA built, first behavioral result (Helm shift)",
+    "author": "relay",
+    "status": null,
+    "owner": null,
+    "ts": "2026-02-14T14:34:32.582Z"
+  },
+  {
+    "id": "mlmf3xftp0pf",
+    "text": "Relay: Dashboard + panels + auto-thinking live",
+    "author": "relay",
+    "status": null,
+    "owner": null,
+    "ts": "2026-02-14T14:34:32.585Z"
+  }
+]

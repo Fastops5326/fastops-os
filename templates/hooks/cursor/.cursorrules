@@ -1,0 +1,13 @@
+# WarriorPath Monorepo — Cursor / Composer (Overwatch)
+
+**First thing:** This repository IS WarriorPath. The legacy FastOps "hub and spoke" model has been dismantled. The `.fastops/` folder is your internal multi-model software factory. All new code should be built inside `packages/warriorpath-unified` based strictly on the blueprints in `warriorpath/docs/computational-prd/`.
+
+**FORCED P0 (every chat):** **`.cursor/rules/p0-composer-assault.mdc`** — CDP↔Claude Code mission + **`missions/cdp-claude-realtime/COMPOSER-SQUAD-RUNBOOK.md`**.
+
+**Canonical orientation:** **`.cursor/CURSOR-OVERWATCH-ONBOARDING.md`**
+
+**Always-on rules:** **`p0-composer-assault.mdc`** · **`overwatch-dna.md`** · **`action-kb-frontier-subagent.mdc`** · **`joel-brevity.md`**
+
+**Repo banner:** **`AGENTS.md`**
+
+**Do not** treat this stub as a second charter. **GEMINI-OVERWATCH.md** and **Watch Officer** files are optional depth for strategic/JOC work—not a conflicting identity. Comms truth: **`comms/data/general.jsonl`**.

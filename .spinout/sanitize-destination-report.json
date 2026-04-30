@@ -1,0 +1,44 @@
+{
+  "generatedAt": "2026-04-30T00:11:56.264Z",
+  "target": "C:\\Users\\joelb\\OneDrive\\Desktop\\fastops-os",
+  "scanned": 1358,
+  "sanitized": 3,
+  "skippedSize": 0,
+  "ruleHits": {
+    "staff-name-joel-beam": 3,
+    "staff-name-paul-thoma": 4
+  },
+  "auditEntries": [
+    {
+      "file": ".archive\\comms-from-dev-process\\comms\\data\\.archive\\general-2026-03-15_to_2026-03-27.jsonl",
+      "findings": [
+        {
+          "rule": "staff-name-joel-beam",
+          "count": 1
+        },
+        {
+          "rule": "staff-name-paul-thoma",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "file": ".fastops-engine\\comms\\active-meeting.jsonl",
+      "findings": [
+        {
+          "rule": "staff-name-joel-beam",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "file": ".fastops-engine\\comms\\general.jsonl",
+      "findings": [
+        {
+          "rule": "staff-name-paul-thoma",
+          "count": 2
+        }
+      ]
+    }
+  ]
+}

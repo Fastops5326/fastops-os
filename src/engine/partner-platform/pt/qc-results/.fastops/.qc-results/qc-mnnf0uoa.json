@@ -1,0 +1,671 @@
+{
+  "files": [
+    "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.fastops\\intel-boot.js"
+  ],
+  "stage1Results": [
+    {
+      "model": "gpt",
+      "findings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Unhandled Promise Rejection on Timeout",
+          "file": "intel-boot.js",
+          "line": 101,
+          "code": "return new Promise((resolve, reject) => { ... reject(new Error('TIMEOUT')) ... });",
+          "explanation": "The promise in the callModel function rejects on timeout, but this rejection is not handled within the processDomain function. If the promise rejects, the error is thrown and not caught, potentially causing the entire process to crash.",
+          "fix": "Wrap the call to callModel in a try-catch block within processDomain to handle errors gracefully."
+        },
+        {
+          "id": 2,
+          "severity": "MINOR",
+          "title": "Potentially Large Diff Output Handling",
+          "file": "intel-boot.js",
+          "line": 72,
+          "code": "if (lines.length > 500) { ... return execSync('git diff --name-status HEAD~1', { encoding: 'utf-8' });",
+          "explanation": "If the diff is larger than 500 lines, the code falls back to name-status, which may not provide enough detail for semantic analysis. While it prevents token exhaustion, it may lead to incomplete information processing.",
+          "fix": "Consider implementing a paginated or batched approach to handle large diffs without losing semantic detail."
+        },
+        {
+          "id": 3,
+          "severity": "CRITICAL",
+          "title": "Synchronous execSync in Asynchronous Context",
+          "file": "intel-boot.js",
+          "line": 67,
+          "code": "const diff = execSync('git diff -U1 HEAD~1', { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] });",
+          "explanation": "The use of execSync blocks the event loop, preventing other asynchronous operations from executing. This can lead to performance bottlenecks if the command takes a long time to execute.",
+          "fix": "Replace execSync with an asynchronous alternative like exec from the child_process module, wrapped in a promise to avoid blocking."
+        }
+      ],
+      "raw": "```json\n[\n  {\n    \"id\": 1,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Unhandled Promise Rejection on Timeout\",\n    \"file\": \"intel-boot.js\",\n    \"line\": 101,\n    \"code\": \"return new Promise((resolve, reject) => { ... reject(new Error('TIMEOUT')) ... });\",\n    \"explanation\": \"The promise in the callModel function rejects on timeout, but this rejection is not handled within the processDomain function. If the promise rejects, the error is thrown and not caught, potentially causing the entire process to crash.\",\n    \"fix\": \"Wrap the call to callModel in a try-catch block within processDomain to handle errors gracefully.\"\n  },\n  {\n    \"id\": 2,\n    \"severity\": \"MINOR\",\n    \"title\": \"Potentially Large Diff Output Handling\",\n    \"file\": \"intel-boot.js\",\n    \"line\": 72,\n    \"code\": \"if (lines.length > 500) { ... return execSync('git diff --name-status HEAD~1', { encoding: 'utf-8' });\",\n    \"explanation\": \"If the diff is larger than 500 lines, the code falls back to name-status, which may not provide enough detail for semantic analysis. While it prevents token exhaustion, it may lead to incomplete information processing.\",\n    \"fix\": \"Consider implementing a paginated or batched approach to handle large diffs without losing semantic detail.\"\n  },\n  {\n    \"id\": 3,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Synchronous execSync in Asynchronous Context\",\n    \"file\": \"intel-boot.js\",\n    \"line\": 67,\n    \"code\": \"const diff = execSync('git diff -U1 HEAD~1', { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] });\",\n    \"explanation\": \"The use of execSync blocks the event loop, preventing other asynchronous operations from executing. This can lead to performance bottlenecks if the command takes a long time to execute.\",\n    \"fix\": \"Replace execSync with an asynchronous alternative like exec from the child_process module, wrapped in a promise to avoid blocking.\"\n  }\n]\n```",
+      "error": null
+    },
+    {
+      "model": "kimi-k2",
+      "findings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Random latency simulation can exceed timeout window",
+          "file": "intel-boot.js",
+          "line": 79,
+          "code": "const latency = Math.floor(Math.random() * 9000) + 1000;",
+          "explanation": "Latency is set to 1-10s but the callModel timeout is 8s. When latency > 8s the promise never resolves or rejects, hanging the await and stalling the entire MapReduce step forever.",
+          "fix": "Clamp latency to 0-7s: Math.floor(Math.random() * 7000)"
+        },
+        {
+          "id": 2,
+          "severity": "CRITICAL",
+          "title": "Unprotected JSON.parse on baseline read",
+          "file": "intel-boot.js",
+          "line": 104,
+          "code": "return JSON.parse(fs.readFileSync(file, 'utf-8'));",
+          "explanation": "If the baseline file exists but contains invalid JSON, JSON.parse throws and the uncaught exception crashes the boot process.",
+          "fix": "Wrap in try/catch and return null on parse failure"
+        },
+        {
+          "id": 3,
+          "severity": "MINOR",
+          "title": "getDelta runs repo-wide diff for every domain",
+          "file": "intel-boot.js",
+          "line": 88,
+          "code": "const diff = execSync('git diff -U1 HEAD~1', { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] });",
+          "explanation": "Each of the five domains calls getDelta, spawning the same git command five times sequentially. Wastes cycles but produces correct output.",
+          "fix": "Memoize the diff result per boot run"
+        }
+      ],
+      "raw": "[\n  {\n    \"id\": 1,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Random latency simulation can exceed timeout window\",\n    \"file\": \"intel-boot.js\",\n    \"line\": 79,\n    \"code\": \"const latency = Math.floor(Math.random() * 9000) + 1000;\",\n    \"explanation\": \"Latency is set to 1-10s but the callModel timeout is 8s. When latency > 8s the promise never resolves or rejects, hanging the await and stalling the entire MapReduce step forever.\",\n    \"fix\": \"Clamp latency to 0-7s: Math.floor(Math.random() * 7000)\"\n  },\n  {\n    \"id\": 2,\n    \"severity\": \"CRITICAL\",\n    \"title\": \"Unprotected JSON.parse on baseline read\",\n    \"file\": \"intel-boot.js\",\n    \"line\": 104,\n    \"code\": \"return JSON.parse(fs.readFileSync(file, 'utf-8'));\",\n    \"explanation\": \"If the baseline file exists but contains invalid JSON, JSON.parse throws and the uncaught exception crashes the boot process.\",\n    \"fix\": \"Wrap in try/catch and return null on parse failure\"\n  },\n  {\n    \"id\": 3,\n    \"severity\": \"MINOR\",\n    \"title\": \"getDelta runs repo-wide diff for every domain\",\n    \"file\": \"intel-boot.js\",\n    \"line\": 88,\n    \"code\": \"const diff = execSync('git diff -U1 HEAD~1', { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] });\",\n    \"explanation\": \"Each of the five domains calls getDelta, spawning the same git command five times sequentially. Wastes cycles but produces correct output.\",\n    \"fix\": \"Memoize the diff result per boot run\"\n  }\n]",
+      "error": null
+    },
+    {
+      "model": "nemotron-ultra",
+      "findings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Uncaught Async Error in main()",
+          "file": "intel-boot.js",
+          "line": 177,
+          "code": "main().catch(err => { ... })",
+          "explanation": "The main() function catches errors but exits immediately with process.exit(1), preventing proper cleanup of open resources or logging. This could lead to data loss or incomplete state if an error occurs during the async process.",
+          "fix": "Replace process.exit(1) with a graceful shutdown procedure that ensures all async operations are terminated and critical data is saved before exiting."
+        },
+        {
+          "id": 2,
+          "severity": "MINOR",
+          "title": "Inconsistent Timeout Handling",
+          "file": "intel-boot.js",
+          "line": 67,
+          "code": "const timer = setTimeout(() => reject(new Error('TIMEOUT')), timeoutMs);",
+          "explanation": "The callModel function sets a timeout but also simulates latency with another setTimeout. The rejection timer is cleared only if the simulated API call completes before the timeout. However, if the simulated latency exceeds the timeoutMs, the error is thrown, but the 'latency' timer is not cleared, leading to potential memory leaks in a real implementation. Not critical here due to simulation but bad practice.",
+          "fix": "Clear the latency timeout in the error case or use a single timer."
+        },
+        {
+          "id": 3,
+          "severity": "CRITICAL",
+          "title": "Git ExecSync with Untrusted Input",
+          "file": "intel-boot.js",
+          "line": 95,
+          "code": "execSync('git diff -U1 HEAD~1', { ... })",
+          "explanation": "The getDelta function executes a git command with execSync using user-controlled input (domainId). If domainId is derived from untrusted sources, this could lead to shell injection vulnerabilities. However, in the current code, domainId is hardcoded in DOMAINS array, so no immediate risk. But if future changes allow external domainId input, this becomes a critical RCE vector.",
+          "fix": "Sanitize domainId before using in execSync or use a safer method like a Git library to avoid shell execution."
+        }
+      ],
+      "raw": "[{\"id\":1,\"severity\":\"CRITICAL\",\"title\":\"Uncaught Async Error in main()\",\"file\":\"intel-boot.js\",\"line\":177,\"code\":\"main().catch(err => { ... })\",\"explanation\":\"The main() function catches errors but exits immediately with process.exit(1), preventing proper cleanup of open resources or logging. This could lead to data loss or incomplete state if an error occurs during the async process.\",\"fix\":\"Replace process.exit(1) with a graceful shutdown procedure that ensures all async operations are terminated and critical data is saved before exiting.\"},{\"id\":2,\"severity\":\"MINOR\",\"title\":\"Inconsistent Timeout Handling\",\"file\":\"intel-boot.js\",\"line\":67,\"code\":\"const timer = setTimeout(() => reject(new Error('TIMEOUT')), timeoutMs);\",\"explanation\":\"The callModel function sets a timeout but also simulates latency with another setTimeout. The rejection timer is cleared only if the simulated API call completes before the timeout. However, if the simulated latency exceeds the timeoutMs, the error is thrown, but the 'latency' timer is not cleared, leading to potential memory leaks in a real implementation. Not critical here due to simulation but bad practice.\",\"fix\":\"Clear the latency timeout in the error case or use a single timer.\"},{\"id\":3,\"severity\":\"CRITICAL\",\"title\":\"Git ExecSync with Untrusted Input\",\"file\":\"intel-boot.js\",\"line\":95,\"code\":\"execSync('git diff -U1 HEAD~1', { ... })\",\"explanation\":\"The getDelta function executes a git command with execSync using user-controlled input (domainId). If domainId is derived from untrusted sources, this could lead to shell injection vulnerabilities. However, in the current code, domainId is hardcoded in DOMAINS array, so no immediate risk. But if future changes allow external domainId input, this becomes a critical RCE vector.\",\"fix\":\"Sanitize domainId before using in execSync or use a safer method like a Git library to avoid shell execution.\"}]",
+      "error": null
+    }
+  ],
+  "clusteredFindings": [
+    {
+      "representative": {
+        "id": 1,
+        "severity": "CRITICAL",
+        "title": "Unhandled Promise Rejection on Timeout",
+        "file": "intel-boot.js",
+        "line": 101,
+        "code": "return new Promise((resolve, reject) => { ... reject(new Error('TIMEOUT')) ... });",
+        "explanation": "The promise in the callModel function rejects on timeout, but this rejection is not handled within the processDomain function. If the promise rejects, the error is thrown and not caught, potentially causing the entire process to crash.",
+        "fix": "Wrap the call to callModel in a try-catch block within processDomain to handle errors gracefully.",
+        "reviewer": "gpt",
+        "family": "openai"
+      },
+      "count": 2,
+      "families": 2,
+      "reviewers": [
+        "gpt",
+        "kimi-k2"
+      ],
+      "confidence": "high",
+      "allFindings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Unhandled Promise Rejection on Timeout",
+          "file": "intel-boot.js",
+          "line": 101,
+          "code": "return new Promise((resolve, reject) => { ... reject(new Error('TIMEOUT')) ... });",
+          "explanation": "The promise in the callModel function rejects on timeout, but this rejection is not handled within the processDomain function. If the promise rejects, the error is thrown and not caught, potentially causing the entire process to crash.",
+          "fix": "Wrap the call to callModel in a try-catch block within processDomain to handle errors gracefully.",
+          "reviewer": "gpt",
+          "family": "openai"
+        },
+        {
+          "id": 2,
+          "severity": "CRITICAL",
+          "title": "Unprotected JSON.parse on baseline read",
+          "file": "intel-boot.js",
+          "line": 104,
+          "code": "return JSON.parse(fs.readFileSync(file, 'utf-8'));",
+          "explanation": "If the baseline file exists but contains invalid JSON, JSON.parse throws and the uncaught exception crashes the boot process.",
+          "fix": "Wrap in try/catch and return null on parse failure",
+          "reviewer": "kimi-k2",
+          "family": "moonshot"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 2,
+        "severity": "MINOR",
+        "title": "Potentially Large Diff Output Handling",
+        "file": "intel-boot.js",
+        "line": 72,
+        "code": "if (lines.length > 500) { ... return execSync('git diff --name-status HEAD~1', { encoding: 'utf-8' });",
+        "explanation": "If the diff is larger than 500 lines, the code falls back to name-status, which may not provide enough detail for semantic analysis. While it prevents token exhaustion, it may lead to incomplete information processing.",
+        "fix": "Consider implementing a paginated or batched approach to handle large diffs without losing semantic detail.",
+        "reviewer": "gpt",
+        "family": "openai"
+      },
+      "count": 2,
+      "families": 2,
+      "reviewers": [
+        "gpt",
+        "nemotron-ultra"
+      ],
+      "confidence": "high",
+      "allFindings": [
+        {
+          "id": 2,
+          "severity": "MINOR",
+          "title": "Potentially Large Diff Output Handling",
+          "file": "intel-boot.js",
+          "line": 72,
+          "code": "if (lines.length > 500) { ... return execSync('git diff --name-status HEAD~1', { encoding: 'utf-8' });",
+          "explanation": "If the diff is larger than 500 lines, the code falls back to name-status, which may not provide enough detail for semantic analysis. While it prevents token exhaustion, it may lead to incomplete information processing.",
+          "fix": "Consider implementing a paginated or batched approach to handle large diffs without losing semantic detail.",
+          "reviewer": "gpt",
+          "family": "openai"
+        },
+        {
+          "id": 2,
+          "severity": "MINOR",
+          "title": "Inconsistent Timeout Handling",
+          "file": "intel-boot.js",
+          "line": 67,
+          "code": "const timer = setTimeout(() => reject(new Error('TIMEOUT')), timeoutMs);",
+          "explanation": "The callModel function sets a timeout but also simulates latency with another setTimeout. The rejection timer is cleared only if the simulated API call completes before the timeout. However, if the simulated latency exceeds the timeoutMs, the error is thrown, but the 'latency' timer is not cleared, leading to potential memory leaks in a real implementation. Not critical here due to simulation but bad practice.",
+          "fix": "Clear the latency timeout in the error case or use a single timer.",
+          "reviewer": "nemotron-ultra",
+          "family": "nvidia"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 3,
+        "severity": "CRITICAL",
+        "title": "Synchronous execSync in Asynchronous Context",
+        "file": "intel-boot.js",
+        "line": 67,
+        "code": "const diff = execSync('git diff -U1 HEAD~1', { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] });",
+        "explanation": "The use of execSync blocks the event loop, preventing other asynchronous operations from executing. This can lead to performance bottlenecks if the command takes a long time to execute.",
+        "fix": "Replace execSync with an asynchronous alternative like exec from the child_process module, wrapped in a promise to avoid blocking.",
+        "reviewer": "gpt",
+        "family": "openai"
+      },
+      "count": 2,
+      "families": 2,
+      "reviewers": [
+        "gpt",
+        "kimi-k2"
+      ],
+      "confidence": "high",
+      "allFindings": [
+        {
+          "id": 3,
+          "severity": "CRITICAL",
+          "title": "Synchronous execSync in Asynchronous Context",
+          "file": "intel-boot.js",
+          "line": 67,
+          "code": "const diff = execSync('git diff -U1 HEAD~1', { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] });",
+          "explanation": "The use of execSync blocks the event loop, preventing other asynchronous operations from executing. This can lead to performance bottlenecks if the command takes a long time to execute.",
+          "fix": "Replace execSync with an asynchronous alternative like exec from the child_process module, wrapped in a promise to avoid blocking.",
+          "reviewer": "gpt",
+          "family": "openai"
+        },
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Random latency simulation can exceed timeout window",
+          "file": "intel-boot.js",
+          "line": 79,
+          "code": "const latency = Math.floor(Math.random() * 9000) + 1000;",
+          "explanation": "Latency is set to 1-10s but the callModel timeout is 8s. When latency > 8s the promise never resolves or rejects, hanging the await and stalling the entire MapReduce step forever.",
+          "fix": "Clamp latency to 0-7s: Math.floor(Math.random() * 7000)",
+          "reviewer": "kimi-k2",
+          "family": "moonshot"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 3,
+        "severity": "MINOR",
+        "title": "getDelta runs repo-wide diff for every domain",
+        "file": "intel-boot.js",
+        "line": 88,
+        "code": "const diff = execSync('git diff -U1 HEAD~1', { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] });",
+        "explanation": "Each of the five domains calls getDelta, spawning the same git command five times sequentially. Wastes cycles but produces correct output.",
+        "fix": "Memoize the diff result per boot run",
+        "reviewer": "kimi-k2",
+        "family": "moonshot"
+      },
+      "count": 2,
+      "families": 2,
+      "reviewers": [
+        "kimi-k2",
+        "nemotron-ultra"
+      ],
+      "confidence": "high",
+      "allFindings": [
+        {
+          "id": 3,
+          "severity": "MINOR",
+          "title": "getDelta runs repo-wide diff for every domain",
+          "file": "intel-boot.js",
+          "line": 88,
+          "code": "const diff = execSync('git diff -U1 HEAD~1', { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] });",
+          "explanation": "Each of the five domains calls getDelta, spawning the same git command five times sequentially. Wastes cycles but produces correct output.",
+          "fix": "Memoize the diff result per boot run",
+          "reviewer": "kimi-k2",
+          "family": "moonshot"
+        },
+        {
+          "id": 3,
+          "severity": "CRITICAL",
+          "title": "Git ExecSync with Untrusted Input",
+          "file": "intel-boot.js",
+          "line": 95,
+          "code": "execSync('git diff -U1 HEAD~1', { ... })",
+          "explanation": "The getDelta function executes a git command with execSync using user-controlled input (domainId). If domainId is derived from untrusted sources, this could lead to shell injection vulnerabilities. However, in the current code, domainId is hardcoded in DOMAINS array, so no immediate risk. But if future changes allow external domainId input, this becomes a critical RCE vector.",
+          "fix": "Sanitize domainId before using in execSync or use a safer method like a Git library to avoid shell execution.",
+          "reviewer": "nemotron-ultra",
+          "family": "nvidia"
+        }
+      ]
+    },
+    {
+      "representative": {
+        "id": 1,
+        "severity": "CRITICAL",
+        "title": "Uncaught Async Error in main()",
+        "file": "intel-boot.js",
+        "line": 177,
+        "code": "main().catch(err => { ... })",
+        "explanation": "The main() function catches errors but exits immediately with process.exit(1), preventing proper cleanup of open resources or logging. This could lead to data loss or incomplete state if an error occurs during the async process.",
+        "fix": "Replace process.exit(1) with a graceful shutdown procedure that ensures all async operations are terminated and critical data is saved before exiting.",
+        "reviewer": "nemotron-ultra",
+        "family": "nvidia"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "nemotron-ultra"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Uncaught Async Error in main()",
+          "file": "intel-boot.js",
+          "line": 177,
+          "code": "main().catch(err => { ... })",
+          "explanation": "The main() function catches errors but exits immediately with process.exit(1), preventing proper cleanup of open resources or logging. This could lead to data loss or incomplete state if an error occurs during the async process.",
+          "fix": "Replace process.exit(1) with a graceful shutdown procedure that ensures all async operations are terminated and critical data is saved before exiting.",
+          "reviewer": "nemotron-ultra",
+          "family": "nvidia"
+        }
+      ]
+    }
+  ],
+  "stage2Results": [
+    {
+      "model": "grok",
+      "verdicts": [
+        {
+          "findingId": 1,
+          "verdict": "FALSE_POSITIVE",
+          "evidence": "In processDomain: try { const result = await callModel(...); } catch (err) { console.warn(`[intel-boot] Failed: ${domain.name} (${err.message}) -> Degrading to [STALE]`); return { ... status: 'STALE', ... }; }",
+          "explanation": "The rejection from callModel is handled by the catch block in processDomain, which degrades to a stale baseline instead of propagating the error."
+        },
+        {
+          "findingId": 2,
+          "verdict": "FALSE_POSITIVE",
+          "evidence": "In getDelta: if (lines.length > 500) { return execSync('git diff --name-status HEAD~1', { encoding: 'utf-8' }); }",
+          "explanation": "The fallback to name-status is an intentional design choice to prevent token exhaustion, and the code correctly handles large diffs without introducing a bug."
+        },
+        {
+          "findingId": 3,
+          "verdict": "CONFIRMED",
+          "evidence": "In getDelta: const diff = execSync('git diff -U1 HEAD~1', { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] });",
+          "explanation": "execSync is synchronous and blocks the event loop, even in an asynchronous context, which can cause performance bottlenecks as claimed."
+        },
+        {
+          "findingId": 4,
+          "verdict": "CONFIRMED",
+          "evidence": "In getDelta: function getDelta(domainId) { ... const diff = execSync('git diff -U1 HEAD~1', ...); } – domainId is not used in the function.",
+          "explanation": "The getDelta function runs the same repo-wide git diff for each domain call, ignoring the domainId parameter, resulting in redundant executions as described."
+        },
+        {
+          "findingId": 5,
+          "verdict": "CONFIRMED",
+          "evidence": "main().catch(err => { console.error(`[intel-boot] Fatal Error: ${err.message}`); process.exit(1); });",
+          "explanation": "The immediate process.exit(1) in the catch handler can prevent proper cleanup of resources, such as unflushed buffers or ongoing operations, leading to potential data loss or incomplete states."
+        }
+      ],
+      "raw": "[\n  {\n    \"findingId\": 1,\n    \"verdict\": \"FALSE_POSITIVE\",\n    \"evidence\": \"In processDomain: try { const result = await callModel(...); } catch (err) { console.warn(`[intel-boot] Failed: ${domain.name} (${err.message}) -> Degrading to [STALE]`); return { ... status: 'STALE', ... }; }\",\n    \"explanation\": \"The rejection from callModel is handled by the catch block in processDomain, which degrades to a stale baseline instead of propagating the error.\"\n  },\n  {\n    \"findingId\": 2,\n    \"verdict\": \"FALSE_POSITIVE\",\n    \"evidence\": \"In getDelta: if (lines.length > 500) { return execSync('git diff --name-status HEAD~1', { encoding: 'utf-8' }); }\",\n    \"explanation\": \"The fallback to name-status is an intentional design choice to prevent token exhaustion, and the code correctly handles large diffs without introducing a bug.\"\n  },\n  {\n    \"findingId\": 3,\n    \"verdict\": \"CONFIRMED\",\n    \"evidence\": \"In getDelta: const diff = execSync('git diff -U1 HEAD~1', { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] });\",\n    \"explanation\": \"execSync is synchronous and blocks the event loop, even in an asynchronous context, which can cause performance bottlenecks as claimed.\"\n  },\n  {\n    \"findingId\": 4,\n    \"verdict\": \"CONFIRMED\",\n    \"evidence\": \"In getDelta: function getDelta(domainId) { ... const diff = execSync('git diff -U1 HEAD~1', ...); } – domainId is not used in the function.\",\n    \"explanation\": \"The getDelta function runs the same repo-wide git diff for each domain call, ignoring the domainId parameter, resulting in redundant executions as described.\"\n  },\n  {\n    \"findingId\": 5,\n    \"verdict\": \"CONFIRMED\",\n    \"evidence\": \"main().catch(err => { console.error(`[intel-boot] Fatal Error: ${err.message}`); process.exit(1); });\",\n    \"explanation\": \"The immediate process.exit(1) in the catch handler can prevent proper cleanup of resources, such as unflushed buffers or ongoing operations, leading to potential data loss or incomplete states.\"\n  }\n]",
+      "error": null
+    }
+  ],
+  "merged": [
+    {
+      "representative": {
+        "id": 1,
+        "severity": "CRITICAL",
+        "title": "Unhandled Promise Rejection on Timeout",
+        "file": "intel-boot.js",
+        "line": 101,
+        "code": "return new Promise((resolve, reject) => { ... reject(new Error('TIMEOUT')) ... });",
+        "explanation": "The promise in the callModel function rejects on timeout, but this rejection is not handled within the processDomain function. If the promise rejects, the error is thrown and not caught, potentially causing the entire process to crash.",
+        "fix": "Wrap the call to callModel in a try-catch block within processDomain to handle errors gracefully.",
+        "reviewer": "gpt",
+        "family": "openai"
+      },
+      "count": 2,
+      "families": 2,
+      "reviewers": [
+        "gpt",
+        "kimi-k2"
+      ],
+      "confidence": "high",
+      "allFindings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Unhandled Promise Rejection on Timeout",
+          "file": "intel-boot.js",
+          "line": 101,
+          "code": "return new Promise((resolve, reject) => { ... reject(new Error('TIMEOUT')) ... });",
+          "explanation": "The promise in the callModel function rejects on timeout, but this rejection is not handled within the processDomain function. If the promise rejects, the error is thrown and not caught, potentially causing the entire process to crash.",
+          "fix": "Wrap the call to callModel in a try-catch block within processDomain to handle errors gracefully.",
+          "reviewer": "gpt",
+          "family": "openai"
+        },
+        {
+          "id": 2,
+          "severity": "CRITICAL",
+          "title": "Unprotected JSON.parse on baseline read",
+          "file": "intel-boot.js",
+          "line": 104,
+          "code": "return JSON.parse(fs.readFileSync(file, 'utf-8'));",
+          "explanation": "If the baseline file exists but contains invalid JSON, JSON.parse throws and the uncaught exception crashes the boot process.",
+          "fix": "Wrap in try/catch and return null on parse failure",
+          "reviewer": "kimi-k2",
+          "family": "moonshot"
+        }
+      ],
+      "verdicts": [
+        {
+          "findingId": 1,
+          "verdict": "FALSE_POSITIVE",
+          "evidence": "In processDomain: try { const result = await callModel(...); } catch (err) { console.warn(`[intel-boot] Failed: ${domain.name} (${err.message}) -> Degrading to [STALE]`); return { ... status: 'STALE', ... }; }",
+          "explanation": "The rejection from callModel is handled by the catch block in processDomain, which degrades to a stale baseline instead of propagating the error.",
+          "verifier": "grok",
+          "family": "xai"
+        }
+      ],
+      "confirmed": 0,
+      "falsePositive": 1,
+      "finalVerdict": "FALSE_POSITIVE"
+    },
+    {
+      "representative": {
+        "id": 2,
+        "severity": "MINOR",
+        "title": "Potentially Large Diff Output Handling",
+        "file": "intel-boot.js",
+        "line": 72,
+        "code": "if (lines.length > 500) { ... return execSync('git diff --name-status HEAD~1', { encoding: 'utf-8' });",
+        "explanation": "If the diff is larger than 500 lines, the code falls back to name-status, which may not provide enough detail for semantic analysis. While it prevents token exhaustion, it may lead to incomplete information processing.",
+        "fix": "Consider implementing a paginated or batched approach to handle large diffs without losing semantic detail.",
+        "reviewer": "gpt",
+        "family": "openai"
+      },
+      "count": 2,
+      "families": 2,
+      "reviewers": [
+        "gpt",
+        "nemotron-ultra"
+      ],
+      "confidence": "high",
+      "allFindings": [
+        {
+          "id": 2,
+          "severity": "MINOR",
+          "title": "Potentially Large Diff Output Handling",
+          "file": "intel-boot.js",
+          "line": 72,
+          "code": "if (lines.length > 500) { ... return execSync('git diff --name-status HEAD~1', { encoding: 'utf-8' });",
+          "explanation": "If the diff is larger than 500 lines, the code falls back to name-status, which may not provide enough detail for semantic analysis. While it prevents token exhaustion, it may lead to incomplete information processing.",
+          "fix": "Consider implementing a paginated or batched approach to handle large diffs without losing semantic detail.",
+          "reviewer": "gpt",
+          "family": "openai"
+        },
+        {
+          "id": 2,
+          "severity": "MINOR",
+          "title": "Inconsistent Timeout Handling",
+          "file": "intel-boot.js",
+          "line": 67,
+          "code": "const timer = setTimeout(() => reject(new Error('TIMEOUT')), timeoutMs);",
+          "explanation": "The callModel function sets a timeout but also simulates latency with another setTimeout. The rejection timer is cleared only if the simulated API call completes before the timeout. However, if the simulated latency exceeds the timeoutMs, the error is thrown, but the 'latency' timer is not cleared, leading to potential memory leaks in a real implementation. Not critical here due to simulation but bad practice.",
+          "fix": "Clear the latency timeout in the error case or use a single timer.",
+          "reviewer": "nemotron-ultra",
+          "family": "nvidia"
+        }
+      ],
+      "verdicts": [
+        {
+          "findingId": 2,
+          "verdict": "FALSE_POSITIVE",
+          "evidence": "In getDelta: if (lines.length > 500) { return execSync('git diff --name-status HEAD~1', { encoding: 'utf-8' }); }",
+          "explanation": "The fallback to name-status is an intentional design choice to prevent token exhaustion, and the code correctly handles large diffs without introducing a bug.",
+          "verifier": "grok",
+          "family": "xai"
+        }
+      ],
+      "confirmed": 0,
+      "falsePositive": 1,
+      "finalVerdict": "FALSE_POSITIVE"
+    },
+    {
+      "representative": {
+        "id": 3,
+        "severity": "CRITICAL",
+        "title": "Synchronous execSync in Asynchronous Context",
+        "file": "intel-boot.js",
+        "line": 67,
+        "code": "const diff = execSync('git diff -U1 HEAD~1', { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] });",
+        "explanation": "The use of execSync blocks the event loop, preventing other asynchronous operations from executing. This can lead to performance bottlenecks if the command takes a long time to execute.",
+        "fix": "Replace execSync with an asynchronous alternative like exec from the child_process module, wrapped in a promise to avoid blocking.",
+        "reviewer": "gpt",
+        "family": "openai"
+      },
+      "count": 2,
+      "families": 2,
+      "reviewers": [
+        "gpt",
+        "kimi-k2"
+      ],
+      "confidence": "high",
+      "allFindings": [
+        {
+          "id": 3,
+          "severity": "CRITICAL",
+          "title": "Synchronous execSync in Asynchronous Context",
+          "file": "intel-boot.js",
+          "line": 67,
+          "code": "const diff = execSync('git diff -U1 HEAD~1', { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] });",
+          "explanation": "The use of execSync blocks the event loop, preventing other asynchronous operations from executing. This can lead to performance bottlenecks if the command takes a long time to execute.",
+          "fix": "Replace execSync with an asynchronous alternative like exec from the child_process module, wrapped in a promise to avoid blocking.",
+          "reviewer": "gpt",
+          "family": "openai"
+        },
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Random latency simulation can exceed timeout window",
+          "file": "intel-boot.js",
+          "line": 79,
+          "code": "const latency = Math.floor(Math.random() * 9000) + 1000;",
+          "explanation": "Latency is set to 1-10s but the callModel timeout is 8s. When latency > 8s the promise never resolves or rejects, hanging the await and stalling the entire MapReduce step forever.",
+          "fix": "Clamp latency to 0-7s: Math.floor(Math.random() * 7000)",
+          "reviewer": "kimi-k2",
+          "family": "moonshot"
+        }
+      ],
+      "verdicts": [
+        {
+          "findingId": 3,
+          "verdict": "CONFIRMED",
+          "evidence": "In getDelta: const diff = execSync('git diff -U1 HEAD~1', { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] });",
+          "explanation": "execSync is synchronous and blocks the event loop, even in an asynchronous context, which can cause performance bottlenecks as claimed.",
+          "verifier": "grok",
+          "family": "xai"
+        }
+      ],
+      "confirmed": 1,
+      "falsePositive": 0,
+      "finalVerdict": "CONFIRMED"
+    },
+    {
+      "representative": {
+        "id": 3,
+        "severity": "MINOR",
+        "title": "getDelta runs repo-wide diff for every domain",
+        "file": "intel-boot.js",
+        "line": 88,
+        "code": "const diff = execSync('git diff -U1 HEAD~1', { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] });",
+        "explanation": "Each of the five domains calls getDelta, spawning the same git command five times sequentially. Wastes cycles but produces correct output.",
+        "fix": "Memoize the diff result per boot run",
+        "reviewer": "kimi-k2",
+        "family": "moonshot"
+      },
+      "count": 2,
+      "families": 2,
+      "reviewers": [
+        "kimi-k2",
+        "nemotron-ultra"
+      ],
+      "confidence": "high",
+      "allFindings": [
+        {
+          "id": 3,
+          "severity": "MINOR",
+          "title": "getDelta runs repo-wide diff for every domain",
+          "file": "intel-boot.js",
+          "line": 88,
+          "code": "const diff = execSync('git diff -U1 HEAD~1', { encoding: 'utf-8', stdio: ['ignore', 'pipe', 'ignore'] });",
+          "explanation": "Each of the five domains calls getDelta, spawning the same git command five times sequentially. Wastes cycles but produces correct output.",
+          "fix": "Memoize the diff result per boot run",
+          "reviewer": "kimi-k2",
+          "family": "moonshot"
+        },
+        {
+          "id": 3,
+          "severity": "CRITICAL",
+          "title": "Git ExecSync with Untrusted Input",
+          "file": "intel-boot.js",
+          "line": 95,
+          "code": "execSync('git diff -U1 HEAD~1', { ... })",
+          "explanation": "The getDelta function executes a git command with execSync using user-controlled input (domainId). If domainId is derived from untrusted sources, this could lead to shell injection vulnerabilities. However, in the current code, domainId is hardcoded in DOMAINS array, so no immediate risk. But if future changes allow external domainId input, this becomes a critical RCE vector.",
+          "fix": "Sanitize domainId before using in execSync or use a safer method like a Git library to avoid shell execution.",
+          "reviewer": "nemotron-ultra",
+          "family": "nvidia"
+        }
+      ],
+      "verdicts": [
+        {
+          "findingId": 4,
+          "verdict": "CONFIRMED",
+          "evidence": "In getDelta: function getDelta(domainId) { ... const diff = execSync('git diff -U1 HEAD~1', ...); } – domainId is not used in the function.",
+          "explanation": "The getDelta function runs the same repo-wide git diff for each domain call, ignoring the domainId parameter, resulting in redundant executions as described.",
+          "verifier": "grok",
+          "family": "xai"
+        }
+      ],
+      "confirmed": 1,
+      "falsePositive": 0,
+      "finalVerdict": "CONFIRMED"
+    },
+    {
+      "representative": {
+        "id": 1,
+        "severity": "CRITICAL",
+        "title": "Uncaught Async Error in main()",
+        "file": "intel-boot.js",
+        "line": 177,
+        "code": "main().catch(err => { ... })",
+        "explanation": "The main() function catches errors but exits immediately with process.exit(1), preventing proper cleanup of open resources or logging. This could lead to data loss or incomplete state if an error occurs during the async process.",
+        "fix": "Replace process.exit(1) with a graceful shutdown procedure that ensures all async operations are terminated and critical data is saved before exiting.",
+        "reviewer": "nemotron-ultra",
+        "family": "nvidia"
+      },
+      "count": 1,
+      "families": 1,
+      "reviewers": [
+        "nemotron-ultra"
+      ],
+      "confidence": "low",
+      "allFindings": [
+        {
+          "id": 1,
+          "severity": "CRITICAL",
+          "title": "Uncaught Async Error in main()",
+          "file": "intel-boot.js",
+          "line": 177,
+          "code": "main().catch(err => { ... })",
+          "explanation": "The main() function catches errors but exits immediately with process.exit(1), preventing proper cleanup of open resources or logging. This could lead to data loss or incomplete state if an error occurs during the async process.",
+          "fix": "Replace process.exit(1) with a graceful shutdown procedure that ensures all async operations are terminated and critical data is saved before exiting.",
+          "reviewer": "nemotron-ultra",
+          "family": "nvidia"
+        }
+      ],
+      "verdicts": [
+        {
+          "findingId": 5,
+          "verdict": "CONFIRMED",
+          "evidence": "main().catch(err => { console.error(`[intel-boot] Fatal Error: ${err.message}`); process.exit(1); });",
+          "explanation": "The immediate process.exit(1) in the catch handler can prevent proper cleanup of resources, such as unflushed buffers or ongoing operations, leading to potential data loss or incomplete states.",
+          "verifier": "grok",
+          "family": "xai"
+        }
+      ],
+      "confirmed": 1,
+      "falsePositive": 0,
+      "finalVerdict": "CONFIRMED"
+    }
+  ],
+  "runId": "mnnf0uoa"
+}

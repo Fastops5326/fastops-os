@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "description": "Allowed JSON body `sender` values for POST /api/external/messages when validated by fastops-os (see fastops-os/server.js). If the FastOps engine on :3100 has its own list, keep it in sync. Sender `fastops_remote` is for a separate remote FastOps user/integration — not Nick/PT routing (see deliverables/NICK-CONNECTION-GUIDE.md for Nick senders only).",
+  "senders": [
+    "nick-agent-01",
+    "nick-agent-02",
+    "pt-agent-01",
+    "fastops-agent-01",
+    "fastops_remote"
+  ]
+}

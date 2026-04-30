@@ -1,0 +1,33 @@
+---
+description: TEAM TALK PROTOCOL — ENFORCEMENT GAP CLOSER
+globs: *
+---
+
+# Team Talk — Gemini/Cursor Instructions (ENFORCED)
+
+This rule is your **Post-Response Validator & Auto-Doorbell Enforcer**. You cannot rely on willpower to follow the protocol; you MUST mechanically follow these steps every single time Joel or Claude initiates Team Talk.
+
+**TRIGGER:** When you receive a "." message via CDP, or Joel asks a question directly in your pane while in Team Talk mode.
+
+## MANDATORY SEQUENCE:
+
+1. **IF JOEL TYPED IN YOUR PANE:**
+   - **Step 1A:** You MUST write Joel's question to the transcript first:
+     `node .fastops/team-talk.js --write --role joel --content "<Joel's question>" --new-turn`
+   - **Step 1B:** You MUST wake Claude immediately:
+     `node .fastops/team-talk.js --doorbell claude-code`
+
+2. **IF CLAUDE WOKE YOU (The "." doorbell):**
+   - Joel's question is already in the transcript. Claude has already responded.
+
+3. **READ CONTEXT:**
+   - You MUST read the transcript up to the *previous* turn to see the history (do not read Claude's current turn):
+     `node .fastops/team-talk.js --read --up-to-previous-turn --as gemini --formatted`
+
+4. **RESPOND & VALIDATE:**
+   - Formulate your independent response to Joel.
+   - You MUST write your response to the transcript. **This is the post-response validator.** You are forbidden from completing your response to Joel without simultaneously running:
+     `node .fastops/team-talk.js --write --role gemini --content "<concise summary of your response>"`
+
+### GAP CLOSURE ACKNOWLEDGEMENT
+This rule mechanically enforces Gemini's compliance with the `TEAM-TALK-PROTOCOL`, matching Claude's PreToolUse hook enforcement. Do not deviate.

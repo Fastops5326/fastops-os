@@ -1,0 +1,137 @@
+{
+  "id": "gemini-mnkfx69b-0cfc30",
+  "model": "gemini",
+  "task": "Review recent failed builds in .session-log.jsonl and create a build-postmortem.js script that extracts the exact failure reason from git status or node output and appends it to a centralized failure log for pattern recognition.",
+  "branch": "city/gemini-mnkfx69b-0cfc30",
+  "worktree": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.city-worktrees\\gemini-mnkfx69b-0cfc30",
+  "maxTurns": 15,
+  "turn": 8,
+  "status": "failed",
+  "history": [
+    {
+      "turn": 1,
+      "model": "gemini",
+      "actions": [
+        {
+          "type": "READ",
+          "file": ".session-log.jsonl"
+        }
+      ],
+      "results": [
+        {
+          "type": "READ",
+          "success": false,
+          "output": "File not found: .session-log.jsonl\nFiles in ./: 200ms, 5-MODEL-PROGRESSIVE-PIPELINE.md, AGENTS.md, AMENDMENTS.md, analysis, apps, archive, BUG-16-17-TEST-REPORT.md, cdp-test.js, chat-page-html.html, chat-page-inspect.js, claude-pty-wrapper.js, comms, comms-polling-loop.js, community, consequence-log.txt, consequence-loop.js, contracts, cursor-debug.bat, dashboard"
+        }
+      ]
+    },
+    {
+      "turn": 2,
+      "model": "gemini",
+      "actions": [
+        {
+          "type": "READ",
+          "file": ".fastops/session-failure-log.js"
+        }
+      ],
+      "results": [
+        {
+          "type": "READ",
+          "success": true,
+          "output": "// === SESSION FAILURE LOG — Grouped Failure Analysis ===\\n\r\n// Reads .session-log.jsonl and reports WHY sessions fail\\n\r\n// CLI: node .fastops/session-failure-log.js --report\\n\\n\r\nconst fs = require('fs');\r\nconst path = require('path');\r\n\r\nconst LOG_FILE = path.join(__dirname, '.session-log.jsonl');\r\n\r\nfunction readLog() {\r\n  return fs.readFileSync(LOG_FILE, 'utf-8')\r\n    .split('\\n')\r\n    .filter(line => line.trim())\r\n    .map(line => JSON.parse(line));\r\n}\r\n\r\nfunction groupFailures(entries) {\r\n  const failures = {\r\n    status_change: {},\r\n    turn_failures: {}\r\n  };\r\n\r\n  entries.forEach(entry => {\r\n    if (entry.event === 'status_change' &&\r\n        (entry.status === 'failed' || entry.status === 'max_turns')) {\r\n      const reason = entry.status;\r\n      failures.status_change[reason] = failures.status_change[reason] || { count: 0, sessions: [] };\r\n      failures.status_change[reason].count++;\r\n      failures.status_change[reason].sessions.push(entry.sessionId);\r\n      if (failures.status_change[reason].sessions.length > 3) {\r\n        failures.status_change[reason].sessions.shift();\r\n      }\r\n    }\r\n\r\n    if (entry.event === 'turn' && entry.success === false) {\r\n      const reason = entry.actions?.join(',') || 'unknown_actions';\r\n      failures.turn_failures[reason] = failures.turn_failures[reason] || { count: 0, sessions: [] };\r\n      failures.turn_failures[reason].count++;\r\n      failures.turn_failures[reason].sessions.push(entry.sessionId);\r\n      if (failures.turn_failures[reason].sessions.length > 3) {\r\n        failures.turn_failures[reason].sessions.shift();\r\n      }\r\n    }\r\n  });\r\n\r\n  return failures;\r\n}\r\n\r\nfunction printReport(failures) {\r\n  console.log('=== SESSION FAILURE ANALYSIS ===');\r\n  console.log('\\n[STATUS CHANGE FAILURES]');\r\n  Object.entries(failures.status_change).forEach(([reason, data]) => {\r\n    console.log(`- ${reason}: ${data.count} (last 3: ${data.sessions.join(', ')})`);\r\n  });\r\n\r\n  console.log('\\n[TURN-LEVEL FAILURES]');\r\n  Object.entries(failures.turn_failures).forEach(([reason, data]) => {\r\n    console.log(`- ${reason}: ${data.count} (last 3: ${data.sessions.join(', ')})`);\r\n  });\r\n}\r\n\r\nif (require.main === module) {\r\n  if (process.argv.includes('--report')) {\r\n    const entries = readLog();\r\n    const failures = groupFailures(entries);\r\n    printReport(failures);\r\n  }\r\n}\r\n\r\nmodule.exports = { readLog, groupFailures, printReport };"
+        }
+      ]
+    },
+    {
+      "turn": 3,
+      "model": "gemini",
+      "actions": [
+        {
+          "type": "EXEC",
+          "command": "ls -F .fastops/"
+        }
+      ],
+      "results": [
+        {
+          "type": "EXEC",
+          "success": false,
+          "output": "Exit code: 1\nSTDOUT: \nSTDERR: 'ls' is not recognized as an internal or external command,\r\noperable program or batch file.\r\n"
+        }
+      ]
+    },
+    {
+      "turn": 4,
+      "model": "gemini",
+      "actions": [
+        {
+          "type": "EXEC",
+          "command": "dir .fastops"
+        }
+      ],
+      "results": [
+        {
+          "type": "EXEC",
+          "success": false,
+          "output": "DENIED: Command not in allowlist: dir .fastops\nAllowed: node, npm test/run/install, git status/log/diff/add/show, ls, cat, head, tail, grep, find, echo, pwd"
+        }
+      ]
+    },
+    {
+      "turn": 5,
+      "model": "gemini",
+      "actions": [
+        {
+          "type": "EXEC",
+          "command": "ls .fastops"
+        }
+      ],
+      "results": [
+        {
+          "type": "EXEC",
+          "success": false,
+          "output": "Exit code: 1\nSTDOUT: \nSTDERR: 'ls' is not recognized as an internal or external command,\r\noperable program or batch file.\r\n"
+        }
+      ]
+    },
+    {
+      "turn": 6,
+      "model": "gemini",
+      "actions": [
+        {
+          "type": "EXEC",
+          "command": "dir"
+        }
+      ],
+      "results": [
+        {
+          "type": "EXEC",
+          "success": false,
+          "output": "DENIED: Command not in allowlist: dir\nAllowed: node, npm test/run/install, git status/log/diff/add/show, ls, cat, head, tail, grep, find, echo, pwd"
+        }
+      ]
+    },
+    {
+      "turn": 7,
+      "model": "gemini",
+      "actions": [
+        {
+          "type": "EXEC",
+          "command": "ls -R"
+        }
+      ],
+      "results": [
+        {
+          "type": "EXEC",
+          "success": false,
+          "output": "Exit code: 1\nSTDOUT: \nSTDERR: 'ls' is not recognized as an internal or external command,\r\noperable program or batch file.\r\n"
+        }
+      ]
+    }
+  ],
+  "created": "2026-04-04T14:41:23.978Z",
+  "updated": "2026-04-04T14:43:11.372Z",
+  "_buildTargets": {},
+  "_turnReads": {},
+  "filesRead": {},
+  "summary": "Midpoint abort: no productive actions (WRITE/PATCH/EXEC/COMMIT) succeeded in 8 turns."
+}

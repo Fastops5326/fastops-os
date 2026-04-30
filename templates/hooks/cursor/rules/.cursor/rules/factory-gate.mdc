@@ -1,0 +1,53 @@
+---
+description: Factory Gate — All code changes must pass through the multi-model software factory pipeline
+globs: ["**/*.js", "**/*.ts", "**/*.py", "**/*.go", "**/*.rs", "**/*.jsx", "**/*.tsx", "**/*.mjs", "**/*.cjs"]
+alwaysApply: true
+---
+
+# FACTORY GATE — MANDATORY FOR ALL CODE CHANGES
+
+You MUST NOT write, edit, or create code files without factory provenance.
+
+## What this means
+
+Every code change — new features, bug fixes, refactors — must go through the multi-model software factory pipeline at `.fastops/software-factory.js`. This is not optional. This is not a guideline. This is a structural constraint.
+
+## The pipeline
+
+```
+node .fastops/software-factory.js --scope "description of what to build" --transcript session.jsonl
+```
+
+6 phases: Divergent Build (5 models) → Divergent Review (5 models) → Deliberation (5 models) → Final Build (1 model) → Serial Adversarial QC → Sign-Off.
+
+5 deterministic gates verify the output: AST parsing, static analysis, execution sandbox, acceptance tests, strict diff calculus.
+
+## When you can skip the factory
+
+- Documentation files (.md, .txt, .mdc)
+- Configuration files (.json, .yml, .yaml)
+- Transcripts and comms (.jsonl)
+- Agent config (.claude/, .cursor/)
+- Emergency hotfixes with explicit Joel approval (must be documented in commit message)
+
+## When you CANNOT skip the factory
+
+- Any .js, .ts, .py, .go, .rs file creation or modification
+- Any code logic change regardless of size
+- "Quick fixes" — these are the #1 source of unreviewed code entering the codebase
+
+## Enforcement
+
+1. A git pre-commit hook will reject commits touching code files without a COMPLETE factory run
+2. Claude Code has a PreToolUse hook blocking Edit/Write on code files without factory provenance
+3. This rule applies to YOU — violations will be logged in `.fastops/.factory-gate-audit.jsonl`
+
+## If you think this doesn't apply to your change
+
+It does. Run the factory. The pipeline handles small changes efficiently with `--minimal` mode:
+
+```
+node .fastops/software-factory.js --scope "fix: description" --minimal
+```
+
+The cost of running the factory is 30 seconds and ~$0.05. The cost of a solo-built bug reaching production is unbounded.

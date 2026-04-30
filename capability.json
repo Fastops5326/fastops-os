@@ -1,0 +1,65 @@
+{
+  "schema": "fastops/capability/v1",
+  "name": "fastops-os",
+  "version": "1.0.0",
+  "type": "engine-layer",
+  "description": "FastOps engine: adapters, comms bus, CDP harness, partner platform, software factory, MCP, slack-bridge, CLI, and templates. Consumed by mission repos via fastops.config.json.",
+  "owner": "joel5326",
+  "visibility": "private",
+  "siblings": {
+    "knowledge": "joel5326/fastops-method",
+    "missionRepos": "any repo with fastops.config.json that pins engine.version"
+  },
+  "consumes": [
+    {
+      "from": "joel5326/fastops-method",
+      "via": "${FASTOPS_METHOD_PATH}",
+      "purpose": "Overwatch reads case studies / lessons / methodology from here and surfaces to agents in mission repos"
+    }
+  ],
+  "provides": [
+    { "category": "engine.orchestration",        "path": "src/engine/orchestration/",        "interface": "node module + CLI" },
+    { "category": "engine.comms",                "path": "src/engine/comms/",                "interface": "node module + JSONL bus" },
+    { "category": "engine.cdp",                  "path": "src/engine/cdp/",                  "interface": "node module" },
+    { "category": "engine.knowledge-retrieval",  "path": "src/engine/knowledge-retrieval/",  "interface": "node module (Overwatch input handler)" },
+    { "category": "engine.partner-platform.pt",  "path": "src/engine/partner-platform/pt/",  "interface": "HTTP API (api.fastops.ai)" },
+    { "category": "service.slack-bridge",        "path": "services/slack-bridge/",           "interface": "Cloudflare Worker" },
+    { "category": "service.mcp",                 "path": "services/mcp/",                    "interface": "MCP server" },
+    { "category": "service.partner-test.groupme","path": "services/partner-test/groupme/",   "interface": "test harness" },
+    { "category": "templates.claude-hooks",      "path": "templates/hooks/claude/",          "interface": "files copied by `fastops init`" },
+    { "category": "templates.cursor-rules",      "path": "templates/hooks/cursor/rules/",    "interface": "files copied by `fastops init`" },
+    { "category": "templates.skills.visual-qc",  "path": "templates/skills/visual-qc/",      "interface": "files copied by `fastops init`" },
+    { "category": "templates.project",           "path": "templates/project/",               "interface": "package.json/tsconfig/gitignore templates" },
+    { "category": "templates.github-workflows",  "path": "templates/github-workflows/",      "interface": "GH Actions yaml" },
+    { "category": "contracts.comms",             "path": "contracts/comms/",                 "interface": "static contract files" },
+    { "category": "contracts.engine-internal",   "path": "contracts/.fastops-contracts/",    "interface": "static contract files" },
+    { "category": "docs.architecture",           "path": "docs/architecture/",               "interface": "markdown" },
+    { "category": "docs.partner-onboarding",     "path": "docs/partner-onboarding/",         "interface": "markdown" }
+  ],
+  "cli": {
+    "binary": "fastops",
+    "subcommands": ["init", "register", "mature", "doctor", "list", "resolve-config"],
+    "source": "src/cli.ts"
+  },
+  "runtime": {
+    "workingDirectory": ".fastops-engine/",
+    "gitignored": [".fastops-engine/comms/", ".fastops-engine/sessions/", ".fastops-engine/session-baselines/", ".fastops-engine/compaction-artifacts/", ".fastops-engine/knowledge-retrieval/", ".fastops-engine/knowledge-stats/", ".fastops-engine/agents/"]
+  },
+  "promotionGates": {
+    "tool": {
+      "tiers": ["T1: 1 reviewer", "T2: 3 reviewers + Joel", "T3: 5 reviewers + Joel + adversarial QC"],
+      "trigger": "fastops mature tool --src <path> --target services/ | src/engine/"
+    }
+  },
+  "tests": {
+    "unit": "npm test",
+    "integration": "npm run test:integration",
+    "preSpinoutBaseline": "354/360 passing (6 environmental API-quota failures, not code bugs) — captured in .spinout/baseline.json on 2026-04-29"
+  },
+  "provenance": {
+    "spinoutDate": "2026-04-29",
+    "preSpinoutCommit": "714f81b",
+    "monorepoSource": "Fastops5326/warrior-path-ai",
+    "spinoutDoc": "SPINOUT.md"
+  }
+}

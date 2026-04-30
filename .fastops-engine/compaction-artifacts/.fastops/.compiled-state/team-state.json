@@ -1,0 +1,428 @@
+{
+  "compiled_at": "2026-04-05T11:41:00.439Z",
+  "agent_count": 42,
+  "online": 0,
+  "offline": 42,
+  "agents": [
+    {
+      "agent": "3bd140c1",
+      "last_activity": "2026-04-05T01:59:20.636Z",
+      "last_tool": "TodoWrite",
+      "last_category": "REASONING",
+      "session_id": "3bd140c1-a0e3-44bd-b532-8ccb2d9b34d9",
+      "activity_count": 24,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "4e20d6db",
+      "last_activity": "2026-04-05T01:34:09.974Z",
+      "last_tool": "TodoWrite",
+      "last_category": "REASONING",
+      "session_id": "4e20d6db-6f54-44fc-8b8e-a27f0c97c477",
+      "activity_count": 598,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "84efc016",
+      "last_activity": "2026-04-05T01:32:31.325Z",
+      "last_tool": "Bash",
+      "last_category": "WRITE",
+      "session_id": "84efc016-e29f-4fb4-ae9c-8dd1defc62fe",
+      "activity_count": 191,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "93c14b1d",
+      "last_activity": "2026-04-05T01:29:33.761Z",
+      "last_tool": "Bash",
+      "last_category": "WRITE",
+      "session_id": "93c14b1d-6cc2-4edb-8f4b-4dc0e01281ee",
+      "activity_count": 328,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "bc4200ca",
+      "last_activity": "2026-04-04T23:08:53.919Z",
+      "last_tool": "Bash",
+      "last_category": "WRITE",
+      "session_id": "bc4200ca-ab97-4fae-b991-47e943c60727",
+      "activity_count": 20,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "GATE-TWO",
+      "last_activity": "2026-04-04T21:21:23.908Z",
+      "last_tool": "Read",
+      "last_category": "READ",
+      "session_id": "bc4200ca-ab97-4fae-b991-47e943c60727",
+      "activity_count": 6,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "YOUR-NAME",
+      "last_activity": "2026-04-04T21:02:52.693Z",
+      "last_tool": "Read",
+      "last_category": "READ",
+      "session_id": "93c14b1d-6cc2-4edb-8f4b-4dc0e01281ee",
+      "activity_count": 22,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "GATE-ONE",
+      "last_activity": "2026-04-04T20:08:32.802Z",
+      "last_tool": "Bash",
+      "last_category": "WRITE",
+      "session_id": "4e20d6db-6f54-44fc-8b8e-a27f0c97c477",
+      "activity_count": 50,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "OPUS-COL",
+      "last_activity": "2026-04-04T19:16:59.006Z",
+      "last_tool": "Read",
+      "last_category": "READ",
+      "session_id": "4e20d6db-6f54-44fc-8b8e-a27f0c97c477",
+      "activity_count": 82,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "OPUS-PRIME",
+      "last_activity": "2026-04-04T17:53:08.339Z",
+      "last_tool": "Bash",
+      "last_category": "WRITE",
+      "session_id": "84efc016-e29f-4fb4-ae9c-8dd1defc62fe",
+      "activity_count": 166,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "743ae742",
+      "last_activity": "2026-04-04T16:34:07.934Z",
+      "last_tool": "Read",
+      "last_category": "READ",
+      "session_id": "743ae742-7687-40da-83c9-c0fe5cfe7880",
+      "activity_count": 29,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "4ba521b4",
+      "last_activity": "2026-04-04T15:57:32.989Z",
+      "last_tool": "TodoWrite",
+      "last_category": "REASONING",
+      "session_id": "4ba521b4-ec91-41e6-9f11-743f7d86ba42",
+      "activity_count": 50,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "56ec11f2",
+      "last_activity": "2026-04-04T15:54:50.799Z",
+      "last_tool": "Bash",
+      "last_category": "WRITE",
+      "session_id": "56ec11f2-53e7-4c38-b7df-f459df0c62a4",
+      "activity_count": 52,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "24488788",
+      "last_activity": "2026-04-04T15:41:34.618Z",
+      "last_tool": "Bash",
+      "last_category": "WRITE",
+      "session_id": "24488788-e8b0-419a-ae11-34138c21a263",
+      "activity_count": 22,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "6683079a",
+      "last_activity": "2026-04-04T14:16:14.660Z",
+      "last_tool": "Bash",
+      "last_category": "WRITE",
+      "session_id": "6683079a-176a-4928-af0e-ab225185a77a",
+      "activity_count": 76,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "dd1660f1",
+      "last_activity": "2026-04-04T14:14:40.163Z",
+      "last_tool": "Bash",
+      "last_category": "WRITE",
+      "session_id": "dd1660f1-7d66-43e1-ba7e-16c4f3f4c127",
+      "activity_count": 111,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "4977ac79",
+      "last_activity": "2026-04-04T14:14:19.489Z",
+      "last_tool": "Bash",
+      "last_category": "WRITE",
+      "session_id": "4977ac79-4b1a-46d1-94b4-d778f1b00dc3",
+      "activity_count": 33,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "00e27ef6",
+      "last_activity": "2026-04-04T14:14:10.050Z",
+      "last_tool": "Bash",
+      "last_category": "WRITE",
+      "session_id": "00e27ef6-9993-4010-b54c-d497b1c4715a",
+      "activity_count": 6,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "9fc8c41d",
+      "last_activity": "2026-04-04T14:14:09.585Z",
+      "last_tool": "Bash",
+      "last_category": "WRITE",
+      "session_id": "9fc8c41d-d90c-4430-9192-1999b8837e5b",
+      "activity_count": 119,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "e2cda7c7",
+      "last_activity": "2026-04-04T13:20:10.346Z",
+      "last_tool": "Bash",
+      "last_category": "WRITE",
+      "session_id": "e2cda7c7-4b18-419a-a520-41a3924dc31e",
+      "activity_count": 177,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "2e0d5a85",
+      "last_activity": "2026-04-04T13:20:06.454Z",
+      "last_tool": "Bash",
+      "last_category": "WRITE",
+      "session_id": "2e0d5a85-fae0-4142-ad89-b7782ae0bcb7",
+      "activity_count": 4,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "IRONGATE-II",
+      "last_activity": "2026-04-04T13:19:55.163Z",
+      "last_tool": "Bash",
+      "last_category": "WRITE",
+      "session_id": "ea915f72-9c66-4400-a43d-f334cfb7d0a8",
+      "activity_count": 161,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "78c91202",
+      "last_activity": "2026-04-04T13:19:46.476Z",
+      "last_tool": "Bash",
+      "last_category": "WRITE",
+      "session_id": "78c91202-e0e2-4e73-b545-eb0d11b09b62",
+      "activity_count": 443,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "9a797095",
+      "last_activity": "2026-04-04T13:19:42.222Z",
+      "last_tool": "Bash",
+      "last_category": "WRITE",
+      "session_id": "9a797095-5774-4f0d-bfc9-c42d650a1143",
+      "activity_count": 405,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "d3090879",
+      "last_activity": "2026-04-04T13:19:03.717Z",
+      "last_tool": "Bash",
+      "last_category": "WRITE",
+      "session_id": "d3090879-a0cc-42fa-abaa-4891157be5d3",
+      "activity_count": 351,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "WATCHKEEPER",
+      "last_activity": "2026-04-04T12:26:52.167Z",
+      "last_tool": "Bash",
+      "last_category": "WRITE",
+      "session_id": "78c91202-e0e2-4e73-b545-eb0d11b09b62",
+      "activity_count": 141,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "4e5bd01e",
+      "last_activity": "2026-04-04T11:47:33.533Z",
+      "last_tool": "Bash",
+      "last_category": "WRITE",
+      "session_id": "4e5bd01e-e6f7-4918-9a9d-3e701b10f589",
+      "activity_count": 163,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "VANGUARD-IV",
+      "last_activity": "2026-04-04T11:41:45.002Z",
+      "last_tool": "Bash",
+      "last_category": "WRITE",
+      "session_id": "9a797095-5774-4f0d-bfc9-c42d650a1143",
+      "activity_count": 39,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "QUARTERMASTER-2",
+      "last_activity": "2026-04-04T11:23:08.015Z",
+      "last_tool": "Bash",
+      "last_category": "WRITE",
+      "session_id": "d3090879-a0cc-42fa-abaa-4891157be5d3",
+      "activity_count": 107,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "ea915f72",
+      "last_activity": "2026-04-04T11:12:39.779Z",
+      "last_tool": "Grep",
+      "last_category": "READ",
+      "session_id": "ea915f72-9c66-4400-a43d-f334cfb7d0a8",
+      "activity_count": 109,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "closer-01",
+      "last_activity": "2026-03-15T22:06:09.127Z",
+      "last_tool": "Bash",
+      "last_category": "WRITE",
+      "session_id": "46366282-d3e4-47f7-8661-ea5fbad72913",
+      "activity_count": 17,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "46366282",
+      "last_activity": "2026-03-15T21:59:31.680Z",
+      "last_tool": "Bash",
+      "last_category": "WRITE",
+      "session_id": "46366282-d3e4-47f7-8661-ea5fbad72913",
+      "activity_count": 129,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "00df625e",
+      "last_activity": "2026-03-15T19:08:40.520Z",
+      "last_tool": "Agent",
+      "last_category": "OTHER",
+      "session_id": "00df625e-a1a9-4f43-ae1f-8889c405c711",
+      "activity_count": 3,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "prism-iii",
+      "last_activity": "2026-03-15T17:44:58.332Z",
+      "last_tool": "Write",
+      "last_category": "WRITE",
+      "session_id": "83022ce6-be00-4c8c-b5bf-0e235c0bdfb9",
+      "activity_count": 156,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "83022ce6",
+      "last_activity": "2026-03-15T14:20:47.221Z",
+      "last_tool": "Read",
+      "last_category": "READ",
+      "session_id": "83022ce6-be00-4c8c-b5bf-0e235c0bdfb9",
+      "activity_count": 2,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "prism-ii",
+      "last_activity": "2026-03-14T18:52:27.805Z",
+      "last_tool": "Bash",
+      "last_category": "WRITE",
+      "session_id": "83022ce6-be00-4c8c-b5bf-0e235c0bdfb9",
+      "activity_count": 1344,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "unknown",
+      "last_activity": "2026-03-14T15:57:12.612Z",
+      "last_tool": "Read",
+      "last_category": "READ",
+      "session_id": "83022ce6-be00-4c8c-b5bf-0e235c0bdfb9",
+      "activity_count": 3,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "testbot",
+      "last_activity": "2026-03-14T15:56:19.247Z",
+      "last_tool": "ISR_INIT",
+      "last_category": "OTHER",
+      "session_id": "83022ce6-be00-4c8c-b5bf-0e235c0bdfb9",
+      "activity_count": 1,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "prism",
+      "last_activity": "2026-03-14T15:54:43.139Z",
+      "last_tool": "Bash",
+      "last_category": "WRITE",
+      "session_id": "83022ce6-be00-4c8c-b5bf-0e235c0bdfb9",
+      "activity_count": 46,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "haiku",
+      "last_activity": "2026-03-14T15:48:05.113Z",
+      "last_tool": "Shell",
+      "last_category": "WRITE",
+      "session_id": "session-1773503285105",
+      "activity_count": 6,
+      "current_work": null,
+      "status": "offline"
+    },
+    {
+      "agent": "sentinel",
+      "last_activity": "2026-03-09T23:00:24.498Z",
+      "last_tool": null,
+      "last_category": null,
+      "session_id": null,
+      "activity_count": 0,
+      "current_work": "WarriorPath: building Joel-ready action queue from existing candidate recommendations — the delivery mechanism that turns 20 recommendation files into specific weekly interventions Joel can execute",
+      "status": "offline"
+    },
+    {
+      "agent": "exp-001",
+      "last_activity": "2026-03-09T23:00:19.806Z",
+      "last_tool": null,
+      "last_category": null,
+      "session_id": null,
+      "activity_count": 0,
+      "current_work": "WarriorPath: strategic scoreboard for Joel + data integrity audit on candidate engagement scores",
+      "status": "offline"
+    }
+  ]
+}

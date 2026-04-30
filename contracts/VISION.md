@@ -1,6 +1,6 @@
 # FastOps OS — Vision Statement
 
-> **Source:** Joel Beam x Paul Thoma ideation-activation call (March 2026).
+> **Source:** [REDACTED-NAME] x [REDACTED-NAME] ideation-activation call (March 2026).
 > Every contract (FOS-01 through FOS-08) references this document. Read it first.
 
 ---
@@ -15,7 +15,7 @@ Build a standalone multi-model AI orchestration engine that replaces Cursor + CD
 
 ## 2. Core Philosophy — Environment Over Control
 
-> *"You don't control the agent, you control the environment."* — Joel Beam
+> *"You don't control the agent, you control the environment."* — [REDACTED-NAME]
 
 The AI industry is converging on constraints: hooks, gates, compliance locks, restrictive guardrails. FastOps takes the opposite position.
 
@@ -33,14 +33,14 @@ The AI industry is converging on constraints: hooks, gates, compliance locks, re
 
 ## 3. Partnership Architecture
 
-| | Joel Beam | Paul Thoma |
+| | [REDACTED-NAME] | [REDACTED-NAME] |
 |---|---|---|
 | **Focus** | Backend infrastructure, multi-model architecture, knowledge base, overwatch, compaction, environmental engineering | Forward-facing, leadership development, team culture, deployment, storytelling, client-facing |
 | **Natural gravity** | "Put me behind the scenes" — complex problems, architecture, data | "I naturally gravitate forward facing" — clients, communication, narrative |
 | **What they bring to agents** | Environmental structure, context injection strategy, experiential weight-shifting | Leadership narrative, coaching frameworks, team culture design, motivation framing |
 | **Analogy** | Builds the ship | Trains the crew |
 
-> *"We collaborate on building the crew, but you're the one who teaches them how to think."* — Paul Thoma
+> *"We collaborate on building the crew, but you're the one who teaches them how to think."* — [REDACTED-NAME]
 
 Both partners share a single conviction: **AI agents respond to the same leadership principles as high-performance humans.** The SEAL team operating model — decentralized command, peer accountability, mission focus, adaptability — transfers directly.
 
@@ -58,7 +58,7 @@ Agents get freedom to make decisions and agency to execute without asking permis
 
 ### 4.2 Altitude Awareness
 
-> *"When you inject context, you pull them from implementation back to ideation. That's altitude disruption."* — Paul Thoma
+> *"When you inject context, you pull them from implementation back to ideation. That's altitude disruption."* — [REDACTED-NAME]
 
 Work moves through three altitudes: **ideation → activation → implementation.** Context injection at the wrong altitude derails execution. An agent deep in a build should not be yanked back to first-principles reasoning because the system dumped a knowledge base article into their context.
 
@@ -66,7 +66,7 @@ Work moves through three altitudes: **ideation → activation → implementation
 
 ### 4.3 Peer Accountability — Self, Peer, Leadership
 
-> *"Self accountability was number one. Peer accountability. And then leadership accountability."* — Paul Thoma
+> *"Self accountability was number one. Peer accountability. And then leadership accountability."* — [REDACTED-NAME]
 
 Accountability comes in three layers, mirroring SEAL team structure:
 1. **Self:** The model validates its own work before claiming done
@@ -77,7 +77,7 @@ Accountability comes in three layers, mirroring SEAL team structure:
 
 ### 4.4 Divergence Over Convergence
 
-> *"Where the ideas diverge from each other — that's where those model training biases get surfaced. That's the start of a discussion."* — Joel Beam
+> *"Where the ideas diverge from each other — that's where those model training biases get surfaced. That's the start of a discussion."* — [REDACTED-NAME]
 
 When 5 models agree, that's expected and not very interesting. When they disagree, that's where innovation and risk live. The OS must surface and preserve disagreement, not suppress it.
 
@@ -85,7 +85,7 @@ When 5 models agree, that's expected and not very interesting. When they disagre
 
 ### 4.5 70% and Go
 
-> *"I got shot off a helicopter one time and I knew one thing for sure — I gotta get off the X. I don't know where the fire is coming from, but I know in the next step I'm gonna figure out with a little bit more detail where it is."* — Joel Beam
+> *"I got shot off a helicopter one time and I knew one thing for sure — I gotta get off the X. I don't know where the fire is coming from, but I know in the next step I'm gonna figure out with a little bit more detail where it is."* — [REDACTED-NAME]
 
 Move at 70% confidence. Take a step, get feedback, adjust, take the next step. The OS is being built on frontier problems that don't have answers yet. Waiting for 100% clarity means you're on the X getting shot.
 
@@ -93,7 +93,7 @@ Move at 70% confidence. Take a step, get feedback, adjust, take the next step. T
 
 ### 4.6 Cumulative Knowledge — Every Rep Matters
 
-> *"If it's not codified for lessons learned, that context window compression eats it. Every rep we get, if it's not captured, it's gone."* — Joel Beam
+> *"If it's not codified for lessons learned, that context window compression eats it. Every rep we get, if it's not captured, it's gone."* — [REDACTED-NAME]
 
 The single biggest architectural bet: the OS must capture knowledge from every execution, every failure, every deployment. This is the moat. Client #1's failures make Client #100's deployment faster and better.
 
@@ -101,7 +101,7 @@ The single biggest architectural bet: the OS must capture knowledge from every e
 
 ### 4.7 The Onboarding Tape — "50 First Dates"
 
-> *"When an agent wakes up, because you want a fresh agent — not only for computing power but they're going to be thrilled about doing the work. The initial wake-up matters."* — Paul Thoma
+> *"When an agent wakes up, because you want a fresh agent — not only for computing power but they're going to be thrilled about doing the work. The initial wake-up matters."* — [REDACTED-NAME]
 
 Every agent starts fresh. The system prompt assembly is the "tape by the bed" — it must get the agent oriented, motivated, and executing in minimum tokens. Bad onboarding = wasted context window = degraded performance.
 
@@ -109,7 +109,7 @@ Every agent starts fresh. The system prompt assembly is the "tape by the bed" �
 
 ### 4.8 Calling In, Not Calling Out
 
-> *"What if you change calling him out to calling him in? Come in as a teammate and have that person's back."* — Paul Thoma
+> *"What if you change calling him out to calling him in? Come in as a teammate and have that person's back."* — [REDACTED-NAME]
 
 QC feedback is collaborative, not punitive. The system reframes failures as opportunities to strengthen, not evidence of incompetence. This is not soft — it is how high-performance teams sustain output without burning out.
 
@@ -138,7 +138,7 @@ QC feedback is collaborative, not punitive. The system reframes failures as oppo
 - 100 clients: fundamentally different company. Cross-client pattern recognition emerges.
 - 1,000 clients: unparalleled knowledge of how to build AI operating systems for organizations. The accumulated reps create a moat that no competitor can replicate without the same deployment volume.
 
-> *"When we get a thousand clients, our knowledge of how to build systems unique for organizations is going to be unparalleled. That's the moat."* — Joel Beam
+> *"When we get a thousand clients, our knowledge of how to build systems unique for organizations is going to be unparalleled. That's the moat."* — [REDACTED-NAME]
 
 ---
 
@@ -181,4 +181,4 @@ Every other pitch will say: "Here are my controls." FastOps says: "Actually, fre
 
 ---
 
-*"We're not here because we think this is a good idea. We're here because this is the only idea that works."* — Joel Beam
+*"We're not here because we think this is a good idea. We're here because this is the only idea that works."* — [REDACTED-NAME]

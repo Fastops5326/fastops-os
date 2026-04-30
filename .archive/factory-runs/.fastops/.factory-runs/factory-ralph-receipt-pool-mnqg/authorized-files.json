@@ -1,0 +1,34 @@
+{
+  "runId": "factory-ralph-receipt-pool-mnqg",
+  "scope": "Git-anchor the spec-review receipt pool itself. Closes convergent batch-10/11/12 critique (~11 models) that the receipt pool is the trust-root weak point.",
+  "authorizedFiles": [
+    "environment/verification/exec-verify.js",
+    "environment/verification/specs/exec-verify.spec.json",
+    ".fastops/.spec-review-receipts.jsonl"
+  ],
+  "authorized_files": [
+    "environment/verification/exec-verify.js",
+    "environment/verification/specs/exec-verify.spec.json",
+    ".fastops/.spec-review-receipts.jsonl"
+  ],
+  "provenance": {
+    "pipeline": "ralph-loop iter + spec-review peer-QC pool",
+    "convergent_critique_addressed": {
+      "flagged_by": ["glm-5-turbo", "grok-4-20-multi-agent-beta", "gemini-3-1-pro-preview-customtools", "gemini-3-1-pro-preview", "gpt-5-2-codex", "minimax-m2-5", "gpt-5-2", "gpt-5-2-pro", "gpt-5-1", "gpt-5-1-codex-mini", "gpt-5-codex"],
+      "count": 11,
+      "reason": "agent can forge receipt in .spec-review-receipts.jsonl because the pool is not git-anchored",
+      "structural_answer": "exec-verify.js now calls gitBlobFreshness() on the receipt pool. checks.receipt_pool_git_clean is added to the verification receipt. A modified-since-commit pool fails the verification, forcing any forged receipt to be committed, which at least provides git history as the audit trail."
+    },
+    "remaining_known_limit": "Local offline trust root is fundamentally limited — an adversary who controls the filesystem can commit forged receipts. Full closure requires remote notarization (signed commits, pushed origin) which is an out-of-scope escalation for this iter.",
+    "sha_chain": {
+      "old_exec_verify_sha": "6390c8a5c6896b51ab9aa0669023f7fce398d48b3e67dcddc663588aaf3a8ac2",
+      "new_exec_verify_sha": "df145577350a95d65278a8777f7bd13460b0677d1436ca28b9302ad791a80e34",
+      "new_spec_canonical_sha": "d7e5bee0792160cb2d9c4556ca22523316f9d46bc5bafb62ca12f06fcb372f6d",
+      "new_peer_review_receipt": "spec-mnqfjdzw-d86056",
+      "peer_review_tally": "5/5 PASS (grok, deepseek, kimi-k2, qwen3-max, mistral)"
+    }
+  },
+  "status": "COMPLETE",
+  "createdAt": "2026-04-08T19:17:00Z",
+  "predecessor_run": "factory-ralph-mandatory-spec-mnqf"
+}

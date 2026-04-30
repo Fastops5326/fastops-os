@@ -1,0 +1,13 @@
+{
+  "name": "fastops-slack-bridge",
+  "version": "1.0.0",
+  "description": "Cloudflare Worker: two-way bridge between Slack and FastOps comms",
+  "main": "src/index.js",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev"
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}

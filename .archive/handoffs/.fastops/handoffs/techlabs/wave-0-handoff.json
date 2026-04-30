@@ -1,0 +1,39 @@
+{
+  "version": "1.0",
+  "wave": 0,
+  "waveName": "Foundation",
+  "interviewId": "session_1769809610266_aalhm7fmg",
+  "timestamp": "2026-01-30T22:15:00.000Z",
+  "outputDirectory": "./techlabs-app",
+  "data": {
+    "type": "foundation",
+    "projectName": "TechLabs",
+    "description": "AI-powered maker education platform for kids ages 10-20. Features AI chatbox that generates code and wiring videos for Raspberry Pi, Arduino, and other circuit boards.",
+    "framework": "next",
+    "database": "sqlite",
+    "styling": "tailwind",
+    "orm": "prisma",
+    "additionalDeps": [
+      "openai",
+      "framer-motion"
+    ],
+    "targetAudience": "Kids ages 10-20",
+    "coreFeatures": [
+      "AI chatbox for code generation",
+      "Multi-language support (Python, JavaScript, C++)",
+      "Wiring diagram generation",
+      "Step-by-step project breakdown",
+      "Progressive difficulty (LED blink → complex projects)"
+    ],
+    "mvpScope": "LED blink tutorial with AI-generated Python code and wiring guidance"
+  },
+  "clarityScore": 85,
+  "notes": [
+    "Founder is 13 years old - keep UI simple and inspiring",
+    "Proof of concept: blinking LEDs and buzzers",
+    "Success metric: Kids get pumped for the next project",
+    "AI integration via OpenAI API for code generation"
+  ],
+  "skippedQuestions": [],
+  "scaffoldLocked": false
+}

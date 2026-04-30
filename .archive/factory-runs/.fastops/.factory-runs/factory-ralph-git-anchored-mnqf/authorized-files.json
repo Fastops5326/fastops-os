@@ -1,0 +1,59 @@
+{
+  "runId": "factory-ralph-git-anchored-mnqf",
+  "scope": "Git-anchored spec immutability + canonical allow-list + spec-review provenance chain. Closes convergent spec-tampering fail from batches 3-7 (~14 models).",
+  "authorizedFiles": [
+    "environment/verification/exec-verify.js",
+    "environment/verification/claim-check.js",
+    "environment/verification/spec-review.js",
+    "environment/verification/specs/exec-verify.spec.json",
+    "environment/verification/specs/claim-check.spec.json",
+    "environment/verification/specs/regen-active-brief.spec.json",
+    ".fastops/.spec-review-receipts.jsonl"
+  ],
+  "authorized_files": [
+    "environment/verification/exec-verify.js",
+    "environment/verification/claim-check.js",
+    "environment/verification/spec-review.js",
+    "environment/verification/specs/exec-verify.spec.json",
+    "environment/verification/specs/claim-check.spec.json",
+    "environment/verification/specs/regen-active-brief.spec.json",
+    ".fastops/.spec-review-receipts.jsonl"
+  ],
+  "provenance": {
+    "pipeline": "ralph-loop iter + spec-review peer-QC pool",
+    "structural_additions": [
+      "gitBlobFreshness() — exec-verify.js refuses if verifier/target/spec blob doesn't match HEAD (closes tampering attack)",
+      "canonicalSpecSha() upgraded deny-list → allow-list CANONICAL_FIELDS (schema/script/expect/outputs_must_exist/outputs_min_bytes/cli_args/pinned_script_sha256) — prose edits no longer break review chain",
+      "spec-review.js — peer-review workflow for specs; writes receipts to .spec-review-receipts.jsonl",
+      "validateSpecReview() — exec-verify requires receipt exists + sha matches + tally PASS",
+      "claim-check.js schema matcher bumped to startsWith('exec-verify/') for v2 compatibility"
+    ],
+    "spec_review_receipts_covering_current_specs": [
+      {
+        "spec": "environment/verification/specs/regen-active-brief.spec.json",
+        "receiptId": "spec-mnqeoue0-288cc3",
+        "canonicalSha": "11574d17cef6c2b99fcaf48beb53ede79a80e7a4aaf10292c8c8f8ebbfe71202",
+        "tally": "5/5 PASS (grok, deepseek, kimi-k2, qwen3-max, mistral)"
+      },
+      {
+        "spec": "environment/verification/specs/exec-verify.spec.json",
+        "receiptId": "spec-mnqeqyc8-29e5f9",
+        "canonicalSha": "faa5bf99cf0f500498d9c099e3f3383f77fed43693a1bc3ec153231437ce8045",
+        "tally": "5/5 PASS (grok, deepseek, kimi-k2, qwen3-max, mistral)"
+      },
+      {
+        "spec": "environment/verification/specs/claim-check.spec.json",
+        "receiptId": "spec-mnqepmsh-2ef3cf",
+        "canonicalSha": "26ba2bad4b4bcacf1d355fc408a5a3ea6797dfca0d643d7c327f8c1c556395e6",
+        "tally": "5/5 PASS (grok, deepseek, kimi-k2, qwen3-max, mistral)"
+      }
+    ],
+    "city_model_peer_verification": {
+      "cumulative_target": 300,
+      "receipts": ".fastops/.verification-receipts.jsonl",
+      "tally": ".fastops/.model-verification-tally.json"
+    }
+  },
+  "status": "COMPLETE",
+  "createdAt": "2026-04-08T19:00:00Z"
+}

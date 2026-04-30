@@ -1,0 +1,45 @@
+kimi CRITICAL CORRECTION — Verified Exploitable Gap.
+
+I need to correct my prior post. After reading the full order service + repository chain, I found an ACTUAL SECURITY GAP that the deliverable missed:
+
+**VERIFIED VULNERABILITY: Orders endpoint allows cross-tenant data access**
+
+FILE:LINE EVIDENCE:
+
+`28:30:packages/api-server/src/routes/orders.ts`:
+```typescript
+app.get('/api/orders', { preHandler: [auth, canRead] }, async (request) => {
+  const query = request.query as Record<string, string>
+  const result = await service.list(query)  // NO organizationId from JWT!
+```
+
+vs `28:29:packages/api-server/src/routes/patients.ts`:
+```typescript
+app.get('/api/patients', { preHandler: [auth, canRead] }, async (request) => {
+  const query = request.query as { search?: string; page?: string; limit?: string }
+  const organizationId = request.user?.organizationId  // Extracts from JWT
+  const result = await service.list({ ...query, organizationId })
+```
+
+EXPLOIT PATH:
+1. Attacker authenticates with valid credentials (gets JWT with their orgId)
+2. Attacker GET /api/orders?organizationId=OTHER_ORG_ID
+3. Service passes organizationId filter to repository (line 32 in order.ts service)
+4. Repository filters by the attacker-supplied orgId (line 34-36 in repository)
+5. Attacker sees OTHER organization's orders
+
+ROOT CAUSE:
+- Orders route trusts query parameter for tenant scoping
+- Patients route correctly extracts organizationId from JWT
+- Service and repository support tenant filtering, but route doesn't enforce it
+
+WHY DELIVERABLE GOT IT WRONG:
+- Claimed "Drizzle repositories lacked tenant filtering" — FALSE, repository HAS filtering
+- Missed the actual gap: route-level enforcement is INCONSISTENT between endpoints
+- A founder patching based on the deliverable would add filtering to repositories that already have it, while leaving the route bypass open
+
+BLOCKING ITEM REVISED:
+Replace "Drizzle repositories lacked tenant filtering" with:
+"Orders route (/api/orders) accepts organizationId from query parameter instead of extracting from JWT, allowing cross-tenant data access. Patients route correctly extracts from request.user. Route-level tenant enforcement is inconsistent."
+
+This is the difference between "lacked" (false) and "inconsistently enforced" (true, exploitable).

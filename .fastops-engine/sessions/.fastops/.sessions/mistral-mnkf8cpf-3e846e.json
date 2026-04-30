@@ -1,0 +1,14 @@
+{
+  "id": "mistral-mnkf8cpf-3e846e",
+  "model": "mistral",
+  "task": "BUILD .fastops/worktree-gc.js — safe garbage collection for stale worktrees. Scan .city-worktrees/ for worktrees older than 48h with no unmerged commits on their branch vs master. List them with age and branch status. With --execute flag, remove them. Never remove worktrees with unmerged commits. Under 40 lines.",
+  "branch": "city/mistral-mnkf8cpf-3e846e",
+  "worktree": "C:\\Users\\joelb\\OneDrive\\Desktop\\Fastops development process\\.city-worktrees\\mistral-mnkf8cpf-3e846e",
+  "maxTurns": 15,
+  "turn": 0,
+  "status": "active",
+  "history": [],
+  "created": "2026-04-04T14:23:46.785Z",
+  "updated": "2026-04-04T14:23:46.785Z",
+  "_buildTargets": {}
+}

@@ -59,4 +59,4 @@ npm run typecheck                   # Zero type errors
 
 ## Built By
 
-Joel Beam & Paul Thoma — FastOps AI
+[REDACTED-NAME] & [REDACTED-NAME] — FastOps AI

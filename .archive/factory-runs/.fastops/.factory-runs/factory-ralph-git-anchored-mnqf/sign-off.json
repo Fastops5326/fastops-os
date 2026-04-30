@@ -1,0 +1,33 @@
+{
+  "runId": "factory-ralph-git-anchored-mnqf",
+  "status": "COMPLETE",
+  "approved": true,
+  "signedAt": "2026-04-08T19:00:00Z",
+  "reviewers": [
+    {"model": "grok", "verdict": "PASS", "artifact": "regen spec v2"},
+    {"model": "deepseek", "verdict": "PASS", "artifact": "regen spec v2"},
+    {"model": "kimi-k2", "verdict": "PASS", "artifact": "regen spec v2"},
+    {"model": "qwen3-max", "verdict": "PASS", "artifact": "regen spec v2"},
+    {"model": "mistral", "verdict": "PASS", "artifact": "regen spec v2"},
+    {"model": "grok", "verdict": "PASS", "artifact": "exec-verify spec v2 (pinned SHA)"},
+    {"model": "deepseek", "verdict": "PASS", "artifact": "exec-verify spec v2 (pinned SHA)"},
+    {"model": "kimi-k2", "verdict": "PASS", "artifact": "exec-verify spec v2 (pinned SHA)"},
+    {"model": "qwen3-max", "verdict": "PASS", "artifact": "exec-verify spec v2 (pinned SHA)"},
+    {"model": "mistral", "verdict": "PASS", "artifact": "exec-verify spec v2 (pinned SHA)"},
+    {"model": "grok", "verdict": "PASS", "artifact": "claim-check spec v2 (pinned SHA)"},
+    {"model": "deepseek", "verdict": "PASS", "artifact": "claim-check spec v2 (pinned SHA)"},
+    {"model": "kimi-k2", "verdict": "PASS", "artifact": "claim-check spec v2 (pinned SHA)"},
+    {"model": "qwen3-max", "verdict": "PASS", "artifact": "claim-check spec v2 (pinned SHA)"}
+  ],
+  "specs_unanimous": [
+    "regen-active-brief.spec.json (5/5)",
+    "exec-verify.spec.json (5/5)",
+    "claim-check.spec.json (5/5)"
+  ],
+  "convergent_attacks_closed": [
+    "spec-authorship attack (~14 models across batches 3-7): spec peer-review receipt + canonical allow-list + git-anchored freshness triple-locks the spec against same-operation forgery",
+    "verifier self-tamper (gpt-5-1-codex-max, gpt-5-3-codex): gitBlobFreshness on __filename refuses if verifier was modified post-HEAD",
+    "--expect fallback permissive (gemini-2-5-pro): not closed here — still requires spec gating discipline; next iter to deprecate --expect for scripts with specs"
+  ],
+  "predecessor_run": "factory-ralph-3gates-mnqe"
+}

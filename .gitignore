@@ -12,3 +12,8 @@ coverage/
 .fastops-engine/audit/
 .fastops-engine/session-distills/
 .fastops-engine/knowledge-base.jsonl
+
+# Local secrets — NEVER commit
+FASTOPS-PARTNER-SECRETS.txt
+*-PARTNER-SECRETS.txt
+.local-secrets*
