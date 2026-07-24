@@ -1,5 +1,14 @@
 # AGENTS.md — fastops-os
 
+## First step — orient
+
+Run this; it prints the live terrain (gates, CI, environment, open work):
+
+    curl -fsSL https://raw.githubusercontent.com/Fastops5326/agent-orient/v1/orient.sh | bash
+
+If it fails, note the failure in your PR and onboard from live GitHub state.
+
+
 > Agent operating instructions for the FastOps engine layer (Layer 2).
 >
 > Sibling repos:
