@@ -1,0 +1,21 @@
+name: Plan Pipeline
+
+# Thin caller — real workflow in Fastops5326/fastops-pipeline@v1
+on:
+  pull_request_target:
+    types: [opened, labeled, unlabeled, synchronize, reopened]
+    branches: [master, main]
+
+concurrency:
+  group: plan-pipeline-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  plan:
+    uses: Fastops5326/fastops-pipeline/.github/workflows/plan-pipeline.yml@v1
+    secrets: inherit
