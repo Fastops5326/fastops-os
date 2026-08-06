@@ -1,0 +1,39 @@
+name: Merge Pipeline
+
+# Thin caller stub — the real pipeline lives in Fastops5326/fastops-pipeline
+# (multi-model review gate, fix station, gate ledger). Upgrades are tag bumps
+# there, not edits here. See that repo's README for requirements.
+#
+# SECURITY: pull_request_target runs this from the trusted base branch with
+# secrets; the called workflow only ever checks out the base ref and reads
+# the PR as data.
+
+on:
+  pull_request_target:
+    # `opened` matters: a PR created with `stage:review` already applied only
+    # emits `opened` (not `labeled`) — without it the required check would
+    # hang in "Expected" forever.
+    # ready_for_review matters: Cursor agent PRs are born as drafts, and
+    # auto-merge cannot arm on a draft - this re-run arms it once a human
+    # marks the PR ready (found live 2026-07-24, maximus PR #6).
+    types: [opened, labeled, unlabeled, synchronize, reopened, ready_for_review]
+    branches: [master]
+
+concurrency:
+  group: merge-pipeline-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write # release-gate arms auto-merge
+  pull-requests: write
+  issues: write
+  checks: read # plan-precheck verifies plan-gate-status at the plan PR head
+
+jobs:
+  # NOTE: this job id prefixes all check names — the required status check is
+  # "gate / merge-gate-status".
+  gate:
+    uses: Fastops5326/fastops-pipeline/.github/workflows/merge-pipeline.yml@v1
+    with:
+      arm_all: true
+    secrets: inherit
