@@ -1,0 +1,40 @@
+name: Gate Ledger Capture
+
+# Thin caller stub — see Fastops5326/fastops-pipeline. Decoupled appender for
+# the gate-ledger branch (Reasoning IP telemetry) + background curation:
+# per-run scorecard/durability closeout, weekly adjudicator audit + Telegram
+# digest. Fail-open: can never affect mergeability.
+#
+# Two schedules, two instruments. Every scheduled run sweeps plan PRs whose
+# implementation already merged, which is why the janitor is nightly: a plan
+# left open is work nobody can see the end of. The digest is a weekly review
+# and stands itself down on the nightly slot, so the extra cron costs no model
+# spend and no Telegram noise.
+
+on:
+  workflow_run:
+    workflows: ["Merge Pipeline", "Plan Pipeline"]
+    types: [completed]
+  issue_comment:
+    types: [created]
+  schedule:
+    - cron: '0 22 * * 0' # weekly curation digest (Sun ~5pm CT)
+    - cron: '0 8 * * *'  # nightly plan-sweep janitor (~3am CT)
+  workflow_dispatch:
+
+# Serialize all ledger writes: queued, never interleaved. This (plus the
+# single-writer design) makes append races structurally impossible.
+concurrency:
+  group: gate-ledger-writer
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  capture:
+    uses: Fastops5326/fastops-pipeline/.github/workflows/ledger-capture.yml@v1
+    secrets: inherit

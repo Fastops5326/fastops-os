@@ -13,11 +13,18 @@ on:
     # `opened` matters: a PR created with `stage:review` already applied only
     # emits `opened` (not `labeled`) — without it the required check would
     # hang in "Expected" forever.
-    # ready_for_review matters: Cursor agent PRs are born as drafts, and
-    # auto-merge cannot arm on a draft - this re-run arms it once a human
-    # marks the PR ready (found live 2026-07-24, maximus PR #6).
-    types: [opened, labeled, unlabeled, synchronize, reopened, ready_for_review]
-    branches: [master]
+    # `ready_for_review` matters: Cursor agent PRs are born as drafts, and
+    # auto-merge cannot arm on a draft — this re-run is what arms it once a
+    # human marks the PR ready (found live 2026-07-24, maximus PR #6).
+    # `closed` matters: merging a plan PR moves master and leaves every other
+    # armed impl PR behind. GitHub will not merge a behind PR, and no
+    # open-PR event fires on the stranded ones (finding #186).
+    types: [opened, labeled, unlabeled, synchronize, reopened, ready_for_review, closed]
+    # Both names, so one canonical file is portable to any repo. This said
+    # `[master]` from the first commit, while four gated repos default to
+    # `main`; distributing it verbatim would have stopped their gate firing
+    # entirely (#359).
+    branches: [master, main]
 
 concurrency:
   group: merge-pipeline-${{ github.event.pull_request.number }}
@@ -28,12 +35,39 @@ permissions:
   pull-requests: write
   issues: write
   checks: read # plan-precheck verifies plan-gate-status at the plan PR head
+  actions: read # plan-precheck reads the Plan Pipeline run at the plan head (#469); a callee scope the caller does not grant is a startup_failure (#519)
 
 jobs:
   # NOTE: this job id prefixes all check names — the required status check is
   # "gate / merge-gate-status".
   gate:
+    if: github.event.action != 'closed'
     uses: Fastops5326/fastops-pipeline/.github/workflows/merge-pipeline.yml@v1
     with:
       arm_all: true
     secrets: inherit
+  catch-up:
+    if: github.event.action == 'closed' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      # A branch update pushed with GITHUB_TOKEN does NOT trigger workflows.
+      # The caught-up PR would go from "behind with green checks" to "current
+      # with NO checks at its head" — still unmergeable, and harder to read.
+      # Falling back would make the #186 stall worse, so refuse loudly instead.
+      - name: Require a token that can retrigger the gates
+        env:
+          PIPELINE_PAT: ${{ secrets.PIPELINE_PAT }}
+        run: |
+          if [ -z "$PIPELINE_PAT" ]; then
+            echo "⛔ catch-up needs PIPELINE_PAT. GITHUB_TOKEN pushes do not trigger workflows,"
+            echo "   so an updated branch would carry no checks at its new head and would sit"
+            echo "   exactly as it does today. Refusing to half-do it."
+            exit 1
+          fi
+      - uses: Fastops5326/fastops-pipeline/actions/run-script@v1
+        with:
+          script: catch-up-branch.mjs
+        env:
+          GH_TOKEN: ${{ secrets.PIPELINE_PAT }}
+          CATCH_UP_ALL_OPEN: '1'
+          GH_REPO: ${{ github.repository }}

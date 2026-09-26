@@ -18,4 +18,6 @@ permissions:
 jobs:
   plan:
     uses: Fastops5326/fastops-pipeline/.github/workflows/plan-pipeline.yml@v1
+    with:
+      arm_all: true
     secrets: inherit
